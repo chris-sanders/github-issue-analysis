@@ -1,5 +1,6 @@
 """Tests for CLI batch processing commands."""
 
+import re
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -10,10 +11,16 @@ from github_issue_analysis.ai.batch.models import BatchJob
 from github_issue_analysis.cli.batch import app
 
 
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text."""
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
+
 @pytest.fixture
 def runner() -> CliRunner:
     """Create CLI runner for testing."""
-    return CliRunner()
+    return CliRunner(env={"NO_COLOR": "1", "FORCE_COLOR": "0", "TERM": "dumb"})
 
 
 @pytest.fixture
@@ -53,14 +60,15 @@ class TestBatchSubmitCommand:
         result = runner.invoke(app, ["submit", "--help"])
 
         assert result.exit_code == 0
-        assert "Target Selection" in result.stdout
-        assert "AI Configuration" in result.stdout
-        assert "Processing Options" in result.stdout
-        assert "--model" in result.stdout
-        assert "--temperature" in result.stdout
-        assert "--retry-count" in result.stdout
-        assert "--thinking-effort" in result.stdout
-        assert "--max-items" in result.stdout
+        clean_output = strip_ansi(result.stdout)
+        assert "Target Selection" in clean_output
+        assert "AI Configuration" in clean_output
+        assert "Processing Options" in clean_output
+        assert "--model" in clean_output
+        assert "--temperature" in clean_output
+        assert "--retry-count" in clean_output
+        assert "--thinking-effort" in clean_output
+        assert "--max-items" in clean_output
 
     def test_submit_with_new_options_dry_run(self, runner: CliRunner) -> None:
         """Test batch submit with new AI configuration options in dry run mode."""
@@ -257,7 +265,7 @@ class TestBatchSubmitCommand:
         assert (
             result.exit_code == 2
         )  # Typer validation error for missing required parameter
-        assert "Missing option '--org'" in result.stderr
+        assert "Missing option '--org'" in strip_ansi(result.stderr)
 
 
 class TestBatchCliBackwardCompatibility:

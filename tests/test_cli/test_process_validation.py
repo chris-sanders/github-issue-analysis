@@ -4,7 +4,7 @@ from typer.testing import CliRunner
 
 from github_issue_analysis.cli.main import app
 
-runner = CliRunner()
+runner = CliRunner(env={"NO_COLOR": "1", "FORCE_COLOR": "0"})
 
 
 class TestProcessCommandValidation:

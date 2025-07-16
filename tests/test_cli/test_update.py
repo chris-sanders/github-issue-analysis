@@ -1,5 +1,6 @@
 """Tests for CLI update functionality with new recommendation system."""
 
+import re
 from pathlib import Path
 
 import pytest
@@ -8,22 +9,29 @@ from typer.testing import CliRunner
 from github_issue_analysis.cli.main import app
 
 
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text."""
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
+
 class TestUpdateLabelsBasic:
     """Basic tests for update-labels CLI command."""
 
     @pytest.fixture
     def runner(self) -> CliRunner:
         """Provide CLI test runner."""
-        return CliRunner()
+        return CliRunner(env={"NO_COLOR": "1", "FORCE_COLOR": "0"})
 
     def test_help_display(self, runner: CliRunner) -> None:
         """Test that help displays correctly."""
         result = runner.invoke(app, ["update-labels", "--help"])
         assert result.exit_code == 0
-        assert "Update GitHub issue labels based on AI recommendations" in result.stdout
-        assert "--org" in result.stdout
-        assert "--dry-run" in result.stdout
-        assert "--min-confidence" in result.stdout
+        clean_output = strip_ansi(result.stdout)
+        assert "Update GitHub issue labels based on AI recommendations" in clean_output
+        assert "--org" in clean_output
+        assert "--dry-run" in clean_output
+        assert "--min-confidence" in clean_output
 
     def test_command_requires_org(self, runner: CliRunner) -> None:
         """Test that org parameter is required."""

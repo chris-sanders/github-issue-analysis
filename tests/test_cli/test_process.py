@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import re
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
@@ -12,13 +13,19 @@ from typer.testing import CliRunner
 from github_issue_analysis.cli.process import _process_single_issue, app
 
 
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text."""
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
+
 class TestProductLabelingBasic:
     """Basic tests for product-labeling CLI command."""
 
     @pytest.fixture
     def runner(self) -> CliRunner:
         """Provide CLI test runner."""
-        return CliRunner()
+        return CliRunner(env={"NO_COLOR": "1", "FORCE_COLOR": "0"})
 
     def test_help_display(self, runner: CliRunner) -> None:
         """Test that help displays correctly."""
@@ -33,14 +40,15 @@ class TestProductLabelingBasic:
         result = runner.invoke(app, ["product-labeling"])
         # Should fail because --org is required
         assert result.exit_code == 2  # Typer validation error
-        assert "Missing option '--org'" in result.stderr
+        assert "Missing option '--org'" in strip_ansi(result.stderr)
 
     def test_concurrency_parameter(self, runner: CliRunner) -> None:
         """Test that concurrency parameter is accepted."""
         result = runner.invoke(app, ["product-labeling", "--help"])
         assert result.exit_code == 0
-        assert "--concurrency" in result.stdout
-        assert "concurrent" in result.stdout.lower()
+        clean_output = strip_ansi(result.stdout)
+        assert "--concurrency" in clean_output
+        assert "concurrent" in clean_output.lower()
 
     def test_concurrency_default_value(self, runner: CliRunner) -> None:
         """Test that concurrency has correct default value."""
