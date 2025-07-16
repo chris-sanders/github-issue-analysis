@@ -22,7 +22,7 @@ jobs:
       run: uv sync --all-extras
     
     - name: Run linting
-      run: uv run ruff check --fix --unsafe-fixes && uv run black . && uv run mypy .
+      run: uv run ruff format . && uv run ruff check --fix --unsafe-fixes && uv run mypy .
 
   test:
     runs-on: ubuntu-latest
