@@ -4,7 +4,7 @@ import asyncio
 import json
 from pathlib import Path
 from typing import Any
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 from typer.testing import CliRunner
@@ -78,7 +78,10 @@ class TestConcurrentProcessing:
 
     @pytest.mark.asyncio
     async def test_process_single_issue_success(
-        self, mock_issue_data: dict[str, Any], mock_recommendation_manager: Any, tmp_path: Path
+        self,
+        mock_issue_data: dict[str, Any],
+        mock_recommendation_manager: Any,
+        tmp_path: Path,
     ) -> None:
         """Test processing a single issue successfully."""
         # Create temporary issue file
@@ -91,7 +94,9 @@ class TestConcurrentProcessing:
 
         # Mock the AI analysis
         with patch("github_issue_analysis.cli.process.analyze_issue") as mock_analyze:
-            mock_result = type("MockResult", (), {"model_dump": lambda self: {"test": "result"}})()
+            mock_result = type(
+                "MockResult", (), {"model_dump": lambda self: {"test": "result"}}
+            )()
             mock_analyze.return_value = mock_result
 
             semaphore = asyncio.Semaphore(1)
@@ -113,7 +118,10 @@ class TestConcurrentProcessing:
 
     @pytest.mark.asyncio
     async def test_process_single_issue_skipped(
-        self, mock_issue_data: dict[str, Any], mock_recommendation_manager: Any, tmp_path: Path
+        self,
+        mock_issue_data: dict[str, Any],
+        mock_recommendation_manager: Any,
+        tmp_path: Path,
     ) -> None:
         """Test skipping an issue that shouldn't be reprocessed."""
         # Configure mock to skip processing
@@ -172,7 +180,9 @@ class TestConcurrentProcessing:
             await asyncio.sleep(0.1)
 
             active_tasks.remove(asyncio.current_task())
-            mock_result = type("MockResult", (), {"model_dump": lambda self: {"test": "result"}})()
+            mock_result = type(
+                "MockResult", (), {"model_dump": lambda self: {"test": "result"}}
+            )()
             return mock_result
 
         with patch(

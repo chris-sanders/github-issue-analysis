@@ -14,6 +14,7 @@ from rich.table import Table
 
 from ..ai.agents import product_labeling_agent
 from ..ai.analysis import analyze_issue
+from ..ai.settings_validator import get_valid_settings_help, validate_settings
 from ..recommendation.manager import RecommendationManager
 
 app = typer.Typer(
@@ -191,6 +192,15 @@ def product_labeling(
             except ValueError:
                 pass  # Keep as string
             model_settings[key] = parsed_value
+
+        # Validate settings BEFORE processing
+        errors = validate_settings(model, model_settings)
+        if errors:
+            console.print("[red]❌ Invalid settings:[/red]")
+            for error in errors:
+                console.print(f"  • {error}")
+            console.print(f"\n{get_valid_settings_help(model)}")
+            raise typer.Exit(1)
 
         asyncio.run(
             _run_product_labeling(

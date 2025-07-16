@@ -2,12 +2,14 @@
 
 import asyncio
 from pathlib import Path
+from typing import Any
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
 from ..ai.batch.batch_manager import BatchManager
+from ..ai.settings_validator import get_valid_settings_help, validate_settings
 
 # No imports needed - let PydanticAI handle validation
 from ..recommendation.manager import RecommendationManager
@@ -184,6 +186,30 @@ async def _run_batch_submit(
             "[red]Error: --org and --repo are required when "
             "specifying --issue-number[/red]"
         )
+        raise typer.Exit(1)
+
+    # Validate model for batch processing (OpenAI only) - MOVED UP
+    if not model.startswith("openai:"):
+        console.print(
+            "[red]❌ Batch processing is only available for OpenAI models[/red]"
+        )
+        console.print(
+            "[yellow]Supported models: openai:gpt-4o, openai:o4-mini, etc.[/yellow]"
+        )
+        raise typer.Exit(1)
+
+    # Build settings dictionary for validation - MOVED UP
+    model_settings: dict[str, Any] = {"temperature": temperature}
+    if thinking_effort:
+        model_settings["openai_reasoning_effort"] = thinking_effort
+
+    # Validate settings - MOVED UP
+    errors = validate_settings(model, model_settings)
+    if errors:
+        console.print("[red]❌ Invalid settings:[/red]")
+        for error in errors:
+            console.print(f"  • {error}")
+        console.print(f"\n{get_valid_settings_help(model)}")
         raise typer.Exit(1)
 
     # Initialize batch manager

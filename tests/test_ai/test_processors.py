@@ -4,7 +4,7 @@ from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from pydantic_ai.messages import BinaryContent, ImageUrl
+from pydantic_ai.messages import BinaryContent
 
 from github_issue_analysis.ai.analysis import (
     analyze_issue,

@@ -138,7 +138,7 @@ class TestBatchSubmitCommand:
                     "--org",
                     "test-org",
                     "--model",
-                    "anthropic:claude-3-5-sonnet-latest",
+                    "openai:o4-mini",
                     "--thinking-budget",
                     "5000",
                     "--dry-run",
@@ -146,7 +146,7 @@ class TestBatchSubmitCommand:
             )
 
         assert result.exit_code == 0
-        assert "anthropic:claude-3-5-sonnet-latest" in result.stdout
+        assert "openai:o4-mini" in result.stdout
         assert "Thinking budget: 5000 tokens" in result.stdout
 
     def test_submit_creates_batch_job_with_new_config(
@@ -180,7 +180,7 @@ class TestBatchSubmitCommand:
                         "--repo",
                         "test-repo",
                         "--model",
-                        "anthropic:claude-3-haiku-20241022",
+                        "openai:gpt-4o",
                         "--temperature",
                         "0.5",
                         "--retry-count",
@@ -201,7 +201,7 @@ class TestBatchSubmitCommand:
 
         # Check the model_config parameter was passed as dict with new format
         model_config = call_args.kwargs["model_config"]
-        assert model_config["model"] == "anthropic:claude-3-haiku-20241022"
+        assert model_config["model"] == "openai:gpt-4o"
         assert model_config["temperature"] == 0.5
         assert model_config["retry_count"] == 1
 
