@@ -15,8 +15,8 @@ from github_issue_analysis.cli.process import _process_single_issue, app
 
 def strip_ansi(text: str) -> str:
     """Strip ANSI escape codes from text."""
-    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-    return ansi_escape.sub('', text)
+    ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+    return ansi_escape.sub("", text)
 
 
 class TestProductLabelingBasic:
