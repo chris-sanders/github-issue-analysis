@@ -404,6 +404,9 @@ dev = [
     { name = "pytest-mock" },
     { name = "ruff" },
 ]
+export = [
+    { name = "pyyaml" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -419,11 +422,12 @@ requires-dist = [
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.14.1" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "pyyaml", marker = "extra == 'export'", specifier = ">=6.0.0" },
     { name = "rich", specifier = ">=13.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.12.1" },
     { name = "typer", specifier = ">=0.9.0" },
 ]
-provides-extras = ["dev"]
+provides-extras = ["dev", "export"]
 
 [[package]]
 name = "google-auth"

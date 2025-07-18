@@ -158,6 +158,49 @@ class StorageManager:
             console.print(f"Error loading issue #{issue_number}: {e}")
             return None
 
+    def load_issues(
+        self, org: str, repo: str | None = None, issue_number: int | None = None
+    ) -> list[StoredIssue]:
+        """Load issues from JSON files.
+
+        Args:
+            org: Organization name
+            repo: Repository name (optional, loads all repos in org if None)
+            issue_number: Specific issue number (optional, loads all issues if None)
+
+        Returns:
+            List of StoredIssue objects
+        """
+        issues = []
+
+        if issue_number is not None:
+            # Load single issue
+            if repo is None:
+                raise ValueError("Repository name required when loading single issue")
+            issue = self.load_issue(org, repo, issue_number)
+            if issue:
+                issues.append(issue)
+        else:
+            # Load multiple issues
+            if repo is not None:
+                # Load all issues from specific repo
+                pattern = f"{org}_{repo}_issue_*.json"
+            else:
+                # Load all issues from organization
+                pattern = f"{org}_*_issue_*.json"
+
+            for file_path in self.base_path.glob(pattern):
+                try:
+                    with open(file_path, encoding="utf-8") as f:
+                        data = json.load(f)
+                        issue = StoredIssue.model_validate(data)
+                        issues.append(issue)
+                except Exception as e:
+                    console.print(f"Error loading {file_path}: {e}")
+                    continue
+
+        return issues
+
     def list_stored_issues(
         self, org: str | None = None, repo: str | None = None
     ) -> list[str]:

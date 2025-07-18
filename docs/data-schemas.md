@@ -1,63 +1,119 @@
 # Data Schemas
 
-## Issue Schema
+This document describes the JSON schemas used for storing GitHub issues, AI analysis results, and related metadata. All schemas are implemented as Pydantic models with full type validation.
 
-Issues are stored as JSON files in `data/issues/` with filename format: `org_repo_issue_<number>.json`
+## GitHub API Mapping
+
+Our data models map directly to GitHub's REST API v3/v4 response structures:
+
+- **Issues**: [GitHub Issues API](https://docs.github.com/en/rest/issues/issues)
+- **Comments**: [GitHub Issue Comments API](https://docs.github.com/en/rest/issues/comments)
+- **Labels**: [GitHub Labels API](https://docs.github.com/en/rest/issues/labels)
+- **Users**: [GitHub Users API](https://docs.github.com/en/rest/users/users)
+
+## Issue Storage Schema
+
+Issues are stored as JSON files in `data/issues/` with filename format: `{org}_{repo}_issue_{number}.json`
+
+The root object follows the `StoredIssue` model, which wraps the GitHub issue data with organizational context and metadata.
 
 ```json
 {
   "org": "example-org",
   "repo": "example-repo",
-  "issue_number": 12345,
-  "title": "Editor fails to highlight syntax",
-  "body": "Full issue description...",
-  "state": "open",
-  "labels": [
-    {
-      "name": "bug",
-      "color": "d73a4a",
-      "description": "Something isn't working"
+  "issue": {
+    "number": 12345,
+    "title": "Editor fails to highlight syntax",
+    "body": "Full issue description in markdown...",
+    "state": "open",
+    "labels": [
+      {
+        "name": "bug",
+        "color": "d73a4a",
+        "description": "Something isn't working"
+      },
+      {
+        "name": "editor",
+        "color": "0075ca", 
+        "description": "Editor related issues"
+      }
+    ],
+    "user": {
+      "login": "username",
+      "id": 12345
     },
-    {
-      "name": "editor",
-      "color": "0075ca", 
-      "description": "Editor related issues"
-    }
-  ],
-  "comments": [
-    {
-      "id": 123456789,
-      "user": "username",
-      "body": "Comment text...",
-      "created_at": "2024-01-01T12:00:00Z",
-      "updated_at": "2024-01-01T12:00:00Z"
-    }
-  ],
-  "created_at": "2024-01-01T10:00:00Z",
-  "updated_at": "2024-01-01T15:00:00Z",
-  "attachments": [
-    {
-      "url": "https://github.com/example-org/example-repo/files/123456/error.log",
-      "filename": "error.log",
-      "local_path": "data/attachments/example-org_example-repo_issue_12345/error.log",
-      "content_type": "text/plain",
-      "size": 2048
-    },
-    {
-      "url": "https://user-images.githubusercontent.com/123/screenshot.png",
-      "filename": "screenshot.png", 
-      "local_path": "data/attachments/example-org_example-repo_issue_12345/screenshot.png",
-      "content_type": "image/png",
-      "size": 51200
-    }
-  ],
+    "comments": [
+      {
+        "id": 123456789,
+        "user": {
+          "login": "commenter",
+          "id": 67890
+        },
+        "body": "Comment text...",
+        "created_at": "2024-01-01T12:00:00Z",
+        "updated_at": "2024-01-01T12:00:00Z"
+      }
+    ],
+    "created_at": "2024-01-01T10:00:00Z",
+    "updated_at": "2024-01-01T15:00:00Z",
+    "repository_name": "example-repo",
+    "attachments": [
+      {
+        "original_url": "https://github.com/example-org/example-repo/files/123456/error.log",
+        "filename": "error.log",
+        "local_path": "data/attachments/example-org_example-repo_issue_12345/error.log",
+        "content_type": "text/plain",
+        "size": 2048,
+        "downloaded": true,
+        "source": "issue_body"
+      },
+      {
+        "original_url": "https://user-images.githubusercontent.com/123/screenshot.png",
+        "filename": "screenshot.png", 
+        "local_path": "data/attachments/example-org_example-repo_issue_12345/screenshot.png",
+        "content_type": "image/png",
+        "size": 51200,
+        "downloaded": true,
+        "source": "comment_123456789"
+      }
+    ]
+  },
   "metadata": {
-    "collected_at": "2024-01-01T20:00:00Z",
-    "github_api_version": "2022-11-28", 
-    "collection_method": "search",
-    "attachments_downloaded": true
+    "collection_timestamp": "2024-01-01T20:00:00Z",
+    "api_version": "v4",
+    "tool_version": "0.1.0"
   }
 }
+```
+
+### Schema Field Mappings
+
+| Our Field | GitHub API Field | Description |
+|-----------|------------------|-------------|
+| `org` | N/A | Organization name (added by our system) |
+| `repo` | N/A | Repository name (added by our system) |
+| `issue.number` | `number` | Issue number within repository |
+| `issue.title` | `title` | Issue title/summary |
+| `issue.body` | `body` | Issue description (markdown) |
+| `issue.state` | `state` | Issue state ("open", "closed") |
+| `issue.labels` | `labels` | Array of label objects |
+| `issue.user` | `user` | Issue creator |
+| `issue.comments` | N/A | Comments (fetched separately) |
+| `issue.created_at` | `created_at` | Issue creation timestamp |
+| `issue.updated_at` | `updated_at` | Last update timestamp |
+| `issue.attachments` | N/A | Downloaded attachments (custom) |
+| `metadata` | N/A | Storage metadata (added by our system) |
+
+### Pydantic Models
+
+The schema is implemented using these Pydantic models in `github_issue_analysis/github_client/models.py`:
+
+- `StoredIssue`: Root storage wrapper
+- `GitHubIssue`: Main issue object
+- `GitHubUser`: User/creator information
+- `GitHubLabel`: Label information
+- `GitHubComment`: Comment information
+- `GitHubAttachment`: Attachment metadata (custom)
 ```
 
 ## AI Analysis Results Schema

@@ -5,6 +5,7 @@ from rich.console import Console
 
 from . import batch, process, recommendations
 from .collect import collect, status
+from .export import export
 from .update import update_labels
 
 app = typer.Typer(
@@ -24,6 +25,9 @@ app.command(name="collect", context_settings={"help_option_names": ["-h", "--hel
 )
 app.command(name="status", context_settings={"help_option_names": ["-h", "--help"]})(
     status
+)
+app.command(name="export", context_settings={"help_option_names": ["-h", "--help"]})(
+    export
 )
 app.command(
     name="update-labels", context_settings={"help_option_names": ["-h", "--help"]}

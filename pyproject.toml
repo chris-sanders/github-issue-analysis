@@ -28,6 +28,9 @@ dev = [
     "mypy>=1.16.1",
     "pre-commit>=3.0.0",
 ]
+export = [
+    "pyyaml>=6.0.0",
+]
 
 [project.scripts]
 github-analysis = "github_issue_analysis.cli.main:app"
