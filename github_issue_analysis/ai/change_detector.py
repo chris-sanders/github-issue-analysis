@@ -34,6 +34,8 @@ class IssueUpdatePlan:
     needs_update: bool
     comment_summary: str
     ai_result: ProductLabelingResponse | None = None
+    root_cause_analysis: str | None = None
+    ai_reasoning: str | None = None
 
 
 class ChangeDetector:
@@ -92,6 +94,8 @@ class ChangeDetector:
                 needs_update=False,
                 comment_summary="",
                 ai_result=ai_result,
+                root_cause_analysis=ai_result.root_cause_analysis,
+                ai_reasoning=ai_result.reasoning,
             )
 
         # Process recommended additions
@@ -136,6 +140,8 @@ class ChangeDetector:
             needs_update=needs_update,
             comment_summary=comment_summary,
             ai_result=ai_result,
+            root_cause_analysis=ai_result.root_cause_analysis,
+            ai_reasoning=ai_result.reasoning,
         )
 
     def _should_remove_label(
@@ -339,7 +345,8 @@ class ChangeDetector:
                     LabelChange(
                         action="add",
                         label=label,
-                        reason=f"AI recommendation (conf: {effective_confidence:.2f})",
+                        reason=recommendation.ai_reasoning
+                        or f"AI recommendation (conf: {effective_confidence:.2f})",
                         confidence=effective_confidence,
                     )
                 )
@@ -351,7 +358,8 @@ class ChangeDetector:
                     LabelChange(
                         action="remove",
                         label=label,
-                        reason=f"AI marked incorrect ({effective_confidence:.2f})",
+                        reason=recommendation.ai_reasoning
+                        or f"AI marked incorrect ({effective_confidence:.2f})",
                         confidence=effective_confidence,
                     )
                 )
@@ -385,4 +393,6 @@ class ChangeDetector:
             needs_update=True,
             comment_summary=comment_summary,
             ai_result=None,  # Not available when working from status files
+            root_cause_analysis=recommendation.root_cause_analysis,
+            ai_reasoning=recommendation.ai_reasoning,
         )

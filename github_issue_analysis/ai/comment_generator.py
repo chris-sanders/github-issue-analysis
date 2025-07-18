@@ -52,6 +52,12 @@ class CommentGenerator:
 
         # Add root cause analysis if available and meaningful
         if (
+            plan.root_cause_analysis
+            and plan.root_cause_analysis != "Root cause unclear"
+        ):
+            lines.append(f"**Root Cause Analysis**: {plan.root_cause_analysis}")
+            lines.append("")
+        elif (
             hasattr(plan, "ai_result")
             and plan.ai_result
             and hasattr(plan.ai_result, "root_cause_analysis")
@@ -62,24 +68,46 @@ class CommentGenerator:
                 f"**Root Cause Analysis**: {plan.ai_result.root_cause_analysis}"
             )
             lines.append("")
+        elif plan.ai_reasoning:
+            # Use the AI reasoning as the root cause
+            lines.append(f"**Root Cause Analysis**: {plan.ai_reasoning}")
+            lines.append("")
         elif len(additions) == 1:
             # Use the reasoning from the addition as the root cause
             lines.append(f"**Root Cause Analysis**: {additions[0].reason}")
+            lines.append("")
+
+        # Add reasoning for the change if available
+        reasoning = None
+        if plan.ai_reasoning:
+            reasoning = plan.ai_reasoning
+        elif (
+            hasattr(plan, "ai_result")
+            and plan.ai_result
+            and hasattr(plan.ai_result, "reasoning")
+            and plan.ai_result.reasoning
+        ):
+            reasoning = plan.ai_result.reasoning
+
+        if reasoning:
+            lines.append(f"**Reasoning**: {reasoning}")
             lines.append("")
 
         # Add confidence level
         lines.append(f"**Confidence Level**: {plan.overall_confidence:.0%}")
 
         # Add root cause confidence if available
+        root_cause_confidence = None
         if (
             hasattr(plan, "ai_result")
             and plan.ai_result
             and hasattr(plan.ai_result, "root_cause_confidence")
             and plan.ai_result.root_cause_confidence is not None
         ):
-            lines.append(
-                f"**Root Cause Confidence**: {plan.ai_result.root_cause_confidence:.0%}"
-            )
+            root_cause_confidence = plan.ai_result.root_cause_confidence
+
+        if root_cause_confidence is not None:
+            lines.append(f"**Root Cause Confidence**: {root_cause_confidence:.0%}")
 
         # Add image analysis context if available
         if (
@@ -118,15 +146,17 @@ class CommentGenerator:
             lines.append(f"Recommendation confidence: {plan.overall_confidence:.2f}")
 
             # Show root cause confidence if available
+            root_cause_confidence = None
             if (
                 hasattr(plan, "ai_result")
                 and plan.ai_result
                 and hasattr(plan.ai_result, "root_cause_confidence")
                 and plan.ai_result.root_cause_confidence is not None
             ):
-                lines.append(
-                    f"Root cause confidence: {plan.ai_result.root_cause_confidence:.2f}"
-                )
+                root_cause_confidence = plan.ai_result.root_cause_confidence
+
+            if root_cause_confidence is not None:
+                lines.append(f"Root cause confidence: {root_cause_confidence:.2f}")
 
             # Show changes without individual confidence scores
             additions = [c for c in plan.changes if c.action == "add"]
