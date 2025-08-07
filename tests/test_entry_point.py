@@ -1,7 +1,7 @@
 """Test that the CLI entry point works correctly in built packages."""
+
 import subprocess
 import sys
-from pathlib import Path
 
 
 def test_entry_point_import():
@@ -9,10 +9,12 @@ def test_entry_point_import():
     # This should work whether we're in dev mode or installed from a wheel
     try:
         from gh_analysis.cli.main import app
+
         assert app is not None
     except ImportError:
         # Fallback for development mode
         from github_issue_analysis.cli.main import app
+
         assert app is not None
 
 
