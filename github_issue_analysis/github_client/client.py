@@ -36,7 +36,6 @@ class GitHubClient:
             )
 
         self.github = Github(self.token)
-        self._check_rate_limit()
 
     def _check_rate_limit(self) -> None:
         """Check rate limit and sleep if necessary."""
