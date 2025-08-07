@@ -745,21 +745,21 @@ class TestQueryCommands:
 uv add duckdb
 
 # 2. Verify existing data
-uv run github-analysis status
+uv run gh-analysis status
 
 # 3. Collect some sample data if needed
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 5
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 5
 ```
 
 ### **Database Functionality**
 ```bash
 # 4. Check database auto-creation
-uv run github-analysis status
+uv run gh-analysis status
 # Should show: "Database Issues: X" and sync status
 
 # 5. Manual sync test
-uv run github-analysis sync
+uv run gh-analysis sync
 # Should show sync results
 
 # 6. Verify database file exists
@@ -769,31 +769,31 @@ ls -la data/issues.duckdb
 ### **Query Interface**
 ```bash
 # 7. List available queries
-uv run github-analysis query list
+uv run gh-analysis query list
 
 # 8. Test query aliases
-uv run github-analysis query alias open_issues
-uv run github-analysis query alias label_summary
+uv run gh-analysis query alias open_issues
+uv run gh-analysis query alias label_summary
 
 # 9. Test custom SQL
-uv run github-analysis query sql "SELECT COUNT(*) as total FROM issues"
-uv run github-analysis query sql "SELECT org, repo, COUNT(*) FROM issues GROUP BY org, repo" --format json
+uv run gh-analysis query sql "SELECT COUNT(*) as total FROM issues"
+uv run gh-analysis query sql "SELECT org, repo, COUNT(*) FROM issues GROUP BY org, repo" --format json
 
 # 10. Test output formats
-uv run github-analysis query alias open_issues --format csv --limit 3
+uv run gh-analysis query alias open_issues --format csv --limit 3
 ```
 
 ### **Error Handling**
 ```bash
 # 11. Test without DuckDB (temporarily uninstall)
 uv remove duckdb
-uv run github-analysis status  # Should work, show "Database: Disabled"
-uv run github-analysis query sql "SELECT 1"  # Should show error message
+uv run gh-analysis status  # Should work, show "Database: Disabled"
+uv run gh-analysis query sql "SELECT 1"  # Should show error message
 uv add duckdb  # Restore
 
 # 12. Test invalid queries
-uv run github-analysis query sql "INVALID SQL"  # Should show error
-uv run github-analysis query alias invalid_query  # Should show error
+uv run gh-analysis query sql "INVALID SQL"  # Should show error
+uv run gh-analysis query alias invalid_query  # Should show error
 ```
 
 ### **Quality Assurance**
@@ -807,8 +807,8 @@ uv run ruff check --fix && uv run black . && uv run mypy .
 
 # 15. Integration test
 # Ask user to provide test organization, repository, and issue number for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
-# Example: uv run github-analysis query sql "SELECT title, state FROM issues WHERE repo = 'USER_PROVIDED_REPO'"
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
+# Example: uv run gh-analysis query sql "SELECT title, state FROM issues WHERE repo = 'USER_PROVIDED_REPO'"
 ```
 
 ## Acceptance Criteria
@@ -826,7 +826,7 @@ uv run ruff check --fix && uv run black . && uv run mypy .
 - [ ] All quality checks pass (ruff, black, mypy)
 - [ ] Clear documentation of query capabilities
 
-**Success Metric**: User can collect issues normally (unchanged workflow) and then use `uv run github-analysis query alias open_issues` to get rich insights not possible with JSON alone.
+**Success Metric**: User can collect issues normally (unchanged workflow) and then use `uv run gh-analysis query alias open_issues` to get rich insights not possible with JSON alone.
 
 ## Agent Notes
 [Document your implementation approach, database design decisions, and query interface choices]

@@ -427,16 +427,16 @@ def test_load_downloaded_images_disabled():
 
 ```bash
 # Test with images (default)
-uv run github-analysis process --task product-labeling --issue 71
+uv run gh-analysis process --task product-labeling --issue 71
 
 # Test without images for comparison
-uv run github-analysis process --task product-labeling --issue 71 --no-images
+uv run gh-analysis process --task product-labeling --issue 71 --no-images
 
 # Process all issues with image analysis
-uv run github-analysis process --task product-labeling --include-images
+uv run gh-analysis process --task product-labeling --include-images
 
 # Use higher quality model for complex image analysis
-uv run github-analysis process --task product-labeling --issue 71 --model openai:gpt-4o
+uv run gh-analysis process --task product-labeling --issue 71 --model openai:gpt-4o
 ```
 
 ## Expected Improvements

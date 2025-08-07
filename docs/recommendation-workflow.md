@@ -30,10 +30,10 @@ Scan for new AI analysis results and create trackable recommendation metadata:
 
 ```bash
 # Discover all new recommendations
-uv run github-analysis recommendations discover
+uv run gh-analysis recommendations discover
 
 # Force refresh existing recommendations
-uv run github-analysis recommendations discover --force-refresh
+uv run gh-analysis recommendations discover --force-refresh
 ```
 
 This command:
@@ -47,7 +47,7 @@ This command:
 Get a dashboard view of all recommendations:
 
 ```bash
-uv run github-analysis recommendations summary
+uv run gh-analysis recommendations summary
 ```
 
 Shows statistics including:
@@ -63,31 +63,31 @@ View recommendations with detailed filtering:
 
 ```bash
 # List all recommendations (default: table format)
-uv run github-analysis recommendations list
+uv run gh-analysis recommendations list
 
 # Filter by organization
-uv run github-analysis recommendations list --org myorg
+uv run gh-analysis recommendations list --org myorg
 
 # Filter by repository
-uv run github-analysis recommendations list --org myorg --repo myrepo
+uv run gh-analysis recommendations list --org myorg --repo myrepo
 
 # Filter by status
-uv run github-analysis recommendations list --status pending --status approved
+uv run gh-analysis recommendations list --status pending --status approved
 
 # Filter by confidence level
-uv run github-analysis recommendations list --min-confidence 0.8
+uv run gh-analysis recommendations list --min-confidence 0.8
 
 # Filter by confidence tier
-uv run github-analysis recommendations list --confidence-tier high --confidence-tier medium
+uv run gh-analysis recommendations list --confidence-tier high --confidence-tier medium
 
 # Filter by product
-uv run github-analysis recommendations list --product kots --product vendor
+uv run gh-analysis recommendations list --product kots --product vendor
 
 # Limit results
-uv run github-analysis recommendations list --limit 10
+uv run gh-analysis recommendations list --limit 10
 
 # Output as JSON
-uv run github-analysis recommendations list --format json
+uv run gh-analysis recommendations list --format json
 ```
 
 ### Interactive Review Session
@@ -96,13 +96,13 @@ Start an interactive review session to process recommendations:
 
 ```bash
 # Review all pending recommendations
-uv run github-analysis recommendations review-session
+uv run gh-analysis recommendations review-session
 
 # Review with filters
-uv run github-analysis recommendations review-session --org myorg --min-confidence 0.8
+uv run gh-analysis recommendations review-session --org myorg --min-confidence 0.8
 
 # Review specific product recommendations
-uv run github-analysis recommendations review-session --product kots
+uv run gh-analysis recommendations review-session --product kots
 ```
 
 During the review session:
@@ -202,10 +202,10 @@ Use the `--reprocess` flag to override the default behavior:
 
 ```bash
 # Individual processing with reprocess
-uv run github-analysis process product-labeling --org myorg --repo myrepo --reprocess
+uv run gh-analysis process product-labeling --org myorg --repo myrepo --reprocess
 
 # Batch processing with reprocess
-uv run github-analysis batch submit product-labeling --org myorg --reprocess
+uv run gh-analysis batch submit product-labeling --org myorg --reprocess
 ```
 
 This will reprocess ALL issues regardless of their recommendation status.
@@ -245,7 +245,7 @@ ls -la data/recommendation_status/
 cat data/recommendation_status/myorg_myrepo_issue_123_status.json | jq
 
 # Count recommendations by status
-uv run github-analysis recommendations list --format json | \
+uv run gh-analysis recommendations list --format json | \
   jq 'group_by(.status) | map({status: .[0].status, count: length})'
 ```
 
@@ -255,17 +255,17 @@ uv run github-analysis recommendations list --format json | \
 
 1. **Start with high confidence**: Review high-confidence recommendations first
    ```bash
-   uv run github-analysis recommendations review-session --min-confidence 0.9
+   uv run gh-analysis recommendations review-session --min-confidence 0.9
    ```
 
 2. **Focus by product**: Review one product at a time for context
    ```bash
-   uv run github-analysis recommendations review-session --product kots
+   uv run gh-analysis recommendations review-session --product kots
    ```
 
 3. **Batch similar issues**: Review related repositories together
    ```bash
-   uv run github-analysis recommendations review-session --org myorg --repo myrepo
+   uv run gh-analysis recommendations review-session --org myorg --repo myrepo
    ```
 
 ### Review Notes
@@ -279,8 +279,8 @@ Add meaningful review notes to track decisions:
 
 1. Run discovery after each AI batch:
    ```bash
-   uv run github-analysis batch collect <job-id>
-   uv run github-analysis recommendations discover
+   uv run gh-analysis batch collect <job-id>
+   uv run gh-analysis recommendations discover
    ```
 
 2. Schedule regular review sessions
@@ -292,17 +292,17 @@ The recommendation system integrates seamlessly with existing commands:
 
 ```bash
 # 1. Collect issues as normal
-uv run github-analysis collect --org myorg --repo myrepo
+uv run gh-analysis collect --org myorg --repo myrepo
 
 # 2. Process with AI (automatically respects review status)
-uv run github-analysis batch submit product-labeling --org myorg --repo myrepo
+uv run gh-analysis batch submit product-labeling --org myorg --repo myrepo
 
 # 3. Discover and review recommendations
-uv run github-analysis recommendations discover
-uv run github-analysis recommendations review-session
+uv run gh-analysis recommendations discover
+uv run gh-analysis recommendations review-session
 
 # 4. Apply approved changes (Phase 2 feature)
-# uv run github-analysis update-labels --approved-only
+# uv run gh-analysis update-labels --approved-only
 ```
 
 ## Advanced Usage
@@ -313,14 +313,14 @@ Complex filtering for specific scenarios:
 
 ```bash
 # High-confidence KOTS issues from last week
-uv run github-analysis recommendations list \
+uv run gh-analysis recommendations list \
   --product kots \
   --min-confidence 0.85 \
   --status pending \
   --format json | jq '.[] | select(.status_updated_at > "2024-01-15")'
 
 # Rejected recommendations needing re-evaluation
-uv run github-analysis recommendations list \
+uv run gh-analysis recommendations list \
   --status rejected \
   --search-text "database" \
   --format table

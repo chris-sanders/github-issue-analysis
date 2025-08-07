@@ -84,7 +84,7 @@ batch_config = {
 ### Manual Verification Commands
 ```bash
 # Submit batch job with new options
-uv run github-analysis batch submit product-labeling \
+uv run gh-analysis batch submit product-labeling \
     --org test --repo test \
     --model anthropic:claude-3-haiku-20241022 \
     --thinking-effort medium \
@@ -93,8 +93,8 @@ uv run github-analysis batch submit product-labeling \
     --dry-run
 
 # Check batch job management
-uv run github-analysis batch list
-uv run github-analysis batch status <job-id>
+uv run gh-analysis batch list
+uv run gh-analysis batch status <job-id>
 
 # Quality checks
 uv run pytest tests/test_cli/test_batch.py -v

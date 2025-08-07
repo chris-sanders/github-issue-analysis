@@ -138,28 +138,28 @@ These letters are available for future use:
 ### collect Command
 ```bash
 # Using standardized options
-uv run github-analysis collect -o myorg -r myrepo -i 123 -l bug,enhancement
+uv run gh-analysis collect -o myorg -r myrepo -i 123 -l bug,enhancement
 
 # Full form equivalent
-uv run github-analysis collect --org myorg --repo myrepo --issue-number 123 --labels bug --labels enhancement
+uv run gh-analysis collect --org myorg --repo myrepo --issue-number 123 --labels bug --labels enhancement
 ```
 
 ### update-labels Command  
 ```bash
 # Using new shorthand options (added in CLI normalization)
-uv run github-analysis update-labels -o myorg -r myrepo -i 123 -d
+uv run gh-analysis update-labels -o myorg -r myrepo -i 123 -d
 
 # Full form equivalent
-uv run github-analysis update-labels --org myorg --repo myrepo --issue-number 123 --dry-run
+uv run gh-analysis update-labels --org myorg --repo myrepo --issue-number 123 --dry-run
 ```
 
 ### batch Command
 ```bash
 # Batch processing with shorthand
-uv run github-analysis batch submit product-labeling -o myorg -r myrepo -d
+uv run gh-analysis batch submit product-labeling -o myorg -r myrepo -d
 
 # Full form equivalent  
-uv run github-analysis batch submit product-labeling --org myorg --repo myrepo --dry-run
+uv run gh-analysis batch submit product-labeling --org myorg --repo myrepo --dry-run
 ```
 
 ## Testing Standards
@@ -190,15 +190,15 @@ Test that shorthand options work correctly:
 
 ```bash
 # Test help shorthand on all commands
-uv run github-analysis collect -h
-uv run github-analysis batch -h
-uv run github-analysis process -h
-uv run github-analysis update-labels -h
+uv run gh-analysis collect -h
+uv run gh-analysis batch -h
+uv run gh-analysis process -h
+uv run gh-analysis update-labels -h
 
 # Test specific shorthand options
-uv run github-analysis collect -o test-org --dry-run
-uv run github-analysis update-labels -o test-org -r test-repo -d
-uv run github-analysis batch submit product-labeling -o test-org -d
+uv run gh-analysis collect -o test-org --dry-run
+uv run gh-analysis update-labels -o test-org -r test-repo -d
+uv run gh-analysis batch submit product-labeling -o test-org -d
 ```
 
 ## Migration Notes

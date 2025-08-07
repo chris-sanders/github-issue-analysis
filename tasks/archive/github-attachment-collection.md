@@ -149,7 +149,7 @@ Add options to collect command:
    ```bash
    # After single-issue collection merges, test with:
    # Ask user to provide test organization, repository, and issue number for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER --download-attachments
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER --download-attachments
    ```
 3. **Validation Checklist** (once single-issue collection is available):
    - [ ] Test with USER_PROVIDED_ORG/USER_PROVIDED_REPO issue #71 (has all attachment types)
@@ -189,7 +189,7 @@ Add options to collect command:
 ```bash
 # Test with issue #71 which has multiple attachment types
 # Ask user to provide test organization, repository, and issue number for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER --download-attachments
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER --download-attachments
 
 # Expected attachments in issue #71:
 # - Images: ![Image](https://github.com/user-attachments/assets/...)

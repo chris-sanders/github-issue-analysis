@@ -42,19 +42,19 @@ Currently, organization-wide collection (`--org orgname`) includes all repositor
 ```bash
 # Exclude single repository
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --exclude-repo private-repo
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --exclude-repo private-repo
 
 # Exclude multiple repositories (multiple flags)
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --exclude-repo private-repo --exclude-repo test-repo
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --exclude-repo private-repo --exclude-repo test-repo
 
 # Exclude multiple repositories (comma-separated)
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --exclude-repos "private-repo,test-repo,archived-repo"
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --exclude-repos "private-repo,test-repo,archived-repo"
 
 # Mix both approaches
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --exclude-repo private-repo --exclude-repos "test-repo,archived-repo"
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --exclude-repo private-repo --exclude-repos "test-repo,archived-repo"
 ```
 
 ### 2. GitHub Search Query Modification
@@ -283,23 +283,23 @@ Follow existing test patterns in the codebase:
 ```bash
 # Test basic exclusion functionality
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --exclude-repo private-repo --limit 5
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --exclude-repo private-repo --limit 5
 
 # Test multiple exclusions
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --exclude-repos "repo1,repo2,repo3" --limit 5
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --exclude-repos "repo1,repo2,repo3" --limit 5
 
 # Test with existing filters
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --exclude-repo private-repo --labels bug --state closed --limit 10
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --exclude-repo private-repo --labels bug --state closed --limit 10
 
 # Verify query building in logs
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --exclude-repos "test-repo,archived-repo" --limit 1
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --exclude-repos "test-repo,archived-repo" --limit 1
 
 # Test error handling
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --exclude-repo "invalid repo name" --limit 1
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --exclude-repo "invalid repo name" --limit 1
 ```
 
 ## Automated Test Commands (No API Keys Required)

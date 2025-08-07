@@ -184,7 +184,7 @@ Implement the core functionality to collect GitHub issues using the advanced sea
 [Agent documents progress, decisions, and validation steps here]
 
 **Validation:**
-- Run `uv run github-analysis collect --org test --repo test`
+- Run `uv run gh-analysis collect --org test --repo test`
 - Verify JSON files created in `data/issues/`
 - Check rate limiting works with large result sets
 - Ensure all tests pass

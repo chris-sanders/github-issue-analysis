@@ -95,7 +95,7 @@ class TestRecommendationsCLI:
             # Create mock AI result and issue files
             self.create_mock_ai_result(Path(temp_dir), "testorg", "testrepo", 123)
 
-            # Run: uv run github-analysis recommendations discover
+            # Run: uv run gh-analysis recommendations discover
             result = runner.invoke(
                 app, ["recommendations", "discover", "--data-dir", temp_dir]
             )
@@ -137,7 +137,7 @@ class TestRecommendationsCLI:
                 with open(status_file, "w") as f:
                     json.dump(rec.model_dump(), f, default=str)
 
-            # Run: uv run github-analysis recommendations list
+            # Run: uv run gh-analysis recommendations list
             result = runner.invoke(
                 app, ["recommendations", "list", "--data-dir", temp_dir]
             )
@@ -266,7 +266,7 @@ class TestRecommendationsCLI:
                 with open(status_file, "w") as f:
                     json.dump(rec.model_dump(), f, default=str)
 
-            # Run: uv run github-analysis recommendations summary
+            # Run: uv run gh-analysis recommendations summary
             result = runner.invoke(
                 app, ["recommendations", "summary", "--data-dir", temp_dir]
             )
@@ -288,7 +288,7 @@ class TestRecommendationsCLI:
             status_dir = Path(temp_dir) / "recommendation_status"
             status_dir.mkdir(parents=True)
 
-            # Run: uv run github-analysis recommendations review-session
+            # Run: uv run gh-analysis recommendations review-session
             result = runner.invoke(
                 app, ["recommendations", "review-session", "--data-dir", temp_dir]
             )

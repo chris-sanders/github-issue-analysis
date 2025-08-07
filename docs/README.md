@@ -13,9 +13,9 @@ User documentation for the GitHub issue collection and AI analysis tool.
 
 1. Set up environment: `uv sync --all-extras`
 2. Configure `.env` file with API keys
-3. Collect issues: `uv run github-analysis collect --org myorg --repo myrepo`
-4. Process issues: `uv run github-analysis process product-labeling --org myorg --repo myrepo`
-5. Update labels: `uv run github-analysis update-labels --org myorg --repo myrepo --dry-run`
+3. Collect issues: `uv run gh-analysis collect --org myorg --repo myrepo`
+4. Process issues: `uv run gh-analysis process product-labeling --org myorg --repo myrepo`
+5. Update labels: `uv run gh-analysis update-labels --org myorg --repo myrepo --dry-run`
 
 ## For AI Agents
 

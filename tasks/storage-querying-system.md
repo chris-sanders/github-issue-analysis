@@ -69,23 +69,23 @@ class StorageManager:
 
 **List Command:**
 ```bash
-uv run github-analysis list --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO
-uv run github-analysis list --labels bug,enhancement --state open
-uv run github-analysis list --created-after 2024-01-01 --count-only
-uv run github-analysis list --title-contains "crash" --limit 10
+uv run gh-analysis list --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO
+uv run gh-analysis list --labels bug,enhancement --state open
+uv run gh-analysis list --created-after 2024-01-01 --count-only
+uv run gh-analysis list --title-contains "crash" --limit 10
 ```
 
 **Stats Command:**
 ```bash  
-uv run github-analysis stats
-uv run github-analysis stats --org USER_PROVIDED_ORG
+uv run gh-analysis stats
+uv run gh-analysis stats --org USER_PROVIDED_ORG
 ```
 
 **Clean Command:**
 ```bash
-uv run github-analysis clean --dry-run
-uv run github-analysis clean --older-than 30d
-uv run github-analysis clean --repo archived-repo
+uv run gh-analysis clean --dry-run
+uv run gh-analysis clean --older-than 30d
+uv run gh-analysis clean --repo archived-repo
 ```
 
 **CLI Implementation:**
@@ -172,12 +172,12 @@ def validate_all_issues() -> Dict[str, List[str]]:
 [Document your query design decisions, performance optimizations, and CLI interface choices]
 
 **Validation:**
-- Ensure issues collected first: `uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 10`
-- Test listing: `uv run github-analysis list --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO`
-- Test filtering: `uv run github-analysis list --labels bug --state open --limit 5`
-- Test stats: `uv run github-analysis stats`
-- Test count-only: `uv run github-analysis list --count-only`
-- Test clean dry-run: `uv run github-analysis clean --dry-run`
+- Ensure issues collected first: `uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 10`
+- Test listing: `uv run gh-analysis list --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO`
+- Test filtering: `uv run gh-analysis list --labels bug --state open --limit 5`
+- Test stats: `uv run gh-analysis stats`
+- Test count-only: `uv run gh-analysis list --count-only`
+- Test clean dry-run: `uv run gh-analysis clean --dry-run`
 - Verify performance with larger datasets (100+ issues)
 - Ensure all tests pass: `uv run pytest tests/test_storage/ -v`
 - Verify code quality: `uv run ruff check && uv run black . && uv run mypy .`

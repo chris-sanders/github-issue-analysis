@@ -74,9 +74,9 @@ class GitHubIntegration:
 ```
 
 ### 3. CLI Commands (Phase 2)
-- `uv run github-analysis recommendations bulk-approve [filters]` - Bulk approve high-confidence recommendations
-- `uv run github-analysis recommendations apply-approved [filters]` - Apply approved recommendations to GitHub
-- `uv run github-analysis recommendations archive-applied [filters]` - Archive completed recommendations
+- `uv run gh-analysis recommendations bulk-approve [filters]` - Bulk approve high-confidence recommendations
+- `uv run gh-analysis recommendations apply-approved [filters]` - Apply approved recommendations to GitHub
+- `uv run gh-analysis recommendations archive-applied [filters]` - Archive completed recommendations
 
 ## Acceptance Criteria (Phase 2)
 
@@ -184,19 +184,19 @@ class TestBulkCLI:
     def test_bulk_approve_command(self):
         """Test bulk approve CLI command."""
         # Create high-confidence pending recommendations
-        # Run: uv run github-analysis recommendations bulk-approve --min-confidence 0.9
+        # Run: uv run gh-analysis recommendations bulk-approve --min-confidence 0.9
         # Verify correct recommendations approved
         
     def test_apply_approved_command_with_filters(self):
         """Test apply approved command with org/repo filters."""
         # Create approved recommendations for multiple orgs
-        # Run: uv run github-analysis recommendations apply-approved --org testorg --dry-run
+        # Run: uv run gh-analysis recommendations apply-approved --org testorg --dry-run
         # Verify only testorg recommendations included in preview
         
     def test_archive_applied_command(self):
         """Test archive command."""
         # Create old applied recommendations
-        # Run: uv run github-analysis recommendations archive-applied --older-than-days 1
+        # Run: uv run gh-analysis recommendations archive-applied --older-than-days 1
         # Verify files moved to archive directory
 ```
 

@@ -6,7 +6,7 @@
 Collect GitHub issues and save them locally.
 
 ```bash
-uv run github-analysis collect [OPTIONS]
+uv run gh-analysis collect [OPTIONS]
 ```
 
 **Options:**
@@ -30,39 +30,39 @@ uv run github-analysis collect [OPTIONS]
 **Examples:**
 ```bash
 # Collect single issue
-uv run github-analysis collect --org example-org --repo example-repo --issue-number 71
+uv run gh-analysis collect --org example-org --repo example-repo --issue-number 71
 
 # Collect from entire organization (20 most recent closed issues)
-uv run github-analysis collect --org example-org --limit 20
+uv run gh-analysis collect --org example-org --limit 20
 
 # Collect bugs from specific repository
-uv run github-analysis collect --org example-org --repo example-repo --labels bug --limit 5
+uv run gh-analysis collect --org example-org --repo example-repo --labels bug --limit 5
 
 # Organization-wide collection excluding specific repositories
-uv run github-analysis collect --org example-org --exclude-repo private-repo --limit 15
+uv run gh-analysis collect --org example-org --exclude-repo private-repo --limit 15
 
 # Exclude multiple repositories using multiple flags
-uv run github-analysis collect --org example-org --exclude-repo private-repo --exclude-repo test-repo --limit 10
+uv run gh-analysis collect --org example-org --exclude-repo private-repo --exclude-repo test-repo --limit 10
 
 # Exclude multiple repositories using comma-separated list
-uv run github-analysis collect --org example-org --exclude-repos "private-repo,test-repo,archived-repo" --limit 10
+uv run gh-analysis collect --org example-org --exclude-repos "private-repo,test-repo,archived-repo" --limit 10
 
 # Mix both exclusion approaches with additional filters
-uv run github-analysis collect --org example-org --exclude-repo private-repo --exclude-repos "test-repo,docs-repo" --labels bug --state open --limit 20
+uv run gh-analysis collect --org example-org --exclude-repo private-repo --exclude-repos "test-repo,docs-repo" --labels bug --state open --limit 20
 ```
 
 ### batch (RECOMMENDED)
 **Batch processing for cost-effective AI analysis (50% cheaper than individual processing).**
 
 ```bash
-uv run github-analysis batch [COMMAND] [OPTIONS]
+uv run gh-analysis batch [COMMAND] [OPTIONS]
 ```
 
 #### submit
 Submit a batch processing job for multiple issues.
 
 ```bash
-uv run github-analysis batch submit product-labeling [OPTIONS]
+uv run gh-analysis batch submit product-labeling [OPTIONS]
 ```
 
 **Options:**
@@ -77,41 +77,41 @@ uv run github-analysis batch submit product-labeling [OPTIONS]
 **Examples:**
 ```bash
 # Batch process all collected issues for an organization (RECOMMENDED)
-uv run github-analysis batch submit product-labeling --org myorg
+uv run gh-analysis batch submit product-labeling --org myorg
 
 # Batch process all issues for a specific repository
-uv run github-analysis batch submit product-labeling --org myorg --repo myrepo
+uv run gh-analysis batch submit product-labeling --org myorg --repo myrepo
 
 # Batch process with specific model
-uv run github-analysis batch submit product-labeling --org myorg --model openai:gpt-4o-mini
+uv run gh-analysis batch submit product-labeling --org myorg --model openai:gpt-4o-mini
 ```
 
 #### status
 Check the status of a batch processing job.
 
 ```bash
-uv run github-analysis batch status <job-id>
+uv run gh-analysis batch status <job-id>
 ```
 
 #### collect
 Collect and process results from a completed batch job.
 
 ```bash
-uv run github-analysis batch collect <job-id>
+uv run gh-analysis batch collect <job-id>
 ```
 
 #### list
 List all batch processing jobs.
 
 ```bash
-uv run github-analysis batch list
+uv run gh-analysis batch list
 ```
 
 #### cancel
 Cancel an active batch processing job.
 
 ```bash
-uv run github-analysis batch cancel <job-id>
+uv run gh-analysis batch cancel <job-id>
 ```
 
 **Notes:**
@@ -123,8 +123,8 @@ uv run github-analysis batch cancel <job-id>
 Remove a batch job record and associated files.
 
 ```bash
-uv run github-analysis batch remove <job-id>
-uv run github-analysis batch remove <job-id> --force
+uv run gh-analysis batch remove <job-id>
+uv run gh-analysis batch remove <job-id> --force
 ```
 
 **Options:**
@@ -138,33 +138,33 @@ uv run github-analysis batch remove <job-id> --force
 **Typical Batch Workflow:**
 ```bash
 # 1. Collect issues
-uv run github-analysis collect --org myorg --limit 30
+uv run gh-analysis collect --org myorg --limit 30
 
 # 2. Submit batch job
-uv run github-analysis batch submit product-labeling --org myorg
+uv run gh-analysis batch submit product-labeling --org myorg
 
 # 3. Check status periodically (shows real-time progress)
-uv run github-analysis batch status <job-id>
+uv run gh-analysis batch status <job-id>
 
 # 4. Collect results when completed
-uv run github-analysis batch collect <job-id>
+uv run gh-analysis batch collect <job-id>
 
 # 5. Update labels with dry run first
-uv run github-analysis update-labels --org myorg --dry-run
+uv run gh-analysis update-labels --org myorg --dry-run
 ```
 
 ### process
 **Individual AI processing commands (use only for single issues or testing).**
 
 ```bash
-uv run github-analysis process [COMMAND] [OPTIONS]
+uv run gh-analysis process [COMMAND] [OPTIONS]
 ```
 
 #### show-settings
 Display available model settings that can be configured.
 
 ```bash
-uv run github-analysis process show-settings
+uv run gh-analysis process show-settings
 ```
 
 Shows common settings like:
@@ -179,7 +179,7 @@ Shows common settings like:
 Analyze GitHub issues for product labeling recommendations with optional image processing.
 
 ```bash
-uv run github-analysis process product-labeling [OPTIONS]
+uv run gh-analysis process product-labeling [OPTIONS]
 ```
 
 **Options:**
@@ -195,31 +195,31 @@ uv run github-analysis process product-labeling [OPTIONS]
 **Examples:**
 ```bash
 # Show available model settings
-uv run github-analysis process show-settings
+uv run gh-analysis process show-settings
 
 # Process all collected issues for a repository
-uv run github-analysis process product-labeling --org myorg --repo myrepo
+uv run gh-analysis process product-labeling --org myorg --repo myrepo
 
 # Process a specific issue with custom model
-uv run github-analysis process product-labeling --org myorg --repo myrepo --issue-number 123 --model openai:o4-mini
+uv run gh-analysis process product-labeling --org myorg --repo myrepo --issue-number 123 --model openai:o4-mini
 
 # Process with custom model settings
-uv run github-analysis process product-labeling --org myorg --repo myrepo \
+uv run gh-analysis process product-labeling --org myorg --repo myrepo \
   --model anthropic:claude-3-5-sonnet \
   --setting temperature=0.5 \
   --setting reasoning_effort=high
 
 # Process with multiple settings
-uv run github-analysis process product-labeling --org myorg --repo myrepo --issue-number 123 \
+uv run gh-analysis process product-labeling --org myorg --repo myrepo --issue-number 123 \
   --model openai:o4-mini \
   --setting reasoning_effort=medium \
   --setting max_tokens=2000
 
 # Dry run to see what would be processed
-uv run github-analysis process product-labeling --org myorg --repo myrepo --dry-run
+uv run gh-analysis process product-labeling --org myorg --repo myrepo --dry-run
 
 # Force reprocessing of already reviewed items
-uv run github-analysis process product-labeling --org myorg --repo myrepo --reprocess
+uv run gh-analysis process product-labeling --org myorg --repo myrepo --reprocess
 ```
 
 **Note on Model Settings:**
@@ -232,7 +232,7 @@ uv run github-analysis process product-labeling --org myorg --repo myrepo --repr
 Update GitHub issue labels based on AI recommendations from product-labeling analysis.
 
 ```bash
-uv run github-analysis update-labels [OPTIONS]
+uv run gh-analysis update-labels [OPTIONS]
 ```
 
 **Required Setup:**
@@ -252,36 +252,36 @@ uv run github-analysis update-labels [OPTIONS]
 - `--data-dir TEXT`: Data directory path (defaults to ./data)
 
 **Recommended Workflow (Batch Processing):**
-1. Collect issues: `uv run github-analysis collect --org myorg --limit 30`
-2. Submit batch job: `uv run github-analysis batch submit product-labeling --org myorg`
-3. Check status: `uv run github-analysis batch status <job-id>`
-4. Collect results: `uv run github-analysis batch collect <job-id>`
-5. Update labels: `uv run github-analysis update-labels --org myorg --dry-run`
+1. Collect issues: `uv run gh-analysis collect --org myorg --limit 30`
+2. Submit batch job: `uv run gh-analysis batch submit product-labeling --org myorg`
+3. Check status: `uv run gh-analysis batch status <job-id>`
+4. Collect results: `uv run gh-analysis batch collect <job-id>`
+5. Update labels: `uv run gh-analysis update-labels --org myorg --dry-run`
 
 **Alternative Workflow (Individual Processing - for single issues only):**
-1. Collect single issue: `uv run github-analysis collect --org myorg --repo myrepo --issue-number 123`
-2. Process individual issue: `uv run github-analysis process product-labeling --org myorg --repo myrepo --issue-number 123`
-3. Update labels: `uv run github-analysis update-labels --org myorg --repo myrepo --issue-number 123 --dry-run`
+1. Collect single issue: `uv run gh-analysis collect --org myorg --repo myrepo --issue-number 123`
+2. Process individual issue: `uv run gh-analysis process product-labeling --org myorg --repo myrepo --issue-number 123`
+3. Update labels: `uv run gh-analysis update-labels --org myorg --repo myrepo --issue-number 123 --dry-run`
 
 **Examples:**
 ```bash
 # Preview changes for a specific issue (safe to run)
-uv run github-analysis update-labels --org myorg --repo myrepo --issue-number 123 --dry-run
+uv run gh-analysis update-labels --org myorg --repo myrepo --issue-number 123 --dry-run
 
 # Update all issues in a repository with high confidence threshold
-uv run github-analysis update-labels --org myorg --repo myrepo --min-confidence 0.9
+uv run gh-analysis update-labels --org myorg --repo myrepo --min-confidence 0.9
 
 # Update specific issue with custom confidence threshold
-uv run github-analysis update-labels --org myorg --repo myrepo --issue-number 123 --min-confidence 0.75
+uv run gh-analysis update-labels --org myorg --repo myrepo --issue-number 123 --min-confidence 0.75
 
 # Apply all changes regardless of confidence (use with caution)
-uv run github-analysis update-labels --org myorg --repo myrepo --force
+uv run gh-analysis update-labels --org myorg --repo myrepo --force
 
 # Update labels without posting explanatory comments
-uv run github-analysis update-labels --org myorg --repo myrepo --skip-comments
+uv run gh-analysis update-labels --org myorg --repo myrepo --skip-comments
 
 # Process up to 5 issues with 1 second delay between API calls
-uv run github-analysis update-labels --org myorg --repo myrepo --max-issues 5 --delay 1.0
+uv run gh-analysis update-labels --org myorg --repo myrepo --max-issues 5 --delay 1.0
 ```
 
 **Safety Features:**
@@ -304,7 +304,7 @@ uv run github-analysis update-labels --org myorg --repo myrepo --max-issues 5 --
 Show storage status and statistics.
 
 ```bash
-uv run github-analysis status
+uv run gh-analysis status
 ```
 
 Displays:
@@ -316,7 +316,7 @@ Displays:
 Show version information.
 
 ```bash
-uv run github-analysis version
+uv run gh-analysis version
 ```
 
 ## Model Configuration
@@ -332,16 +332,16 @@ The simplified AI architecture uses a generic `--setting` flag for all model con
 
 ```bash
 # OpenAI reasoning models
-uv run github-analysis process product-labeling --model openai:o4-mini \
+uv run gh-analysis process product-labeling --model openai:o4-mini \
   --setting reasoning_effort=medium
 
 # Anthropic models with thinking
-uv run github-analysis process product-labeling --model anthropic:claude-3-5-sonnet-latest \
+uv run gh-analysis process product-labeling --model anthropic:claude-3-5-sonnet-latest \
   --setting reasoning_effort=high \
   --setting temperature=0.5
 
 # Multiple settings
-uv run github-analysis process product-labeling --model openai:gpt-4o \
+uv run gh-analysis process product-labeling --model openai:gpt-4o \
   --setting temperature=0.7 \
   --setting max_tokens=2000 \
   --setting top_p=0.9

@@ -48,16 +48,16 @@ Enable GitHub issue collection based on date ranges (e.g., "collect all issues i
 **Usage Examples:**
 ```bash
 # Absolute date ranges
-uv run github-analysis collect --org myorg --created-after 2024-01-01 --created-before 2024-06-30
+uv run gh-analysis collect --org myorg --created-after 2024-01-01 --created-before 2024-06-30
 
 # Last 6 months (convenience option)
-uv run github-analysis collect --org myorg --last-months 6
+uv run gh-analysis collect --org myorg --last-months 6
 
 # Combined with existing filters
-uv run github-analysis collect --org myorg --repo myrepo --labels bug --last-weeks 2
+uv run gh-analysis collect --org myorg --repo myrepo --labels bug --last-weeks 2
 
 # Updated date filtering
-uv run github-analysis collect --org myorg --updated-after 2024-01-01
+uv run gh-analysis collect --org myorg --updated-after 2024-01-01
 ```
 
 ### Phase 2: Date Parsing and Validation
@@ -152,43 +152,43 @@ is:issue created:>2024-01-01 updated:<2024-12-31  # Combined filters
 ```bash
 # 1. Test absolute date filtering
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --created-after 2024-01-01 --limit 5
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --created-after 2024-01-01 --limit 5
 
 # 2. Test relative dates
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --last-months 3 --limit 5
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --last-months 3 --limit 5
 
 # 3. Test date ranges
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --created-after 2024-01-01 --created-before 2024-06-30 --limit 5
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --created-after 2024-01-01 --created-before 2024-06-30 --limit 5
 
 # 4. Test updated date filtering
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --updated-after 2024-01-01 --limit 5
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --updated-after 2024-01-01 --limit 5
 
 # 5. Combine with existing filters
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --labels bug --last-weeks 4 --limit 5
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --labels bug --last-weeks 4 --limit 5
 ```
 
 ### Edge Case Testing
 ```bash
 # 6. Test invalid date formats
-uv run github-analysis collect --org test --created-after "invalid-date"
+uv run gh-analysis collect --org test --created-after "invalid-date"
 
 # 7. Test invalid date ranges  
-uv run github-analysis collect --org test --created-after 2024-12-31 --created-before 2024-01-01
+uv run gh-analysis collect --org test --created-after 2024-12-31 --created-before 2024-01-01
 
 # 8. Test parameter conflicts
-uv run github-analysis collect --org test --created-after 2024-01-01 --last-months 6
+uv run gh-analysis collect --org test --created-after 2024-01-01 --last-months 6
 
 # 9. Test organization-wide with dates
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --last-months 1 --limit 10
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --last-months 1 --limit 10
 
 # 10. Verify existing functionality unchanged
 # Ask user to provide test organization, repository, and issue number for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
 ```
 
 ### Quality Assurance
@@ -197,14 +197,14 @@ uv run github-analysis collect --org test --created-after 2024-01-01 --last-mont
 uv run black . && uv run ruff check --fix --unsafe-fixes && uv run mypy . && uv run pytest
 
 # 12. Test help documentation
-uv run github-analysis collect --help
+uv run gh-analysis collect --help
 
 # 13. Verify documentation is updated and accurate
 grep -r "created-after\|last-months" docs/
 grep -r "date.*filter" docs/
 
 # 14. Verify storage and results format unchanged
-uv run github-analysis status
+uv run gh-analysis status
 ```
 
 **Dependencies:**

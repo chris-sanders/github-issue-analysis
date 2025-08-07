@@ -61,14 +61,14 @@ async def product_labeling(
     
     Examples:
         # Basic usage
-        github-analysis process product-labeling --org myorg --repo myrepo
+        gh-analysis process product-labeling --org myorg --repo myrepo
         
         # With specific model and thinking
-        github-analysis process product-labeling --org myorg --repo myrepo \\
+        gh-analysis process product-labeling --org myorg --repo myrepo \\
             --model openai:o1-mini --thinking-effort high
         
         # Process single issue
-        github-analysis process product-labeling --org myorg --repo myrepo \\
+        gh-analysis process product-labeling --org myorg --repo myrepo \\
             --issue-number 123 --dry-run
     """
 ```
@@ -85,15 +85,15 @@ async def product_labeling(
 uv run pytest -v --cov=src/github_analysis --cov-report=term-missing
 
 # CLI help quality verification
-uv run github-analysis --help
-uv run github-analysis process --help
-uv run github-analysis process product-labeling --help
-uv run github-analysis batch --help
-uv run github-analysis batch submit --help
+uv run gh-analysis --help
+uv run gh-analysis process --help
+uv run gh-analysis process product-labeling --help
+uv run gh-analysis batch --help
+uv run gh-analysis batch submit --help
 
 # End-to-end workflow testing
-uv run github-analysis process product-labeling --org test --repo test --issue-number 1 --dry-run
-uv run github-analysis batch submit product-labeling --org test --repo test --dry-run
+uv run gh-analysis process product-labeling --org test --repo test --issue-number 1 --dry-run
+uv run gh-analysis batch submit product-labeling --org test --repo test --dry-run
 ```
 
 ### Success Metrics Verification
@@ -108,11 +108,11 @@ uv run github-analysis batch submit product-labeling --org test --repo test --dr
 uv run black . && uv run ruff check --fix --unsafe-fixes && uv run mypy . && uv run pytest -v
 
 # Help text verification
-uv run github-analysis process product-labeling --help | grep -A 10 "AI Configuration"
+uv run gh-analysis process product-labeling --help | grep -A 10 "AI Configuration"
 
 # Final integration tests
-uv run github-analysis process product-labeling --org test --repo test --issue-number 1 --dry-run
-uv run github-analysis batch submit product-labeling --org test --repo test --dry-run
+uv run gh-analysis process product-labeling --org test --repo test --issue-number 1 --dry-run
+uv run gh-analysis batch submit product-labeling --org test --repo test --dry-run
 
 # Line count verification
 git diff --stat HEAD~5  # Compare to start of project

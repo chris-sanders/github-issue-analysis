@@ -27,22 +27,22 @@ Implement basic OpenAI Batch API integration for cost-effective AI processing. W
 ## New Operations
 ```bash
 # Submit batch job using standard CLI patterns
-uv run github-analysis batch submit product-labeling --org myorg --repo myrepo
+uv run gh-analysis batch submit product-labeling --org myorg --repo myrepo
 
 # Submit batch job for entire organization
-uv run github-analysis batch submit product-labeling --org myorg
+uv run gh-analysis batch submit product-labeling --org myorg
 
 # Submit specific issue to batch processing
-uv run github-analysis batch submit product-labeling --org myorg --repo myrepo --issue-number 123
+uv run gh-analysis batch submit product-labeling --org myorg --repo myrepo --issue-number 123
 
 # Check batch job status
-uv run github-analysis batch status <job-id>
+uv run gh-analysis batch status <job-id>
 
 # Collect completed batch results
-uv run github-analysis batch collect <job-id>
+uv run gh-analysis batch collect <job-id>
 
 # List all batch jobs
-uv run github-analysis batch list
+uv run gh-analysis batch list
 ```
 
 ## New Functionality
@@ -66,7 +66,7 @@ uv run github-analysis batch list
 **Batch Command Implementation:**
 ```bash
 # Follow same patterns as collect/process commands
-uv run github-analysis batch submit product-labeling [STANDARD_FLAGS]
+uv run gh-analysis batch submit product-labeling [STANDARD_FLAGS]
 
 # Where STANDARD_FLAGS match existing commands:
 # --org myorg --repo myrepo          # Repository-specific  
@@ -128,16 +128,16 @@ class OpenAIBatchProvider:
 ### **Setup and Testing**
 ```bash
 # 1. Ensure existing data is available
-uv run github-analysis status
+uv run gh-analysis status
 
 # 2. Test batch submission with standard CLI patterns
-uv run github-analysis batch submit product-labeling --org test-org --repo test-repo
+uv run gh-analysis batch submit product-labeling --org test-org --repo test-repo
 
 # 3. Check job status
-uv run github-analysis batch status <job-id>
+uv run gh-analysis batch status <job-id>
 
 # 4. Collect results when ready
-uv run github-analysis batch collect <job-id>
+uv run gh-analysis batch collect <job-id>
 
 # 5. Verify results are in correct format
 ls data/results/*_product-labeling.json
@@ -146,10 +146,10 @@ ls data/results/*_product-labeling.json
 ### **Error Handling**
 ```bash
 # 6. Test with nonexistent organization/repository
-uv run github-analysis batch submit product-labeling --org nonexistent-org --repo nonexistent-repo
+uv run gh-analysis batch submit product-labeling --org nonexistent-org --repo nonexistent-repo
 
 # 7. Test with no collected issues
-uv run github-analysis batch submit product-labeling --org empty-org --repo empty-repo
+uv run gh-analysis batch submit product-labeling --org empty-org --repo empty-repo
 ```
 
 ## Success Criteria

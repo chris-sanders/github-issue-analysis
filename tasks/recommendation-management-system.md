@@ -688,8 +688,8 @@ class ProductLabelingProcessor:
 ```
 
 **CLI Command Modifications:**
-- Add `--reprocess` flag to `uv run github-analysis process product-labeling` 
-- Add `--reprocess` flag to `uv run github-analysis batch submit product-labeling`
+- Add `--reprocess` flag to `uv run gh-analysis process product-labeling` 
+- Add `--reprocess` flag to `uv run gh-analysis batch submit product-labeling`
 - Both commands check recommendation status before AI submission
 
 ### 6. CLI Interface Implementation
@@ -1132,41 +1132,41 @@ class TestRecommendationsCLI:
     def test_discover_command(self):
         """Test recommendation discovery CLI command."""
         # Create mock AI result and issue files
-        # Run: uv run github-analysis recommendations discover
+        # Run: uv run gh-analysis recommendations discover
         # Verify command succeeds
         # Verify recommendation status files created
         
     def test_list_command_no_filters(self):
         """Test list command with no filters shows all recommendations."""
         # Create 3 recommendation status files
-        # Run: uv run github-analysis recommendations list
+        # Run: uv run gh-analysis recommendations list
         # Verify output shows all 3 recommendations in table format
         
     def test_list_command_with_filters(self):
         """Test list command with various filter combinations."""
         # Create recommendations with different org, status, confidence
-        # Test --org filter: uv run github-analysis recommendations list --org testorg
-        # Test --status filter: uv run github-analysis recommendations list --status pending
+        # Test --org filter: uv run gh-analysis recommendations list --org testorg
+        # Test --status filter: uv run gh-analysis recommendations list --status pending
         # Test --min-confidence filter
         # Verify each filter returns only matching recommendations
         
     def test_summary_command(self):
         """Test summary dashboard command."""
         # Create recommendations with various statuses and products
-        # Run: uv run github-analysis recommendations summary
+        # Run: uv run gh-analysis recommendations summary
         # Verify statistics table displayed
         # Verify counts match created recommendations
         
     def test_review_session_command_no_recommendations(self):
         """Test review session with no pending recommendations."""
         # Ensure no recommendation files exist
-        # Run: uv run github-analysis recommendations review-session
+        # Run: uv run gh-analysis recommendations review-session
         # Verify shows "No recommendations found" message
         
     def test_review_session_command_with_filters(self):
         """Test review session command filters work correctly."""
         # Create recommendations with different orgs and confidence levels
-        # Run: uv run github-analysis recommendations review-session --org testorg --min-confidence 0.8
+        # Run: uv run gh-analysis recommendations review-session --org testorg --min-confidence 0.8
         # Verify only matching recommendations are included in session
 ```
 
@@ -1222,12 +1222,12 @@ Create comprehensive user documentation at `docs/recommendation-workflow.md` cov
 ### Setup and Discovery
 ```bash
 # 1. Ensure we have AI results to work with (use your actual org/repo)
-uv run github-analysis collect --org YOUR_ORG --repo YOUR_REPO --limit 5
-uv run github-analysis process product-labeling --org YOUR_ORG --repo YOUR_REPO
+uv run gh-analysis collect --org YOUR_ORG --repo YOUR_REPO --limit 5
+uv run gh-analysis process product-labeling --org YOUR_ORG --repo YOUR_REPO
 
 # 2. Test recommendation discovery
-uv run github-analysis recommendations discover
-uv run github-analysis recommendations summary
+uv run gh-analysis recommendations discover
+uv run gh-analysis recommendations summary
 
 # 3. Verify status files are created
 ls -la data/recommendation_status/
@@ -1236,27 +1236,27 @@ ls -la data/recommendation_status/
 ### Core Functionality
 ```bash
 # 4. Test recommendation listing and filtering
-uv run github-analysis recommendations list
-uv run github-analysis recommendations list --status pending --min-confidence 0.8
-uv run github-analysis recommendations list --product kots --confidence-tier high
+uv run gh-analysis recommendations list
+uv run gh-analysis recommendations list --status pending --min-confidence 0.8
+uv run gh-analysis recommendations list --product kots --confidence-tier high
 
 # 5. Test interactive review session (main feature)
-uv run github-analysis recommendations review-session
-uv run github-analysis recommendations review-session --org YOUR_ORG --min-confidence 0.8
+uv run gh-analysis recommendations review-session
+uv run gh-analysis recommendations review-session --org YOUR_ORG --min-confidence 0.8
 
 # 6. Verify status changes persist
-uv run github-analysis recommendations list --status approved
-uv run github-analysis recommendations summary
+uv run gh-analysis recommendations list --status approved
+uv run gh-analysis recommendations summary
 ```
 
 ### Reprocessing Safety
 ```bash
 # 7. Test reprocessing safety (should skip reviewed recommendations)
-uv run github-analysis process product-labeling --org YOUR_ORG --repo YOUR_REPO
+uv run gh-analysis process product-labeling --org YOUR_ORG --repo YOUR_REPO
 # Should skip issues with reviewed recommendations
 
 # 8. Test reprocess override
-uv run github-analysis process product-labeling --org YOUR_ORG --repo YOUR_REPO --reprocess
+uv run gh-analysis process product-labeling --org YOUR_ORG --repo YOUR_REPO --reprocess
 # Should reprocess all issues regardless of status
 ```
 
@@ -1293,10 +1293,10 @@ uv run black . && uv run ruff check --fix --unsafe-fixes && uv run mypy . && uv 
 - [ ] **User Documentation**: Complete workflow guide in `docs/recommendation-workflow.md`
 
 ### CLI Commands (Phase 1)
-- [ ] `uv run github-analysis recommendations discover` - Scan for new recommendations
-- [ ] `uv run github-analysis recommendations summary` - Dashboard view of recommendations
-- [ ] `uv run github-analysis recommendations list [filters]` - List and filter recommendations  
-- [ ] `uv run github-analysis recommendations review-session [filters]` - Interactive review workflow
+- [ ] `uv run gh-analysis recommendations discover` - Scan for new recommendations
+- [ ] `uv run gh-analysis recommendations summary` - Dashboard view of recommendations
+- [ ] `uv run gh-analysis recommendations list [filters]` - List and filter recommendations  
+- [ ] `uv run gh-analysis recommendations review-session [filters]` - Interactive review workflow
 
 ## Success Metrics (Phase 1)
 
