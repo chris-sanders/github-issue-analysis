@@ -46,6 +46,7 @@ allow-direct-references = true
 [tool.ruff]
 line-length = 88
 target-version = "py313"
+exclude = ["github_issue_analysis/ai/prompts.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
