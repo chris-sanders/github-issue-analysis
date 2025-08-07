@@ -6,17 +6,19 @@ build-backend = "hatchling.build"
 name = "github-issue-analysis"
 version = "0.1.2"
 description = "GitHub issue collection and AI-powered analysis"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = [
+    "anthropic>=0.7.0",
+    "httpx>=0.24.0",
+    "mcp", # Model Context Protocol support
+    "openai>=1.0.0",
     "pydantic>=2.5.0",
     "pydantic-ai>=0.4.0",
-    "httpx>=0.24.0",
-    "typer>=0.9.0",
-    "rich>=13.0.0",
-    "python-dotenv>=1.0.0",
-    "openai>=1.0.0",
-    "anthropic>=0.7.0",
     "pygithub>=2.6.1",
+    "python-dotenv>=1.0.0",
+    "rich>=13.0.0",
+    "troubleshoot-mcp-server @ git+https://github.com/chris-sanders/troubleshoot-mcp-server.git@main",
+    "typer>=0.9.0",
 ]
 
 [project.optional-dependencies]
@@ -38,9 +40,12 @@ github-analysis = "github_issue_analysis.cli.main:app"
 [tool.hatchling.build.targets.wheel]
 packages = ["github_issue_analysis"]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.ruff]
 line-length = 88
-target-version = "py312"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
@@ -59,7 +64,7 @@ markers = [
 ]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 strict = true
 exclude = ["trees/"]
 
