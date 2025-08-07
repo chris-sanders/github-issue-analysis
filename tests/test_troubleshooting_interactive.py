@@ -29,7 +29,7 @@ class TestMultilineInput:
         assert mock_ask.call_count == 1
 
         # Verify it was called with the correct prompt
-        mock_ask.assert_called_with(">>> ", default="")
+        mock_ask.assert_called_with("Enter your question", default="")
 
     @patch("github_issue_analysis.ai.interactive.Prompt.ask")
     def test_multiline_with_backslash(self, mock_ask):
@@ -41,9 +41,9 @@ class TestMultilineInput:
 
         # Verify prompts change for continuation lines
         expected_calls = [
-            (">>> ", ""),  # First call args
-            ("... ", ""),  # Continuation prompt
-            ("... ", ""),  # Continuation prompt
+            ("Enter your question", ""),  # First call args
+            ("Continue", ""),  # Continuation prompt
+            ("Continue", ""),  # Continuation prompt
         ]
         actual_calls = [
             (call.args[0], call.kwargs.get("default", ""))
@@ -387,7 +387,7 @@ class TestInteractiveIntegration:
             "\n[bold blue]── Interactive Mode ─────────────────────────[/bold blue]",
             "Ask follow-up questions about this issue.",
             "• Type 'exit' or press Ctrl+C to end",
-            "• Multi-line: Use '\\' at line end to continue to next line",
+            "• For multi-line input: End lines with '\\' to continue",
         ]
 
         for expected_print in expected_prints:

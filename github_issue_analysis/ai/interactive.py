@@ -29,8 +29,7 @@ async def run_interactive_session(
     )
     console.print("Ask follow-up questions about this issue.")
     console.print("• Type 'exit' or press Ctrl+C to end")
-    console.print("• Single line: Type and press Enter")
-    console.print("• Multi-line: Use '\\' at line end to continue to next line")
+    console.print("• For multi-line input: End lines with '\\' to continue")
     console.print("[bold blue]" + "─" * 55 + "[/bold blue]\n")
 
     message_history = initial_result.new_messages()
@@ -81,15 +80,17 @@ def get_multiline_input() -> str:
     Returns:
         The complete multi-line input string
     """
-    lines = []
-    prompt = ">>> "
+    lines: list[str] = []
+    prompt_text = "Enter your question"
 
     while True:
-        line = Prompt.ask(prompt, default="")
+        if lines:  # Continuation line
+            line = Prompt.ask("Continue", default="")
+        else:  # First line
+            line = Prompt.ask(prompt_text, default="")
 
         if line.endswith("\\"):
             lines.append(line[:-1])  # Remove backslash
-            prompt = "... "  # Clearer continuation prompt
         else:
             lines.append(line)
             break
