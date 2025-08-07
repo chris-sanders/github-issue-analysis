@@ -106,6 +106,8 @@ def format_troubleshooting_prompt(
 ) -> str:
     """Format issue data into a prompt for troubleshooting analysis.
 
+    Uses the same compact formatting as exp03 for optimal agent parsing.
+
     Args:
         issue_data: Issue data dictionary
         image_count: Number of images included in analysis
@@ -115,54 +117,19 @@ def format_troubleshooting_prompt(
     """
     issue = issue_data["issue"]
 
-    # Include all comments with full content
-    comment_text = ""
+    # Build context using exp03's simple format
+    context = f"Title: {issue['title']}\nBody: {issue['body']}\n"
+
     if issue.get("comments"):
-        all_comments = issue["comments"]
-        comment_entries = []
-        for comment in all_comments:
-            user = comment["user"]["login"]
-            body = comment["body"]  # Keep full formatting for troubleshooting
-            comment_entries.append(f"**Comment by {user}:**\n{body}\n")
-        comment_text = "\n".join(comment_entries)
+        context += "\nComments:\n"
+        for comment in issue["comments"]:
+            context += f"- {comment['body']}\n"
 
-    # Add image context for troubleshooting
+    # Add image context if needed (keep minimal)
     if image_count > 0:
-        image_instruction = f"""
+        context += f"\n[{image_count} image(s) provided for analysis]\n"
 
-**IMAGES PROVIDED:** This issue contains {image_count} image(s) that you should
-analyze for troubleshooting.
-When analyzing the images, look for:
-- Error messages, stack traces, or diagnostic outputs
-- System status displays, dashboards, or monitoring screens
-- Configuration files, logs, or command line outputs
-- Network diagrams, architecture views, or topology displays
-- Any visual evidence of system behavior or failures
-
-Use the images to gather diagnostic evidence for your technical analysis.
-"""
-    else:
-        image_instruction = ""
-
-    return f"""
-**ISSUE DETAILS:**
-
-**Title:** {issue["title"]}
-
-**Repository:** {issue_data["org"]}/{issue_data["repo"]}
-
-**Description:**
-{issue["body"]}
-
-**Comments:**
-{comment_text or "No comments available"}
-
-**Current Labels:** {[label["name"] for label in issue["labels"]]}
-{image_instruction}
-
-**ANALYSIS TASK:** Provide comprehensive technical troubleshooting analysis of
-this issue.
-"""
+    return f"**Problem Description:**\n{context}"
 
 
 def format_issue_prompt(issue_data: dict[str, Any], image_count: int = 0) -> str:
