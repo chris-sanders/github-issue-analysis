@@ -60,13 +60,40 @@ async def run_interactive_session(
             # Display response with better formatting
             console.print("\n[bold green]Response:[/bold green]")
 
-            # Try to render as markdown for better formatting
-            try:
-                markdown_content = Markdown(result.output)
-                console.print(markdown_content)
-            except Exception:
-                # Fallback to plain text if markdown parsing fails
-                console.print(f"{result.output}")
+            # Format the response based on its type
+            response_output = result.output
+
+            # Check if it's a TroubleshootingResponse object and format it
+            if hasattr(response_output, "analysis"):
+                # Format the structured troubleshooting response
+                analysis = response_output.analysis
+                formatted_response = f"""## Root Cause
+{analysis.root_cause}
+
+## Key Findings
+{chr(10).join(f"• {finding}" for finding in analysis.key_findings)}
+
+## Remediation
+{analysis.remediation}
+
+## Technical Explanation
+{analysis.explanation}
+
+**Confidence:** {response_output.confidence_score:.2f}
+**Processing Time:** {response_output.processing_time_seconds:.1f}s"""
+
+                try:
+                    markdown_content = Markdown(formatted_response)
+                    console.print(markdown_content)
+                except Exception:
+                    console.print(formatted_response)
+            else:
+                # Handle other response types (like simple strings)
+                try:
+                    markdown_content = Markdown(str(response_output))
+                    console.print(markdown_content)
+                except Exception:
+                    console.print(str(response_output))
 
             console.print("")  # Add blank line for readability
 
