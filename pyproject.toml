@@ -17,7 +17,7 @@ dependencies = [
     "pygithub>=2.6.1",
     "python-dotenv>=1.0.0",
     "rich>=13.0.0",
-    "troubleshoot-mcp-server @ git+https://github.com/chris-sanders/troubleshoot-mcp-server.git@main",
+    "troubleshoot-mcp-server>=1.10.0",
     "typer>=0.9.0",
 ]
 
@@ -35,10 +35,10 @@ export = [
 ]
 
 [project.scripts]
-gh-analysis = "github_issue_analysis.cli.main:app"
+gh-analysis = "gh_analysis.cli.main:app"
 
 [tool.hatchling.build.targets.wheel]
-packages = ["github_issue_analysis"]
+packages = ["gh_analysis"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
