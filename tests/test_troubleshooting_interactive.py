@@ -20,35 +20,32 @@ from github_issue_analysis.ai.interactive import (
 class TestMultilineInput:
     """Test multi-line input handling."""
 
-    @patch("github_issue_analysis.ai.interactive.Prompt.ask")
-    def test_single_line_input(self, mock_ask):
+    @patch("builtins.input")
+    def test_single_line_input(self, mock_input):
         """Test normal single-line input without backslash continuation."""
-        mock_ask.return_value = "What is the error?"
+        mock_input.return_value = "What is the error?"
         result = get_multiline_input()
         assert result == "What is the error?"
-        assert mock_ask.call_count == 1
+        assert mock_input.call_count == 1
 
         # Verify it was called with the correct prompt
-        mock_ask.assert_called_with("Enter your question", default="")
+        mock_input.assert_called_with("Enter your question: ")
 
-    @patch("github_issue_analysis.ai.interactive.Prompt.ask")
-    def test_multiline_with_backslash(self, mock_ask):
+    @patch("builtins.input")
+    def test_multiline_with_backslash(self, mock_input):
         """Test backslash continuation for multi-line input."""
-        mock_ask.side_effect = ["First line\\", "Second line\\", "Third line"]
+        mock_input.side_effect = ["First line\\", "Second line\\", "Third line"]
         result = get_multiline_input()
         assert result == "First line\nSecond line\nThird line"
-        assert mock_ask.call_count == 3
+        assert mock_input.call_count == 3
 
         # Verify prompts change for continuation lines
         expected_calls = [
-            ("Enter your question", ""),  # First call args
-            ("Continue", ""),  # Continuation prompt
-            ("Continue", ""),  # Continuation prompt
+            "Enter your question: ",  # First call
+            "Continue: ",  # Continuation prompt
+            "Continue: ",  # Continuation prompt
         ]
-        actual_calls = [
-            (call.args[0], call.kwargs.get("default", ""))
-            for call in mock_ask.call_args_list
-        ]
+        actual_calls = [call.args[0] for call in mock_input.call_args_list]
         assert actual_calls == expected_calls
 
     @patch("github_issue_analysis.ai.interactive.Prompt.ask")

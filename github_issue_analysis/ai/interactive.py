@@ -81,13 +81,19 @@ def get_multiline_input() -> str:
         The complete multi-line input string
     """
     lines: list[str] = []
-    prompt_text = "Enter your question"
+    prompt_text = "Enter your question: "
 
     while True:
         if lines:  # Continuation line
-            line = Prompt.ask("Continue", default="")
+            try:
+                line = input("Continue: ").strip()
+            except EOFError:
+                break
         else:  # First line
-            line = Prompt.ask(prompt_text, default="")
+            try:
+                line = input(prompt_text).strip()
+            except EOFError:
+                break
 
         if line.endswith("\\"):
             lines.append(line[:-1])  # Remove backslash
