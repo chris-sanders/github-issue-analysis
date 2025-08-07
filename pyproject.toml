@@ -67,10 +67,16 @@ markers = [
 python_version = "3.13"
 strict = true
 exclude = ["trees/"]
+plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 module = "tests.*"
 disallow_untyped_defs = false
 check_untyped_defs = true
+
+[dependency-groups]
+dev = [
+    "types-pyyaml>=6.0.12.20250516",
+]
 
 

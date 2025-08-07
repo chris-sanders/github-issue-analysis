@@ -7,6 +7,7 @@ from typing import Any
 import typer
 from rich.console import Console
 
+from ..github_client.models import StoredIssue
 from ..storage.manager import StorageManager
 from .options import ISSUE_NUMBER_OPTION, ORG_OPTION, REPO_OPTION
 
@@ -125,9 +126,9 @@ def export(
         raise typer.Exit(1)
 
 
-def prepare_export_data(issues: list[Any]) -> dict[str, Any]:
+def prepare_export_data(issues: list[StoredIssue]) -> dict[str, Any]:
     """Prepare issues data for export in a clean, readable format."""
-    export_data = {
+    export_data: dict[str, Any] = {
         "export_info": {
             "total_issues": len(issues),
             "export_timestamp": "2024-01-01T00:00:00Z",  # Will be replaced
@@ -141,11 +142,7 @@ def prepare_export_data(issues: list[Any]) -> dict[str, Any]:
 
     for stored_issue in issues:
         # Convert StoredIssue to dict for export
-        issue_data = (
-            stored_issue.model_dump()
-            if hasattr(stored_issue, "model_dump")
-            else stored_issue
-        )
+        issue_data = stored_issue.model_dump()
 
         # Clean up the issue data for better readability
         clean_issue = {
