@@ -7,6 +7,8 @@ from pydantic_ai.usage import UsageLimits
 from rich.console import Console
 from rich.markdown import Markdown
 
+from .models import InteractiveTroubleshootingResponse
+
 console = Console()
 
 
@@ -56,49 +58,41 @@ async def run_interactive_session(
                 "[dim]🤔 Analyzing your question...[/dim]", spinner="dots"
             ):
                 # Run with context and proper usage limits
+                # Use InteractiveTroubleshootingResponse for conversational answers
+                # Continue the conversation naturally with the user's question
                 result = await agent.run(
                     user_input,
                     message_history=message_history,
                     usage_limits=UsageLimits(request_limit=150),
+                    output_type=InteractiveTroubleshootingResponse,
                 )
 
             # Display response with better formatting
             console.print("\n[bold green]Response:[/bold green]")
 
-            # Format the response based on its type
+            # Format the interactive response
             response_output = result.output
 
-            # Check if it's a TroubleshootingResponse object and format it
-            if hasattr(response_output, "analysis"):
-                # Format the structured troubleshooting response
-                analysis = response_output.analysis
-                formatted_response = f"""## Root Cause
-{analysis.root_cause}
+            # Display the main answer in markdown format
+            try:
+                markdown_content = Markdown(response_output.answer)
+                console.print(markdown_content)
+            except Exception:
+                # Fallback to plain text if markdown parsing fails
+                console.print(response_output.answer)
 
-## Key Findings
-{chr(10).join(f"• {finding}" for finding in analysis.key_findings)}
+            # Show additional findings if any
+            if response_output.additional_findings:
+                console.print("\n[bold cyan]Additional Findings:[/bold cyan]")
+                for finding in response_output.additional_findings:
+                    console.print(f"• {finding}")
 
-## Remediation
-{analysis.remediation}
-
-## Technical Explanation
-{analysis.explanation}
-
-**Confidence:** {response_output.confidence_score:.2f}
-**Processing Time:** {response_output.processing_time_seconds:.1f}s"""
-
-                try:
-                    markdown_content = Markdown(formatted_response)
-                    console.print(markdown_content)
-                except Exception:
-                    console.print(formatted_response)
-            else:
-                # Handle other response types (like simple strings)
-                try:
-                    markdown_content = Markdown(str(response_output))
-                    console.print(markdown_content)
-                except Exception:
-                    console.print(str(response_output))
+            # Show references used if any
+            if response_output.references_used:
+                console.print("\n[bold dim]References:[/bold dim]")
+                console.print(
+                    "[dim]" + ", ".join(response_output.references_used) + "[/dim]"
+                )
 
             console.print("")  # Add blank line for readability
 
