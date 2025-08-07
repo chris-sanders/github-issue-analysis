@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic_ai import Agent
 from rich.console import Console
-from rich.prompt import Prompt
+from rich.markdown import Markdown
 
 console = Console()
 
@@ -50,11 +50,25 @@ async def run_interactive_session(
                 )
                 continue
 
-            # Run with context
-            result = await agent.run(user_input, message_history=message_history)
+            # Show thinking indicator with spinner
+            with console.status(
+                "[dim]🤔 Analyzing your question...[/dim]", spinner="dots"
+            ):
+                # Run with context
+                result = await agent.run(user_input, message_history=message_history)
 
-            # Display response
-            console.print(f"\n{result.output}\n")
+            # Display response with better formatting
+            console.print("\n[bold green]Response:[/bold green]")
+
+            # Try to render as markdown for better formatting
+            try:
+                markdown_content = Markdown(result.output)
+                console.print(markdown_content)
+            except Exception:
+                # Fallback to plain text if markdown parsing fails
+                console.print(f"{result.output}")
+
+            console.print("")  # Add blank line for readability
 
             # Update message history for next iteration
             message_history = result.new_messages()
