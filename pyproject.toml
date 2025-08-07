@@ -35,10 +35,10 @@ export = [
 ]
 
 [project.scripts]
-gh-analysis = "github_issue_analysis.cli.main:app"
+gh-analysis = "gh_analysis.cli.main:app"
 
 [tool.hatchling.build.targets.wheel]
-packages = ["github_issue_analysis"]
+packages = ["gh_analysis"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

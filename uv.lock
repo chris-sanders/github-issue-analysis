@@ -477,7 +477,7 @@ requires-dist = [
     { name = "pyyaml", marker = "extra == 'export'", specifier = ">=6.0.0" },
     { name = "rich", specifier = ">=13.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.12.1" },
-    { name = "troubleshoot-mcp-server", git = "https://github.com/chris-sanders/troubleshoot-mcp-server.git?rev=main" },
+    { name = "troubleshoot-mcp-server", specifier = ">=1.10.0" },
     { name = "typer", specifier = ">=0.9.0" },
 ]
 provides-extras = ["dev", "export"]
@@ -1663,8 +1663,8 @@ wheels = [
 
 [[package]]
 name = "troubleshoot-mcp-server"
-version = "0.1.0"
-source = { git = "https://github.com/chris-sanders/troubleshoot-mcp-server.git?rev=main#d5d5f2b799b7fc3fe83e896ee0588d2d1049aae6" }
+version = "1.10.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "fastapi" },
@@ -1674,6 +1674,10 @@ dependencies = [
     { name = "pyyaml" },
     { name = "typer" },
     { name = "uvicorn" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/be/a9/3efa8af05d91422563823a7800e877b003d399755ff753dde3f62c987ad9/troubleshoot_mcp_server-1.10.0.tar.gz", hash = "sha256:904069f8ac0f61547cbcd7ffa7e2b2dcf1228676d9049b3996b31cd0dcd716d0", size = 63029, upload-time = "2025-08-07T15:54:54.437Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f9/cf/4855da2397b63946769520d59712c11e64b37f3fe0b45311352dd4a2b456/troubleshoot_mcp_server-1.10.0-py3-none-any.whl", hash = "sha256:1533c9507be05b36c8c0f6685076cc3af469d1df69d76e54585d023d2eaa652e", size = 65532, upload-time = "2025-08-07T15:54:52.719Z" },
 ]
 
 [[package]]
