@@ -43,7 +43,6 @@ class GitHubClient:
         try:
             rate_limit = self.github.get_rate_limit()
             remaining = rate_limit.core.remaining
-
             console.print(f"GitHub API rate limit: {remaining} requests remaining")
 
             if remaining < 10:
@@ -54,8 +53,9 @@ class GitHubClient:
                 )
                 time.sleep(sleep_time)
 
-        except Exception as e:
-            console.print(f"Warning: Could not check rate limit: {e}")
+        except Exception:
+            # Silently continue if rate limit check fails - it's not critical
+            pass
 
     def _convert_user(self, github_user: NamedUser) -> GitHubUser:
         """Convert PyGitHub user to our model."""
