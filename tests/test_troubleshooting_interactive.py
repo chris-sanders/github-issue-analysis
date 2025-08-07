@@ -48,38 +48,38 @@ class TestMultilineInput:
         actual_calls = [call.args[0] for call in mock_input.call_args_list]
         assert actual_calls == expected_calls
 
-    @patch("github_issue_analysis.ai.interactive.Prompt.ask")
-    def test_empty_line_handling(self, mock_ask):
+    @patch("builtins.input")
+    def test_empty_line_handling(self, mock_input):
         """Test handling of empty lines in multi-line input."""
-        mock_ask.side_effect = [
+        mock_input.side_effect = [
             "First line\\",
             "\\",  # Empty continuation line with backslash to continue
             "Last line",
         ]
         result = get_multiline_input()
         assert result == "First line\n\nLast line"
-        assert mock_ask.call_count == 3
+        assert mock_input.call_count == 3
 
-    @patch("github_issue_analysis.ai.interactive.Prompt.ask")
-    def test_backslash_removal(self, mock_ask):
+    @patch("builtins.input")
+    def test_backslash_removal(self, mock_input):
         """Test that backslashes are properly removed from continuation lines."""
-        mock_ask.side_effect = ["Line with backslash\\", "Final line"]
+        mock_input.side_effect = ["Line with backslash\\", "Final line"]
         result = get_multiline_input()
         # Should remove the backslash from the first line
         assert result == "Line with backslash\nFinal line"
         assert "\\" not in result
 
-    @patch("github_issue_analysis.ai.interactive.Prompt.ask")
-    def test_empty_line_ends_input(self, mock_ask):
+    @patch("builtins.input")
+    def test_empty_line_ends_input(self, mock_input):
         """Test that empty lines without backslash end the input."""
-        mock_ask.side_effect = [
+        mock_input.side_effect = [
             "First line\\",
             "",  # Empty line without backslash - ends input
         ]
         result = get_multiline_input()
         # Should only capture first line, empty line ends the input
         assert result == "First line\n"
-        assert mock_ask.call_count == 2
+        assert mock_input.call_count == 2
 
 
 class TestInteractiveSession:
@@ -194,7 +194,9 @@ class TestInteractiveSession:
         mock_agent = AsyncMock()
         # First call raises exception, second succeeds
         mock_result_obj = SimpleNamespace()
-        mock_result_obj.output = "Recovery response"
+        mock_result_obj.output = SimpleNamespace(
+            answer="Recovery response", additional_findings=[], references_used=[]
+        )
         mock_result_obj.new_messages = lambda: []
 
         mock_agent.run.side_effect = [Exception("API timeout"), mock_result_obj]
@@ -219,7 +221,12 @@ class TestInteractiveSession:
         )
 
         # Session should continue and process second question
-        mock_console.print.assert_any_call("\nRecovery response\n")
+        # The response is printed as a Markdown object - check for successful response
+        calls = mock_console.print.call_args_list
+        markdown_calls = [call for call in calls if "Markdown" in str(call)]
+        assert len(markdown_calls) > 0, (
+            "Expected at least one Markdown object to be printed after recovery"
+        )
 
     @patch("github_issue_analysis.ai.interactive.get_multiline_input")
     @patch("github_issue_analysis.ai.interactive.console")
@@ -233,11 +240,15 @@ class TestInteractiveSession:
 
         # Create mock results with evolving message histories
         first_result = SimpleNamespace()
-        first_result.output = "First response"
+        first_result.output = SimpleNamespace(
+            answer="First response", additional_findings=[], references_used=[]
+        )
         first_result.new_messages = lambda: ["msg1", "msg2"]
 
         second_result = SimpleNamespace()
-        second_result.output = "Second response"
+        second_result.output = SimpleNamespace(
+            answer="Second response", additional_findings=[], references_used=[]
+        )
         second_result.new_messages = lambda: ["msg1", "msg2", "msg3", "msg4"]
 
         mock_agent.run.side_effect = [first_result, second_result]
@@ -399,7 +410,11 @@ class TestInteractiveIntegration:
 
         mock_agent = AsyncMock()
         mock_result_obj = SimpleNamespace()
-        mock_result_obj.output = "This is the agent response"
+        mock_result_obj.output = SimpleNamespace(
+            answer="This is the agent response",
+            additional_findings=[],
+            references_used=[],
+        )
         mock_result_obj.new_messages = lambda: []
         mock_agent.run.return_value = mock_result_obj
 
@@ -413,5 +428,12 @@ class TestInteractiveIntegration:
             include_images=False,
         )
 
-        # Verify response is formatted with surrounding newlines
-        mock_console.print.assert_any_call("\nThis is the agent response\n")
+        # Verify response header is displayed and Markdown object was printed
+        mock_console.print.assert_any_call("\n[bold green]Response:[/bold green]")
+
+        # Check that a Markdown object was printed (contains the actual response)
+        calls = mock_console.print.call_args_list
+        markdown_calls = [call for call in calls if "Markdown" in str(call)]
+        assert len(markdown_calls) > 0, (
+            "Expected a Markdown object to be printed with the response"
+        )

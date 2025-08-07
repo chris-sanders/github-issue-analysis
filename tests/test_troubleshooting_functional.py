@@ -138,10 +138,7 @@ class TestEndToEnd:
         assert "Network connectivity issue" in prompt_content
         assert "Pods cannot communicate with each other" in prompt_content
         assert "kubectl get pods shows CrashLoopBackOff status" in prompt_content
-        assert (
-            "**ANALYSIS TASK:** Provide comprehensive technical troubleshooting"
-            in prompt_content
-        )
+        assert "**Problem Description:**" in prompt_content
 
         # Critical: should NOT contain product labeling requests
         assert "product label" not in prompt_content.lower()
@@ -259,10 +256,7 @@ class TestEndToEnd:
             assert "Database connection timeout" in captured_prompt
             assert "PostgreSQL connection is failing" in captured_prompt
             assert "connection refused" in captured_prompt
-            assert (
-                "**ANALYSIS TASK:** Provide comprehensive technical troubleshooting"
-                in captured_prompt
-            )
+            assert "**Problem Description:**" in captured_prompt
 
             # Should NOT contain product labeling content
             assert "product label" not in captured_prompt.lower()
