@@ -752,20 +752,28 @@ async def _run_troubleshoot(
                 processed_issue_data, include_images
             )
 
-            # Run agent directly to get full RunResult
-            agent_result = await troubleshoot_agent.run(
-                message_parts, usage_limits=UsageLimits(request_limit=150)
-            )
+            # Run agent directly to get full RunResult with thinking indicator
+            with console.status(
+                "[dim]🤔 Analyzing issue with troubleshooting agent...[/dim]",
+                spinner="dots",
+            ):
+                agent_result = await troubleshoot_agent.run(
+                    message_parts, usage_limits=UsageLimits(request_limit=150)
+                )
 
             # Extract the output for display and saving
             result = agent_result.output
         else:
-            # Non-interactive mode uses the helper function
-            result = await analyze_troubleshooting_issue(
-                troubleshoot_agent,
-                processed_issue_data,
-                include_images=include_images,
-            )
+            # Non-interactive mode uses the helper function with thinking indicator
+            with console.status(
+                "[dim]🤔 Analyzing issue with troubleshooting agent...[/dim]",
+                spinner="dots",
+            ):
+                result = await analyze_troubleshooting_issue(
+                    troubleshoot_agent,
+                    processed_issue_data,
+                    include_images=include_images,
+                )
             agent_result = None
 
         end_time = datetime.utcnow()
