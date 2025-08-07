@@ -101,6 +101,30 @@ class ProductLabelingResponse(BaseModel):
         return v
 
 
+class TechnicalAnalysis(BaseModel):
+    """Structured technical analysis output."""
+
+    root_cause: str = Field(description="Primary cause of the issue")
+    key_findings: list[str] = Field(
+        description="Important discoveries and observations"
+    )
+    remediation: str = Field(description="Recommended solution steps")
+    explanation: str = Field(description="Detailed technical explanation")
+
+
+class TroubleshootingResponse(BaseModel):
+    """Response model for troubleshooting analysis."""
+
+    analysis: TechnicalAnalysis
+    confidence_score: float = Field(
+        ge=0.0, le=1.0, description="Confidence in analysis"
+    )
+    tools_used: list[str] = Field(
+        default_factory=list, description="MCP tools utilized"
+    )
+    processing_time_seconds: float = Field(description="Time taken for analysis")
+
+
 # Future: Easy to add new response types for different analysis tasks
 class IssueClassificationResponse(BaseModel):
     """Future: General issue classification beyond just product labels."""

@@ -45,7 +45,7 @@ class TestGitHubLabel:
 
     def test_label_without_description(self) -> None:
         """Test label without description."""
-        label = GitHubLabel(name="enhancement", color="00ff00")
+        label = GitHubLabel(name="enhancement", color="00ff00", description=None)
         assert label.name == "enhancement"
         assert label.color == "00ff00"
         assert label.description is None
@@ -105,6 +105,7 @@ class TestGitHubIssue:
             comments=[comment],
             created_at=datetime.now(),
             updated_at=datetime.now(),
+            repository_name=None,
         )
 
     def test_valid_issue(self) -> None:
@@ -134,6 +135,7 @@ class TestGitHubIssue:
             comments=[],
             created_at=datetime.now(),
             updated_at=datetime.now(),
+            repository_name=None,
         )
 
         assert issue.body is None
@@ -151,6 +153,7 @@ class TestGitHubIssue:
             user=user,
             created_at=datetime.now(),
             updated_at=datetime.now(),
+            repository_name=None,
         )
 
         assert issue.comments == []
@@ -172,6 +175,7 @@ class TestStoredIssue:
             comments=[],
             created_at=datetime.now(),
             updated_at=datetime.now(),
+            repository_name=None,
         )
 
         metadata: dict[str, Any] = {
@@ -201,6 +205,7 @@ class TestStoredIssue:
             comments=[],
             created_at=datetime.now(),
             updated_at=datetime.now(),
+            repository_name=None,
         )
 
         stored_issue = StoredIssue(

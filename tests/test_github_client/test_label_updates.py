@@ -10,7 +10,7 @@ from github_issue_analysis.github_client.client import GitHubClient
 
 
 @pytest.fixture
-def mock_github() -> Generator[MagicMock, None, None]:
+def mock_github() -> Generator[MagicMock]:
     """Mock GitHub API client."""
     with patch(
         "github_issue_analysis.github_client.client.Github"

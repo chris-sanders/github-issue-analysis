@@ -80,3 +80,8 @@ dmypy.json
 # Specific test data patterns
 *replicated-collab*
 *pixee-replicated*
+# Exclude sensitive test data
+data/
+*.json
+repomix-output.xml
+*.log

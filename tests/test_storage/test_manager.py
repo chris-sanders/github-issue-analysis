@@ -21,7 +21,7 @@ class TestStorageManager:
     """Test StorageManager class."""
 
     @pytest.fixture
-    def temp_storage(self) -> Generator[StorageManager, None, None]:
+    def temp_storage(self) -> Generator[StorageManager]:
         """Create temporary storage directory."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield StorageManager(base_path=temp_dir)
