@@ -497,6 +497,12 @@ def troubleshoot(
         help="Preview changes without applying them",
         rich_help_panel="Processing Options",
     ),
+    interactive: bool = typer.Option(
+        False,
+        "--interactive",
+        help="Enter interactive mode after analysis for follow-up questions",
+        rich_help_panel="Processing Options",
+    ),
 ) -> None:
     """Analyze GitHub issues using advanced troubleshooting agents with MCP tools.
 
@@ -547,6 +553,7 @@ def troubleshoot(
                 include_images,
                 limit_comments,
                 dry_run,
+                interactive,
             )
         )
     except ValueError as e:
@@ -563,6 +570,7 @@ async def _run_troubleshoot(
     include_images: bool,
     limit_comments: int | None,
     dry_run: bool,
+    interactive: bool,
 ) -> None:
     """Run troubleshooting analysis."""
     import re
@@ -733,11 +741,33 @@ async def _run_troubleshoot(
     start_time = datetime.utcnow()
 
     try:
-        result = await analyze_troubleshooting_issue(
-            troubleshoot_agent,
-            processed_issue_data,
-            include_images=include_images,
-        )
+        # For interactive mode, we need the full RunResult, not just the output
+        if interactive:
+            # Import analysis helper and run agent directly
+            from pydantic_ai.usage import UsageLimits
+
+            from ..ai.analysis import prepare_issue_for_troubleshooting
+
+            message_parts = prepare_issue_for_troubleshooting(
+                processed_issue_data, include_images
+            )
+
+            # Run agent directly to get full RunResult
+            agent_result = await troubleshoot_agent.run(
+                message_parts, usage_limits=UsageLimits(request_limit=150)
+            )
+
+            # Extract the output for display and saving
+            result = agent_result.output
+        else:
+            # Non-interactive mode uses the helper function
+            result = await analyze_troubleshooting_issue(
+                troubleshoot_agent,
+                processed_issue_data,
+                include_images=include_images,
+            )
+            agent_result = None
+
         end_time = datetime.utcnow()
         processing_time = (end_time - start_time).total_seconds()
 
@@ -803,6 +833,17 @@ async def _run_troubleshoot(
         console.print(f"\n[green]✓ Results saved to {result_file.name}[/green]")
     except Exception as e:
         console.print(f"\n[red]❌ Failed to save results: {e}[/red]")
+
+    # Start interactive session if requested
+    if interactive:
+        from ..ai.interactive import run_interactive_session
+
+        await run_interactive_session(
+            troubleshoot_agent,
+            agent_result,  # The RunResult from initial analysis
+            processed_issue_data,
+            include_images=include_images,
+        )
 
 
 if __name__ == "__main__":

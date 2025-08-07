@@ -125,6 +125,19 @@ class TroubleshootingResponse(BaseModel):
     processing_time_seconds: float = Field(description="Time taken for analysis")
 
 
+class InteractiveTroubleshootingResponse(BaseModel):
+    """Response model for interactive follow-up questions."""
+
+    answer: str = Field(description="Direct answer to the user's question")
+    additional_findings: list[str] = Field(
+        default_factory=list, description="Any new findings discovered while answering"
+    )
+    references_used: list[str] = Field(
+        default_factory=list,
+        description="References to initial analysis or new tools used",
+    )
+
+
 # Future: Easy to add new response types for different analysis tasks
 class IssueClassificationResponse(BaseModel):
     """Future: General issue classification beyond just product labels."""

@@ -247,6 +247,7 @@ class TestEndToEnd:
                         include_images=False,
                         limit_comments=None,
                         dry_run=False,
+                        interactive=False,
                     )
 
             # Validate the prompt content
@@ -340,6 +341,7 @@ class TestEndToEnd:
                         include_images=False,
                         limit_comments=None,
                         dry_run=False,
+                        interactive=False,
                     )
 
                     # Verify analyze_troubleshooting_issue was called
