@@ -42,11 +42,11 @@ class GitHubClient:
         """Check rate limit and sleep if necessary."""
         try:
             rate_limit = self.github.get_rate_limit()
-            remaining = rate_limit.core.remaining
+            remaining = rate_limit.rate.remaining
             console.print(f"GitHub API rate limit: {remaining} requests remaining")
 
             if remaining < 10:
-                reset_time = rate_limit.core.reset.timestamp()
+                reset_time = rate_limit.rate.reset.timestamp()
                 sleep_time = reset_time - time.time() + 1
                 console.print(
                     f"Rate limit low, sleeping for {sleep_time:.1f} seconds..."
