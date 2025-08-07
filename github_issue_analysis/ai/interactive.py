@@ -3,6 +3,7 @@
 from typing import Any
 
 from pydantic_ai import Agent
+from pydantic_ai.usage import UsageLimits
 from rich.console import Console
 from rich.markdown import Markdown
 
@@ -54,8 +55,12 @@ async def run_interactive_session(
             with console.status(
                 "[dim]🤔 Analyzing your question...[/dim]", spinner="dots"
             ):
-                # Run with context
-                result = await agent.run(user_input, message_history=message_history)
+                # Run with context and proper usage limits
+                result = await agent.run(
+                    user_input,
+                    message_history=message_history,
+                    usage_limits=UsageLimits(request_limit=150),
+                )
 
             # Display response with better formatting
             console.print("\n[bold green]Response:[/bold green]")
