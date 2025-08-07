@@ -121,27 +121,27 @@ AI_THINKING_SUMMARY=detailed
 **Validation:**
 ```bash
 # Test thinking model configurations
-uv run github-analysis process product-labeling \
+uv run gh-analysis process product-labeling \
   --model openai:o1-mini --thinking-effort high \
   --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
 
-uv run github-analysis process product-labeling \
+uv run gh-analysis process product-labeling \
   --model anthropic:claude-3-5-sonnet-latest --thinking-budget 2048 \
   --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
 
 # Test validation errors
-uv run github-analysis process product-labeling \
+uv run gh-analysis process product-labeling \
   --model openai:gpt-4o --thinking-effort high
 # Should show helpful error with model suggestions
 
 # Test environment variables
 export AI_THINKING_EFFORT=medium
-uv run github-analysis process product-labeling \
+uv run gh-analysis process product-labeling \
   --model openai:o1-mini \
   --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
 
 # Test backward compatibility
-uv run github-analysis process product-labeling \
+uv run gh-analysis process product-labeling \
   --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
 # Should work exactly as before
 

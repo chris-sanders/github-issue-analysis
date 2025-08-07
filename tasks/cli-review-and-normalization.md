@@ -60,7 +60,7 @@ Standardize CLI option patterns across all commands to ensure consistent shortha
 ## Phase 3: Verification and Testing
 
 7. **Verify `-h` for `--help`**:
-   - Test that `uv run github-analysis collect -h` works correctly
+   - Test that `uv run gh-analysis collect -h` works correctly
    - If not working, investigate Typer configuration needed
    - Document findings and fix if necessary
 
@@ -133,21 +133,21 @@ uv run python -c "from github_issue_analysis.cli.options import ORG_OPTION, REPO
 **Phase 2 - Updated Commands:**
 ```bash
 # Test collect command with shorthand options
-uv run github-analysis collect -o USER_PROVIDED_ORG -r USER_PROVIDED_REPO -i USER_PROVIDED_ISSUE_NUMBER --dry-run
+uv run gh-analysis collect -o USER_PROVIDED_ORG -r USER_PROVIDED_REPO -i USER_PROVIDED_ISSUE_NUMBER --dry-run
 
 # Test batch command with shorthand options  
-uv run github-analysis batch submit product-labeling -o USER_PROVIDED_ORG -r USER_PROVIDED_REPO --dry-run
+uv run gh-analysis batch submit product-labeling -o USER_PROVIDED_ORG -r USER_PROVIDED_REPO --dry-run
 
 # Test process command with shorthand options
-uv run github-analysis process product-labeling -o USER_PROVIDED_ORG -r USER_PROVIDED_REPO -i USER_PROVIDED_ISSUE_NUMBER --dry-run
+uv run gh-analysis process product-labeling -o USER_PROVIDED_ORG -r USER_PROVIDED_REPO -i USER_PROVIDED_ISSUE_NUMBER --dry-run
 
 # Test update-labels with NEW shorthand options (most important)
-uv run github-analysis update-labels -o USER_PROVIDED_ORG -r USER_PROVIDED_REPO -i USER_PROVIDED_ISSUE_NUMBER -d
+uv run gh-analysis update-labels -o USER_PROVIDED_ORG -r USER_PROVIDED_REPO -i USER_PROVIDED_ISSUE_NUMBER -d
 
 # Test help shorthand works
-uv run github-analysis collect -h
-uv run github-analysis batch -h  
-uv run github-analysis update-labels -h
+uv run gh-analysis collect -h
+uv run gh-analysis batch -h  
+uv run gh-analysis update-labels -h
 ```
 
 **Phase 3 - Consistency Validation:**

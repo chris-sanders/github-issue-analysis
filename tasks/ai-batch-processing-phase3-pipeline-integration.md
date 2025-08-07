@@ -27,15 +27,15 @@ Add batch execution mode to existing DuckDB Phase 2 pipeline commands. Allows al
 ## New Operations
 ```bash
 # Existing pipeline commands with --batch-mode added
-uv run github-analysis process-query missing product-labeling --batch-mode
-uv run github-analysis process-query reprocess product-labeling --threshold 0.7 --batch-mode
-uv run github-analysis process-query custom product-labeling "SELECT * FROM issues WHERE state='open'" --batch-mode
+uv run gh-analysis process-query missing product-labeling --batch-mode
+uv run gh-analysis process-query reprocess product-labeling --threshold 0.7 --batch-mode
+uv run gh-analysis process-query custom product-labeling "SELECT * FROM issues WHERE state='open'" --batch-mode
 
 # Repository and filtering with batch mode
-uv run github-analysis process-query missing product-labeling --org replicated --repo kots --batch-mode
+uv run gh-analysis process-query missing product-labeling --org replicated --repo kots --batch-mode
 
 # Monitor batch jobs from pipeline
-uv run github-analysis process-query batch-status
+uv run gh-analysis process-query batch-status
 ```
 
 ## New Functionality
@@ -230,38 +230,38 @@ def batch_status():
 ### **Setup and Prerequisites**
 ```bash
 # 1. Ensure DuckDB Phase 2 is working
-uv run github-analysis process-query missing product-labeling --limit 1
+uv run gh-analysis process-query missing product-labeling --limit 1
 
 # 2. Ensure batch processing Phase 1 & 2 are working
-uv run github-analysis batch history
+uv run gh-analysis batch history
 ```
 
 ### **Pipeline Batch Mode Testing**
 ```bash
 # 3. Test missing analysis in batch mode
-uv run github-analysis process-query missing product-labeling --batch-mode --limit 5
+uv run gh-analysis process-query missing product-labeling --batch-mode --limit 5
 
 # 4. Test reprocessing in batch mode
-uv run github-analysis process-query reprocess product-labeling --threshold 0.8 --batch-mode --limit 3
+uv run gh-analysis process-query reprocess product-labeling --threshold 0.8 --batch-mode --limit 3
 
 # 5. Test custom query in batch mode
-uv run github-analysis process-query custom product-labeling "SELECT * FROM issues WHERE state='closed'" --batch-mode --limit 2
+uv run gh-analysis process-query custom product-labeling "SELECT * FROM issues WHERE state='closed'" --batch-mode --limit 2
 ```
 
 ### **Batch Monitoring**
 ```bash
 # 6. Check batch job status
-uv run github-analysis process-query batch-status
+uv run gh-analysis process-query batch-status
 
 # 7. Verify batch jobs are tracked in database
-uv run github-analysis query sql "SELECT job_id, processor, status FROM batch_jobs ORDER BY created_at DESC LIMIT 5"
+uv run gh-analysis query sql "SELECT job_id, processor, status FROM batch_jobs ORDER BY created_at DESC LIMIT 5"
 ```
 
 ### **Integration Testing**
 ```bash
 # 8. Test same command in real-time vs batch mode
-uv run github-analysis process-query missing product-labeling --limit 2  # Real-time
-uv run github-analysis process-query missing product-labeling --limit 2 --batch-mode  # Batch
+uv run gh-analysis process-query missing product-labeling --limit 2  # Real-time
+uv run gh-analysis process-query missing product-labeling --limit 2 --batch-mode  # Batch
 
 # 9. Verify results end up in same location
 ls data/results/*_product-labeling.json
@@ -270,10 +270,10 @@ ls data/results/*_product-labeling.json
 ### **Error Handling**
 ```bash
 # 10. Test batch mode with invalid processor
-uv run github-analysis process-query missing invalid-processor --batch-mode
+uv run gh-analysis process-query missing invalid-processor --batch-mode
 
 # 11. Test batch status with no jobs
-uv run github-analysis process-query batch-status
+uv run gh-analysis process-query batch-status
 ```
 
 ## Success Criteria

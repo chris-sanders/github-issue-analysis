@@ -242,21 +242,21 @@ uv run black . && uv run ruff check --fix --unsafe-fixes && uv run mypy . && uv 
 
 # 2. Collect fresh test data (no existing data in new branch)
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 3
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 3
 
 # 3. Test AI processing with real issue (MUST actually run to generate results for testing)
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis process product-labeling --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number 71
+# Example: uv run gh-analysis process product-labeling --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number 71
 
 # 4. Test confidence filtering with different thresholds (ALWAYS use --dry-run)
-# Example: uv run github-analysis update-labels --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --min-confidence 0.9 --dry-run
-# Example: uv run github-analysis update-labels --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --min-confidence 0.5 --dry-run
-# Example: uv run github-analysis update-labels --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --min-confidence 0.8 --dry-run
+# Example: uv run gh-analysis update-labels --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --min-confidence 0.9 --dry-run
+# Example: uv run gh-analysis update-labels --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --min-confidence 0.5 --dry-run
+# Example: uv run gh-analysis update-labels --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --min-confidence 0.8 --dry-run
 
 # 5. Test full processing pipeline with all collected issues
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis process product-labeling --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO
-# Example: uv run github-analysis update-labels --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --dry-run
+# Example: uv run gh-analysis process product-labeling --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO
+# Example: uv run gh-analysis update-labels --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --dry-run
 
 # 6. Verify JSON output structure manually
 # Example: cat data/results/ORG_REPO_issue_NUMBER_product-labeling.json | jq '.analysis | keys'

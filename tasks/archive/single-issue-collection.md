@@ -23,15 +23,15 @@ Enhance the existing `collect` command to support flexible issue collection patt
    ```bash
    # Single issue collection (new)
    # Ask user to provide test organization, repository, and issue number for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
    
    # Organization-wide search (new) - search all repos in org
    # Ask user to provide test organization for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --limit 20
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --limit 20
    
    # Repository-specific bulk collection (existing, enhanced)
    # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 10
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 10
    ```
 
 3. **Collection Mode Logic**
@@ -121,7 +121,7 @@ Enhance the existing `collect` command to support flexible issue collection patt
 ```bash
 # Test with the specific issue mentioned
 # Ask user to provide test organization, repository, and issue number for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
 
 # Expected: Successfully collect issue #71 "Weird Behavior with RunPods"
 # Verify: File created at data/issues/ORG_REPO_issue_NUMBER.json
@@ -133,7 +133,7 @@ Enhance the existing `collect` command to support flexible issue collection patt
 ```bash
 # Test organization-wide search
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --limit 10
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --limit 10
 
 # Expected: Collects 10 closed issues from any repo in USER_PROVIDED_ORG org
 # Verify: Issues from multiple repositories are collected
@@ -145,7 +145,7 @@ Enhance the existing `collect` command to support flexible issue collection patt
 ```bash
 # Test repository collection uses closed by default
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 5
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 5
 
 # Expected: Collects 5 closed issues from provided repo only
 # Verify: All collected issues have "state": "closed"
@@ -156,13 +156,13 @@ Enhance the existing `collect` command to support flexible issue collection patt
 ```bash
 # Test non-existent issue
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number 99999
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number 99999
 
 # Expected: Clear error message about issue not found
 # Verify: No file created, proper exit code
 
 # Test invalid parameter combinations
-uv run github-analysis collect --issue-number 71
+uv run gh-analysis collect --issue-number 71
 
 # Expected: Error message requiring both --org and --repo for single issue mode
 ```
@@ -171,7 +171,7 @@ uv run github-analysis collect --issue-number 71
 ```bash
 # Test existing bulk collection still works with explicit state
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --state open --limit 3
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --state open --limit 3
 
 # Expected: Collects 3 open issues (overriding new default)
 # Verify: All collected issues have "state": "open"

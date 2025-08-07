@@ -82,10 +82,10 @@ model: Annotated[str, Option(
 ### Manual Verification Commands
 ```bash
 # Basic functionality
-uv run github-analysis process product-labeling --org test --repo test --issue-number 1 --dry-run
+uv run gh-analysis process product-labeling --org test --repo test --issue-number 1 --dry-run
 
 # With new options
-uv run github-analysis process product-labeling \
+uv run gh-analysis process product-labeling \
     --org test --repo test --issue-number 1 \
     --model anthropic:claude-3-haiku-20241022 \
     --thinking-effort high \
@@ -94,7 +94,7 @@ uv run github-analysis process product-labeling \
     --dry-run
 
 # Help text quality
-uv run github-analysis process product-labeling --help
+uv run gh-analysis process product-labeling --help
 
 # Quality checks
 uv run pytest tests/test_cli/test_process.py -v
@@ -224,7 +224,7 @@ uv run pytest tests/test_cli/test_process.py -v
 
 **Help Text Display:**
 ```bash
-uv run github-analysis process product-labeling --help
+uv run gh-analysis process product-labeling --help
 ```
 Output: Displays well-organized rich help panels with Target Selection, AI Configuration, and Processing Options sections, plus comprehensive examples.
 

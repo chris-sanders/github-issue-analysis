@@ -255,17 +255,17 @@ Analyze the provided issue and respond with structured recommendations including
 ### Basic Command Structure
 ```bash
 # Process specific issue (primary use case)
-uv run github-analysis process --task product-labeling --issue 71
+uv run gh-analysis process --task product-labeling --issue 71
 
 # Process all collected issues
-uv run github-analysis process --task product-labeling
+uv run gh-analysis process --task product-labeling
 
 # Use different model
-uv run github-analysis process --task product-labeling --issue 71 --model anthropic:claude-3-5-sonnet
+uv run gh-analysis process --task product-labeling --issue 71 --model anthropic:claude-3-5-sonnet
 
 # Environment configuration
 export AI_MODEL=openai:gpt-4o-mini
-uv run github-analysis process --task product-labeling --issue 71
+uv run gh-analysis process --task product-labeling --issue 71
 ```
 
 ### CLI Implementation

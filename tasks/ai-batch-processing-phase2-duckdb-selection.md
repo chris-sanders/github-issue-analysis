@@ -31,19 +31,19 @@ Extend batch processing with SQL-powered issue selection using DuckDB. Adds inte
 ## New Operations
 ```bash
 # Batch process using SQL selection
-uv run github-analysis batch submit product-labeling --sql "SELECT * FROM issues WHERE state='open'"
+uv run gh-analysis batch submit product-labeling --sql "SELECT * FROM issues WHERE state='open'"
 
 # Batch process issues missing analysis
-uv run github-analysis batch submit product-labeling --missing-analysis
+uv run gh-analysis batch submit product-labeling --missing-analysis
 
 # Batch process specific repository
-uv run github-analysis batch submit product-labeling --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO
+uv run gh-analysis batch submit product-labeling --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO
 
 # Show batch job history from database
-uv run github-analysis batch history
+uv run gh-analysis batch history
 
 # Show batch job details
-uv run github-analysis batch details <job-id>
+uv run gh-analysis batch details <job-id>
 ```
 
 ## New Functionality
@@ -146,34 +146,34 @@ class BatchManager:
 ### **Setup and Database Integration**
 ```bash
 # 1. Ensure DuckDB Phase 1 is working
-uv run github-analysis status  # Should show database enabled
+uv run gh-analysis status  # Should show database enabled
 
 # 2. Verify database has issues
-uv run github-analysis query sql "SELECT COUNT(*) FROM issues"
+uv run gh-analysis query sql "SELECT COUNT(*) FROM issues"
 
 # 3. Test SQL-based batch selection
-uv run github-analysis batch submit product-labeling --sql "SELECT * FROM issues WHERE state='open' LIMIT 5"
+uv run gh-analysis batch submit product-labeling --sql "SELECT * FROM issues WHERE state='open' LIMIT 5"
 ```
 
 ### **Batch Job Tracking**
 ```bash
 # 4. Check batch job was stored in database
-uv run github-analysis batch history
+uv run gh-analysis batch history
 
 # 5. Test missing analysis selection
-uv run github-analysis batch submit product-labeling --missing-analysis
+uv run gh-analysis batch submit product-labeling --missing-analysis
 
 # 6. Verify batch job details
-uv run github-analysis batch details <job-id>
+uv run gh-analysis batch details <job-id>
 ```
 
 ### **Database Queries**
 ```bash
 # 7. Query batch jobs directly
-uv run github-analysis query sql "SELECT * FROM batch_jobs ORDER BY created_at DESC"
+uv run gh-analysis query sql "SELECT * FROM batch_jobs ORDER BY created_at DESC"
 
 # 8. Check batch items tracking
-uv run github-analysis query sql "SELECT COUNT(*) FROM batch_items"
+uv run gh-analysis query sql "SELECT COUNT(*) FROM batch_items"
 ```
 
 ### **Integration Testing**
@@ -182,7 +182,7 @@ uv run github-analysis query sql "SELECT COUNT(*) FROM batch_items"
 # Run same batch twice, verify second run skips already processed issues
 
 # 10. Test error handling with invalid SQL
-uv run github-analysis batch submit product-labeling --sql "INVALID SQL"
+uv run gh-analysis batch submit product-labeling --sql "INVALID SQL"
 ```
 
 ## Success Criteria

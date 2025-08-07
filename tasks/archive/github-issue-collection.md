@@ -37,7 +37,7 @@ Implement basic GitHub issue collection using the GitHub REST API. Focus on sear
 
 **CLI Interface:**
 ```bash
-uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --labels bug --limit 5
+uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --labels bug --limit 5
 ```
 
 **Pydantic Models Needed:**
@@ -138,9 +138,9 @@ Build GitHub search queries like: `repo:USER_PROVIDED_ORG/USER_PROVIDED_REPO is:
 
 **Validation:**
 ✅ CLI commands work correctly:
-- `uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 3` (requires GITHUB_TOKEN)
-- `uv run github-analysis status` (shows storage statistics)
-- `uv run github-analysis --help` (shows all commands)
+- `uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 3` (requires GITHUB_TOKEN)
+- `uv run gh-analysis status` (shows storage statistics)
+- `uv run gh-analysis --help` (shows all commands)
 
 ✅ All tests pass: `uv run pytest tests/test_github_client/ tests/test_storage/ -v` (48/48 tests)
 
@@ -148,4 +148,4 @@ Build GitHub search queries like: `repo:USER_PROVIDED_ORG/USER_PROVIDED_REPO is:
 
 **CLI Structure Fixed:**
 - Corrected command structure from nested `collect collect` to direct `collect`
-- Commands now work as documented: `github-analysis collect --org X --repo Y`
+- Commands now work as documented: `gh-analysis collect --org X --repo Y`

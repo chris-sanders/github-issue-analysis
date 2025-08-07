@@ -8,13 +8,13 @@ This approach reprocesses all issues regardless of their current status:
 
 ```bash
 # 1. Reprocess all issues with the --reprocess flag
-uv run github-analysis process product-labeling --org myorg --repo myrepo --reprocess
+uv run gh-analysis process product-labeling --org myorg --repo myrepo --reprocess
 
 # 2. Re-discover recommendations to update statuses
-uv run github-analysis recommendations discover --force-refresh
+uv run gh-analysis recommendations discover --force-refresh
 
 # 3. Review the updated recommendations
-uv run github-analysis recommendations list
+uv run gh-analysis recommendations list
 ```
 
 ## Option 2: Batch Reprocessing (Cost-Effective)
@@ -23,16 +23,16 @@ For large repositories, use batch processing:
 
 ```bash
 # 1. Submit batch job with reprocess flag
-uv run github-analysis batch submit product-labeling --org myorg --repo myrepo --reprocess
+uv run gh-analysis batch submit product-labeling --org myorg --repo myrepo --reprocess
 
 # 2. Check batch status
-uv run github-analysis batch status <job-id>
+uv run gh-analysis batch status <job-id>
 
 # 3. Collect results when complete
-uv run github-analysis batch collect <job-id>
+uv run gh-analysis batch collect <job-id>
 
 # 4. Re-discover recommendations
-uv run github-analysis recommendations discover --force-refresh
+uv run gh-analysis recommendations discover --force-refresh
 ```
 
 ## Option 3: Selective Reprocessing
@@ -41,13 +41,13 @@ To reprocess only specific issues:
 
 ```bash
 # 1. List all recommendations including NO_CHANGE_NEEDED
-uv run github-analysis recommendations list --include-no-change
+uv run gh-analysis recommendations list --include-no-change
 
 # 2. Reprocess specific issues
-uv run github-analysis process product-labeling --org myorg --repo myrepo --issue-number 123 --reprocess
+uv run gh-analysis process product-labeling --org myorg --repo myrepo --issue-number 123 --reprocess
 
 # 3. Re-discover for that issue
-uv run github-analysis recommendations discover --force-refresh
+uv run gh-analysis recommendations discover --force-refresh
 ```
 
 ## Understanding Status Transitions
@@ -68,18 +68,18 @@ uv run github-analysis recommendations discover --force-refresh
 
 ```bash
 # See current state
-uv run github-analysis recommendations summary
+uv run gh-analysis recommendations summary
 
 # Reprocess everything
-uv run github-analysis batch submit product-labeling --org myorg --reprocess
+uv run gh-analysis batch submit product-labeling --org myorg --reprocess
 
 # Wait for completion...
-uv run github-analysis batch collect <job-id>
+uv run gh-analysis batch collect <job-id>
 
 # Update all statuses
-uv run github-analysis recommendations discover --force-refresh
+uv run gh-analysis recommendations discover --force-refresh
 
 # See what changed
-uv run github-analysis recommendations summary
-uv run github-analysis recommendations list  # Shows only items needing changes
+uv run gh-analysis recommendations summary
+uv run gh-analysis recommendations list  # Shows only items needing changes
 ```

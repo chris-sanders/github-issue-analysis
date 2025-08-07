@@ -96,7 +96,7 @@ The following label changes have been applied based on AI analysis:
 **Command Structure:**
 ```bash
 # New subcommand under main CLI
-uv run github-analysis update-labels [OPTIONS]
+uv run gh-analysis update-labels [OPTIONS]
 
 # Filtering options
 --org TEXT                    # Organization name (required if --repo)
@@ -117,13 +117,13 @@ uv run github-analysis update-labels [OPTIONS]
 **Command Examples:**
 ```bash
 # Preview changes for specific issue
-uv run github-analysis update-labels --org USER_PROVIDED_ORG --repo actian-replicated --issue-number 17 --dry-run
+uv run gh-analysis update-labels --org USER_PROVIDED_ORG --repo actian-replicated --issue-number 17 --dry-run
 
 # Update all issues for a repository with high confidence
-uv run github-analysis update-labels --org USER_PROVIDED_ORG --repo actian-replicated --min-confidence 0.9
+uv run gh-analysis update-labels --org USER_PROVIDED_ORG --repo actian-replicated --min-confidence 0.9
 
 # Update specific issue with custom confidence
-uv run github-analysis update-labels --org USER_PROVIDED_ORG --repo actian-replicated --issue-number 17 --min-confidence 0.75
+uv run gh-analysis update-labels --org USER_PROVIDED_ORG --repo actian-replicated --issue-number 17 --min-confidence 0.75
 ```
 
 ### 5. File Structure

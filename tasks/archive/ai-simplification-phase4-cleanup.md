@@ -84,8 +84,8 @@ THINKING_MODELS = {
 uv run black . && uv run ruff check --fix --unsafe-fixes && uv run mypy . && uv run pytest -v
 
 # Test core functionality still works
-uv run github-analysis process product-labeling --org test --repo test --issue-number 1 --dry-run
-uv run github-analysis batch submit product-labeling --org test --repo test --dry-run
+uv run gh-analysis process product-labeling --org test --repo test --issue-number 1 --dry-run
+uv run gh-analysis batch submit product-labeling --org test --repo test --dry-run
 
 # Verify line count reduction
 git diff --stat HEAD~4  # Compare to before Phase 1

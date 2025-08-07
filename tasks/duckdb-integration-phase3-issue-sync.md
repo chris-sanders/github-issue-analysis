@@ -964,50 +964,50 @@ class TestUpdateStrategy:
 ### **Setup and Preparation**
 ```bash
 # 1. Ensure DuckDB Phase 1 is working with some data
-uv run github-analysis status
+uv run gh-analysis status
 
 # 2. Collect some test issues (mix of open/closed)
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 5
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 5
 ```
 
 ### **Core Feature Testing: Non-Closed Issues**
 ```bash
 # 3. Test the verified feature - update non-closed issues (dry run first)
-uv run github-analysis update open-issues --dry-run
-uv run github-analysis update open-issues --limit 3
+uv run gh-analysis update open-issues --dry-run
+uv run gh-analysis update open-issues --limit 3
 
 # 4. Verify changes detected
-uv run github-analysis update changes --days 1
+uv run gh-analysis update changes --days 1
 
 # 5. Check sync history
-uv run github-analysis update history --days 1
+uv run gh-analysis update history --days 1
 ```
 
 ### **Additional Update Strategies**
 ```bash
 # 6. Test stale issue updates
-uv run github-analysis update stale --days 1 --limit 2 --dry-run
-uv run github-analysis update stale --days 1 --limit 2
+uv run gh-analysis update stale --days 1 --limit 2 --dry-run
+uv run gh-analysis update stale --days 1 --limit 2
 
 # 7. Test repository updates
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis update repo USER_PROVIDED_ORG USER_PROVIDED_REPO --limit 2 --dry-run
+# Example: uv run gh-analysis update repo USER_PROVIDED_ORG USER_PROVIDED_REPO --limit 2 --dry-run
 
 # 8. Test smart update strategy
-uv run github-analysis update smart --limit 5 --dry-run
+uv run gh-analysis update smart --limit 5 --dry-run
 ```
 
 ### **Data Verification**
 ```bash
 # 9. Query updated issues
-uv run github-analysis query sql "SELECT org, repo, number, state, collection_timestamp FROM issues ORDER BY collection_timestamp DESC LIMIT 5"
+uv run gh-analysis query sql "SELECT org, repo, number, state, collection_timestamp FROM issues ORDER BY collection_timestamp DESC LIMIT 5"
 
 # 10. Check for state changes
-uv run github-analysis query sql "SELECT COUNT(*) FROM issue_updates WHERE update_type = 'state_change'"
+uv run gh-analysis query sql "SELECT COUNT(*) FROM issue_updates WHERE update_type = 'state_change'"
 
 # 11. Verify sync tracking
-uv run github-analysis query sql "SELECT sync_type, COUNT(*) FROM sync_history GROUP BY sync_type"
+uv run gh-analysis query sql "SELECT sync_type, COUNT(*) FROM sync_history GROUP BY sync_type"
 ```
 
 ### **Quality Assurance**
@@ -1034,7 +1034,7 @@ uv run black . && uv run ruff check --fix --unsafe-fixes && uv run mypy . && uv 
 - [ ] Performance optimization for large update batches
 
 **Success Metrics**:
-1. `uv run github-analysis update open-issues` successfully finds and updates previously non-closed issues
+1. `uv run gh-analysis update open-issues` successfully finds and updates previously non-closed issues
 2. Change detection accurately identifies state changes (open→closed, etc.)
 3. Update history shows clear audit trail of sync operations
 4. Smart update strategy efficiently prioritizes most important issues

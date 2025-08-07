@@ -28,7 +28,7 @@ Users need the ability to:
 ## Acceptance Criteria
 
 ### Cancel Functionality
-- [ ] Add `cancel` command to CLI: `uv run github-analysis batch cancel <job-id>`
+- [ ] Add `cancel` command to CLI: `uv run gh-analysis batch cancel <job-id>`
 - [ ] Implement `cancel_batch()` method in OpenAI provider to call DELETE API
 - [ ] Implement `cancel_job()` method in BatchManager 
 - [ ] Handle different job states appropriately:
@@ -39,7 +39,7 @@ Users need the ability to:
 - [ ] Handle API errors gracefully (job already completed, etc.)
 
 ### Remove Functionality  
-- [ ] Add `remove` command to CLI: `uv run github-analysis batch remove <job-id>`
+- [ ] Add `remove` command to CLI: `uv run gh-analysis batch remove <job-id>`
 - [ ] Implement `remove_job()` method in BatchManager
 - [ ] Remove job metadata file from `data/batch/jobs/`
 - [ ] Optionally remove associated input/output files
@@ -88,13 +88,13 @@ Users need the ability to:
 
 ```bash
 # Cancel an active batch job
-uv run github-analysis batch cancel <job-id>
+uv run gh-analysis batch cancel <job-id>
 
 # Remove a batch job record (with confirmation)
-uv run github-analysis batch remove <job-id>
+uv run gh-analysis batch remove <job-id>
 
 # Remove a batch job record (skip confirmation)
-uv run github-analysis batch remove <job-id> --force
+uv run gh-analysis batch remove <job-id> --force
 ```
 
 ### OpenAI Provider Method
@@ -162,24 +162,24 @@ def remove_job(self, job_id: str, force: bool = False) -> bool:
 
 ```bash
 # Setup: Create a test batch job
-uv run github-analysis batch submit product-labeling --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER --dry-run
+uv run gh-analysis batch submit product-labeling --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER --dry-run
 
 # Test cancellation
-uv run github-analysis batch cancel <job-id>
-uv run github-analysis batch status <job-id>  # Should show cancelled
+uv run gh-analysis batch cancel <job-id>
+uv run gh-analysis batch status <job-id>  # Should show cancelled
 
 # Test removal with confirmation
-uv run github-analysis batch remove <job-id>
+uv run gh-analysis batch remove <job-id>
 # Should prompt for confirmation
 
 # Test removal with force
-uv run github-analysis batch remove <job-id> --force
+uv run gh-analysis batch remove <job-id> --force
 # Should remove without confirmation
 
 
 # Test error cases
-uv run github-analysis batch cancel nonexistent-job
-uv run github-analysis batch remove nonexistent-job
+uv run gh-analysis batch cancel nonexistent-job
+uv run gh-analysis batch remove nonexistent-job
 
 # Run all tests
 uv run black . && uv run ruff check --fix --unsafe-fixes && uv run mypy . && uv run pytest

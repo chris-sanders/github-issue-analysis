@@ -107,7 +107,7 @@ The new approach should work like this:
 
 **Example 1 - Incompatible Flags:**
 ```
-$ uv run github-analysis process --model openai:gpt-4o --thinking-effort high
+$ uv run gh-analysis process --model openai:gpt-4o --thinking-effort high
 Error: Model 'gpt-4o' does not support thinking-effort flag.
 Compatible flags for this model: [none - standard processing]
 For thinking capabilities, try a model that supports reasoning.
@@ -115,13 +115,13 @@ For thinking capabilities, try a model that supports reasoning.
 
 **Example 2 - Compatible Usage:**
 ```
-$ uv run github-analysis process --model openai:o4-mini --thinking-effort medium
+$ uv run gh-analysis process --model openai:o4-mini --thinking-effort medium
 ✓ Using thinking-capable model with reasoning effort: medium
 ```
 
 **Example 3 - Provider Mismatch:**
 ```
-$ uv run github-analysis process --model anthropic:claude-3-haiku --thinking-effort high  
+$ uv run gh-analysis process --model anthropic:claude-3-haiku --thinking-effort high  
 Error: Model 'claude-3-haiku' does not support OpenAI thinking-effort flag.
 Compatible flags for this model: --thinking-budget (Anthropic reasoning control)
 ```
@@ -159,14 +159,14 @@ Compatible flags for this model: --thinking-budget (Anthropic reasoning control)
 
 1. **Run CLI Commands**:
    ```bash
-   uv run github-analysis process --help
-   uv run github-analysis batch --help
+   uv run gh-analysis process --help
+   uv run gh-analysis batch --help
    ```
    Verify help text uses generic language about compatible models
 
 2. **Test Error Messages**:
    ```bash
-   uv run github-analysis process product-labeling --model openai:gpt-4o --thinking-effort high
+   uv run gh-analysis process product-labeling --model openai:gpt-4o --thinking-effort high
    ```
    Should explain that gpt-4o doesn't support thinking-effort and show compatible flags
 
@@ -179,7 +179,7 @@ Compatible flags for this model: --thinking-budget (Anthropic reasoning control)
    ```bash
    # Test with a thinking-capable model (system should detect compatibility)
    # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis process product-labeling --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number 71 --model openai:o4-mini --thinking-effort medium
+# Example: uv run gh-analysis process product-labeling --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number 71 --model openai:o4-mini --thinking-effort medium
    ```
 
 ## Success Metrics

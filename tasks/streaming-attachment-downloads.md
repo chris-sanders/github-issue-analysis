@@ -21,7 +21,7 @@ GitHub attachment downloads are failing with HTTP 400 Bad Request errors during 
 **Exact Command That Triggered the Failures:**
 ```bash
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 20
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 20
 ```
 
 **System Context:**

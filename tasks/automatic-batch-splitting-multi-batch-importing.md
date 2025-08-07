@@ -34,22 +34,22 @@ Implement automatic batch splitting for large issue collections using a fixed 30
 ## New Operations
 ```bash
 # Existing commands work seamlessly with automatic splitting
-uv run github-analysis batch submit product-labeling --org myorg  # Auto-splits if >30 issues
+uv run gh-analysis batch submit product-labeling --org myorg  # Auto-splits if >30 issues
 
 # Enhanced status shows group progress  
-uv run github-analysis batch status <group-id>  # Shows all batches in group
-uv run github-analysis batch status <job-id>    # Individual batch status
+uv run gh-analysis batch status <group-id>  # Shows all batches in group
+uv run gh-analysis batch status <job-id>    # Individual batch status
 
 # Group-level operations
-uv run github-analysis batch group-collect <group-id>  # Collect all results
-uv run github-analysis batch list --groups            # Show batch groups
+uv run gh-analysis batch group-collect <group-id>  # Collect all results
+uv run gh-analysis batch list --groups            # Show batch groups
 
 # Preview splitting
-uv run github-analysis batch submit product-labeling --org myorg --dry-run  # Preview split plan
+uv run gh-analysis batch submit product-labeling --org myorg --dry-run  # Preview split plan
 
 # Advanced group management
-uv run github-analysis batch group-cancel <group-id>
-uv run github-analysis batch group-retry <group-id> --failed-only
+uv run gh-analysis batch group-cancel <group-id>
+uv run gh-analysis batch group-retry <group-id> --failed-only
 ```
 
 ## New Functionality
@@ -307,46 +307,46 @@ def submit(
 ```bash
 # 1. Test splitting preview for small collections
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis batch submit product-labeling --org USER_PROVIDED_ORG --dry-run --limit 10
+# Example: uv run gh-analysis batch submit product-labeling --org USER_PROVIDED_ORG --dry-run --limit 10
 
 # 2. Test splitting preview for large collections
 # Ask user to provide test organization for validation  
-# Example: uv run github-analysis batch submit product-labeling --org USER_PROVIDED_ORG --dry-run --limit 100
+# Example: uv run gh-analysis batch submit product-labeling --org USER_PROVIDED_ORG --dry-run --limit 100
 ```
 
 ### **Automatic Splitting**
 ```bash
 # 3. Test small batch (no splitting required)
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis batch submit product-labeling --org USER_PROVIDED_ORG --limit 20
+# Example: uv run gh-analysis batch submit product-labeling --org USER_PROVIDED_ORG --limit 20
 
 # 4. Test large batch (auto-splitting into 30-issue chunks)
 # Ask user to provide test organization for validation
-# Example: uv run github-analysis batch submit product-labeling --org USER_PROVIDED_ORG --limit 80
+# Example: uv run gh-analysis batch submit product-labeling --org USER_PROVIDED_ORG --limit 80
 
 # 5. Verify group creation and tracking
-uv run github-analysis batch list --groups
+uv run gh-analysis batch list --groups
 ```
 
 ### **Multi-Batch Management**
 ```bash
 # 6. Monitor group progress
-uv run github-analysis batch status <group-id>
+uv run gh-analysis batch status <group-id>
 
 # 7. Test individual batch status within group
-uv run github-analysis batch status <individual-job-id>
+uv run gh-analysis batch status <individual-job-id>
 
 # 8. Collect group results when complete
-uv run github-analysis batch group-collect <group-id>
+uv run gh-analysis batch group-collect <group-id>
 ```
 
 ### **Integration and Edge Cases**
 ```bash
 # 9. Test edge case: exactly 30 issues (no splitting)
-uv run github-analysis batch submit product-labeling --org test-org --limit 30
+uv run gh-analysis batch submit product-labeling --org test-org --limit 30
 
 # 10. Test edge case: 31 issues (splits into 30 + 1)
-uv run github-analysis batch submit product-labeling --org test-org --limit 31
+uv run gh-analysis batch submit product-labeling --org test-org --limit 31
 
 # 11. Test error handling
 # Submit batch, cancel one job in group, verify partial collection works
@@ -358,12 +358,12 @@ uv run github-analysis batch submit product-labeling --org test-org --limit 31
 ### **Backward Compatibility**
 ```bash
 # 13. Verify existing small batch workflows unchanged
-uv run github-analysis batch submit product-labeling --org test-org --repo small-repo
+uv run gh-analysis batch submit product-labeling --org test-org --repo small-repo
 
 # 14. Verify existing CLI commands work with groups
-uv run github-analysis batch list
-uv run github-analysis batch status <job-id>
-uv run github-analysis batch collect <job-id>
+uv run gh-analysis batch list
+uv run gh-analysis batch status <job-id>
+uv run gh-analysis batch collect <job-id>
 ```
 
 ## Success Criteria

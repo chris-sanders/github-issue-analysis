@@ -68,20 +68,20 @@ Sanitize the GitHub issue analysis repository for open source release by removin
 **Instead of hardcoded examples like:**
 ```bash
 # Ask user to provide test organization, repository, and issue number for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --issue-number USER_PROVIDED_ISSUE_NUMBER
 ```
 
 **Use runtime prompts like:**
 ```bash
 # Ask user for test repository
-uv run github-analysis collect --org YOUR_ORG --repo YOUR_REPO --issue-number 123 --dry-run
+uv run gh-analysis collect --org YOUR_ORG --repo YOUR_REPO --issue-number 123 --dry-run
 ```
 
 **Task templates should instruct:**
 ```markdown
 **Validation:**
 - Ask user to provide a test organization and repository for validation
-- Run with --dry-run flag: `uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --dry-run`
+- Run with --dry-run flag: `uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --dry-run`
 ```
 
 ### Implementation Approach
@@ -180,7 +180,7 @@ Files to update: All files in tasks/ and tasks/archive/ directories containing '
 
 Required changes:
 1. Replace hardcoded customer examples with instructions like: 'Ask user to provide test organization and repository for validation'
-2. Update validation sections to use pattern: 'uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --dry-run'
+2. Update validation sections to use pattern: 'uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --dry-run'
 3. Ensure all validation commands include --dry-run flag
 4. Use consistent instruction pattern: 'Ask user to provide test organization/repository at runtime'
 
@@ -226,7 +226,7 @@ git ls-tree -r HEAD --name-only | xargs grep -l "USER_PROVIDED_ORG" | wc -l
 git ls-tree -r HEAD --name-only | xargs grep -l "USER_PROVIDED_ORG\|pixee-replicated" || echo "Clean!"
 
 # Test CLI with generic examples
-uv run github-analysis collect --help | grep -E "(YOUR_ORG|example-org)"
+uv run gh-analysis collect --help | grep -E "(YOUR_ORG|example-org)"
 
 # Ensure quality checks pass
 uv run black . && uv run ruff check --fix --unsafe-fixes && uv run mypy . && uv run pytest

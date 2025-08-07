@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "github-issue-analysis"
+name = "gh-analysis"
 version = "0.2.0"
 description = "GitHub issue collection and AI-powered analysis"
 requires-python = ">=3.13"
@@ -35,7 +35,7 @@ export = [
 ]
 
 [project.scripts]
-github-analysis = "github_issue_analysis.cli.main:app"
+gh-analysis = "github_issue_analysis.cli.main:app"
 
 [tool.hatchling.build.targets.wheel]
 packages = ["github_issue_analysis"]

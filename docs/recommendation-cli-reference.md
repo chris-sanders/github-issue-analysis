@@ -5,7 +5,7 @@ This document provides detailed information about all recommendation management 
 ## Commands Overview
 
 ```bash
-uv run github-analysis recommendations <command> [options]
+uv run gh-analysis recommendations <command> [options]
 ```
 
 Available commands:
@@ -19,7 +19,7 @@ Available commands:
 Scans the results directory for AI analysis files and creates/updates recommendation metadata.
 
 ```bash
-uv run github-analysis recommendations discover [OPTIONS]
+uv run gh-analysis recommendations discover [OPTIONS]
 ```
 
 ### Options:
@@ -35,10 +35,10 @@ uv run github-analysis recommendations discover [OPTIONS]
 
 ```bash
 # Discover new recommendations
-uv run github-analysis recommendations discover
+uv run gh-analysis recommendations discover
 
 # Force refresh all recommendations (e.g., after reprocessing)
-uv run github-analysis recommendations discover --force-refresh
+uv run gh-analysis recommendations discover --force-refresh
 ```
 
 ## Command: `list`
@@ -46,7 +46,7 @@ uv run github-analysis recommendations discover --force-refresh
 Lists recommendations with various filtering options.
 
 ```bash
-uv run github-analysis recommendations list [OPTIONS]
+uv run gh-analysis recommendations list [OPTIONS]
 ```
 
 ### Options:
@@ -70,19 +70,19 @@ uv run github-analysis recommendations list [OPTIONS]
 
 ```bash
 # List all pending recommendations (excluding NO_CHANGE_NEEDED)
-uv run github-analysis recommendations list
+uv run gh-analysis recommendations list
 
 # List high-confidence pending recommendations for KOTS
-uv run github-analysis recommendations list --status pending --product kots --min-confidence 0.9
+uv run gh-analysis recommendations list --status pending --product kots --min-confidence 0.9
 
 # Show all recommendations including those needing no changes
-uv run github-analysis recommendations list --include-no-change
+uv run gh-analysis recommendations list --include-no-change
 
 # Export recommendations as JSON
-uv run github-analysis recommendations list --format json > recommendations.json
+uv run gh-analysis recommendations list --format json > recommendations.json
 
 # List recommendations for a specific repository
-uv run github-analysis recommendations list --org myorg --repo myrepo
+uv run gh-analysis recommendations list --org myorg --repo myrepo
 ```
 
 ## Command: `summary`
@@ -90,7 +90,7 @@ uv run github-analysis recommendations list --org myorg --repo myrepo
 Shows a dashboard with recommendation statistics.
 
 ```bash
-uv run github-analysis recommendations summary [OPTIONS]
+uv run gh-analysis recommendations summary [OPTIONS]
 ```
 
 ### Options:
@@ -110,7 +110,7 @@ uv run github-analysis recommendations summary [OPTIONS]
 Starts an interactive review session for recommendations.
 
 ```bash
-uv run github-analysis recommendations review-session [OPTIONS]
+uv run gh-analysis recommendations review-session [OPTIONS]
 ```
 
 ### Options:
@@ -136,13 +136,13 @@ uv run github-analysis recommendations review-session [OPTIONS]
 
 ```bash
 # Review all pending recommendations
-uv run github-analysis recommendations review-session
+uv run gh-analysis recommendations review-session
 
 # Review only high-confidence KOTS recommendations
-uv run github-analysis recommendations review-session --product kots --min-confidence 0.9
+uv run gh-analysis recommendations review-session --product kots --min-confidence 0.9
 
 # Review pending and needs_modification items for specific repo
-uv run github-analysis recommendations review-session --org myorg --repo myrepo --status pending --status needs_modification
+uv run gh-analysis recommendations review-session --org myorg --repo myrepo --status pending --status needs_modification
 ```
 
 ## Status Lifecycle
@@ -162,10 +162,10 @@ When using the `--reprocess` flag with AI processing:
 
 ```bash
 # Reprocess all issues (including NO_CHANGE_NEEDED)
-uv run github-analysis process product-labeling --org myorg --repo myrepo --reprocess
+uv run gh-analysis process product-labeling --org myorg --repo myrepo --reprocess
 
 # Then re-discover to update statuses
-uv run github-analysis recommendations discover --force-refresh
+uv run gh-analysis recommendations discover --force-refresh
 ```
 
 This workflow ensures that:

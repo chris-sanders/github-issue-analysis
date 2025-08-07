@@ -13,43 +13,43 @@ Collect GitHub issues and analyze them with AI to improve issue labeling and cat
 
 2. **Collect Issues**
    ```bash
-   uv run github-analysis collect --org YOUR_ORG --repo YOUR_REPO --labels bug --limit 5
+   uv run gh-analysis collect --org YOUR_ORG --repo YOUR_REPO --labels bug --limit 5
    ```
 
 3. **Process with AI (Batch Processing - Recommended)**
    ```bash
    # Submit batch job (50% cheaper than individual processing)
-   uv run github-analysis batch submit product-labeling --org YOUR_ORG --repo YOUR_REPO
+   uv run gh-analysis batch submit product-labeling --org YOUR_ORG --repo YOUR_REPO
    
    # Check status
-   uv run github-analysis batch list
+   uv run gh-analysis batch list
    
    # Collect results when completed
-   uv run github-analysis batch collect <job-id>
+   uv run gh-analysis batch collect <job-id>
    ```
 
    **Individual Processing** (for single issues or custom models):
    ```bash
    # Use default model
-   uv run github-analysis process product-labeling --org YOUR_ORG --repo YOUR_REPO --issue-number 123
+   uv run gh-analysis process product-labeling --org YOUR_ORG --repo YOUR_REPO --issue-number 123
    
    # Use custom model with settings
-   uv run github-analysis process product-labeling --org YOUR_ORG --repo YOUR_REPO \
+   uv run gh-analysis process product-labeling --org YOUR_ORG --repo YOUR_REPO \
      --model anthropic:claude-3-5-sonnet \
      --setting temperature=0.5 \
      --setting reasoning_effort=high
    
    # Show available model settings
-   uv run github-analysis process show-settings
+   uv run gh-analysis process show-settings
    ```
 
 4. **Update Labels** (with GitHub write token)
    ```bash
    # Preview changes first
-   uv run github-analysis update-labels --org YOUR_ORG --repo YOUR_REPO --dry-run
+   uv run gh-analysis update-labels --org YOUR_ORG --repo YOUR_REPO --dry-run
    
    # Apply changes
-   uv run github-analysis update-labels --org YOUR_ORG --repo YOUR_REPO
+   uv run gh-analysis update-labels --org YOUR_ORG --repo YOUR_REPO
    ```
 
 ## For AI Agents

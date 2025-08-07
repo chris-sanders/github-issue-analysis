@@ -82,13 +82,13 @@ QUERY_ALIASES['label_summary'] = {
 **Usage Examples:**
 ```bash
 # Show label analysis for all repositories
-uv run github-analysis query alias label_summary
+uv run gh-analysis query alias label_summary
 
 # Filter to specific repository
-uv run github-analysis query sql "SELECT * FROM (${label_summary_sql}) WHERE repository = 'replicated/kots'"
+uv run gh-analysis query sql "SELECT * FROM (${label_summary_sql}) WHERE repository = 'replicated/kots'"
 
 # Find under-labeled issues
-uv run github-analysis query sql "SELECT * FROM (${label_summary_sql}) WHERE recommendation_impact = 'Under-labeled'"
+uv run gh-analysis query sql "SELECT * FROM (${label_summary_sql}) WHERE recommendation_impact = 'Under-labeled'"
 ```
 
 ### **AI Results Schema Extension**
@@ -812,11 +812,11 @@ class TestAIProcessingPipeline:
 ### **Setup and Data Preparation**
 ```bash
 # 1. Ensure Phase 1 is working
-uv run github-analysis status  # Should show database enabled
+uv run gh-analysis status  # Should show database enabled
 
 # 2. Collect some test data
 # Ask user to provide test organization and repository for validation
-# Example: uv run github-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 3
+# Example: uv run gh-analysis collect --org USER_PROVIDED_ORG --repo USER_PROVIDED_REPO --limit 3
 
 # 3. Run some AI processing to have existing results
 # (This assumes AI processing is available from previous tasks)
@@ -825,31 +825,31 @@ uv run github-analysis status  # Should show database enabled
 ### **AI Results Integration**
 ```bash
 # 4. Sync existing AI results to database
-uv run github-analysis sync --ai-results
+uv run gh-analysis sync --ai-results
 
 # 5. Check AI analytics
-uv run github-analysis process-query analytics
+uv run gh-analysis process-query analytics
 ```
 
 ### **Pipeline Functionality**
 ```bash
 # 6. Test missing analysis processing
-uv run github-analysis process-query missing product-labeling --limit 2
+uv run gh-analysis process-query missing product-labeling --limit 2
 
 # 7. Test reprocessing low confidence
-uv run github-analysis process-query reprocess product-labeling --threshold 0.8 --limit 1
+uv run gh-analysis process-query reprocess product-labeling --threshold 0.8 --limit 1
 
 # 8. Test custom query processing
-uv run github-analysis process-query custom product-labeling "SELECT * FROM issues WHERE state = 'closed'" --limit 1
+uv run gh-analysis process-query custom product-labeling "SELECT * FROM issues WHERE state = 'closed'" --limit 1
 ```
 
 ### **Advanced Queries**
 ```bash
 # 9. Query AI results through SQL
-uv run github-analysis query sql "SELECT processor, AVG(confidence), COUNT(*) FROM ai_results GROUP BY processor"
+uv run gh-analysis query sql "SELECT processor, AVG(confidence), COUNT(*) FROM ai_results GROUP BY processor"
 
 # 10. Find issues needing attention
-uv run github-analysis query sql "SELECT org, repo, number FROM issues i LEFT JOIN ai_results ar ON i.id = ar.issue_id WHERE ar.id IS NULL AND i.state = 'open'"
+uv run gh-analysis query sql "SELECT org, repo, number FROM issues i LEFT JOIN ai_results ar ON i.id = ar.issue_id WHERE ar.id IS NULL AND i.state = 'open'"
 ```
 
 ### **Quality Assurance**
@@ -874,10 +874,10 @@ uv run black . && uv run ruff check --fix --unsafe-fixes && uv run mypy . && uv 
 - [ ] Error handling and progress reporting
 
 **Success Metrics**: 
-1. User can run `uv run github-analysis process-query missing product-labeling --state open --limit 10` to intelligently select and process issues
-2. `uv run github-analysis process-query analytics` shows comprehensive AI processing insights
+1. User can run `uv run gh-analysis process-query missing product-labeling --state open --limit 10` to intelligently select and process issues
+2. `uv run gh-analysis process-query analytics` shows comprehensive AI processing insights
 3. Processing pipeline enables complex workflows like "process open issues from specific repos that don't have product labels"
-4. Extended `uv run github-analysis query alias label_summary` shows current vs AI-recommended label usage with impact analysis
+4. Extended `uv run gh-analysis query alias label_summary` shows current vs AI-recommended label usage with impact analysis
 
 ## Agent Notes
 [Document your pipeline design decisions, integration approach, and performance optimizations]

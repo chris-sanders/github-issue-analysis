@@ -46,17 +46,17 @@ data/
 
 ### Step 1: Collect Issues
 ```bash
-uv run github-analysis collect --org myorg --repo myrepo --limit 10
+uv run gh-analysis collect --org myorg --repo myrepo --limit 10
 ```
 
 ### Step 2: Run AI Analysis  
 ```bash
-uv run github-analysis process product-labeling --org myorg --repo myrepo
+uv run gh-analysis process product-labeling --org myorg --repo myrepo
 ```
 
 ### Step 3: Preview Changes (Recommended)
 ```bash
-uv run github-analysis update-labels --org myorg --repo myrepo --dry-run
+uv run gh-analysis update-labels --org myorg --repo myrepo --dry-run
 ```
 
 The dry run shows you exactly what changes will be made, including:
@@ -66,7 +66,7 @@ The dry run shows you exactly what changes will be made, including:
 
 ### Step 4: Apply Changes
 ```bash
-uv run github-analysis update-labels --org myorg --repo myrepo
+uv run gh-analysis update-labels --org myorg --repo myrepo
 ```
 
 ## Usage Examples
@@ -74,31 +74,31 @@ uv run github-analysis update-labels --org myorg --repo myrepo
 ### Single Issue Update
 ```bash
 # Preview changes for one issue
-uv run github-analysis update-labels --org myorg --repo myrepo --issue-number 123 --dry-run
+uv run gh-analysis update-labels --org myorg --repo myrepo --issue-number 123 --dry-run
 
 # Apply changes to one issue
-uv run github-analysis update-labels --org myorg --repo myrepo --issue-number 123
+uv run gh-analysis update-labels --org myorg --repo myrepo --issue-number 123
 ```
 
 ### Batch Processing with Safety
 ```bash
 # High confidence only (90%+)
-uv run github-analysis update-labels --org myorg --repo myrepo --min-confidence 0.9
+uv run gh-analysis update-labels --org myorg --repo myrepo --min-confidence 0.9
 
 # Limit to 5 issues with delay between API calls
-uv run github-analysis update-labels --org myorg --repo myrepo --max-issues 5 --delay 2.0
+uv run gh-analysis update-labels --org myorg --repo myrepo --max-issues 5 --delay 2.0
 
 # Skip posting explanatory comments
-uv run github-analysis update-labels --org myorg --repo myrepo --skip-comments
+uv run gh-analysis update-labels --org myorg --repo myrepo --skip-comments
 ```
 
 ### Advanced Options
 ```bash
 # Force apply all changes (use with extreme caution)
-uv run github-analysis update-labels --org myorg --repo myrepo --force
+uv run gh-analysis update-labels --org myorg --repo myrepo --force
 
 # Custom data directory
-uv run github-analysis update-labels --org myorg --repo myrepo --data-dir /path/to/data
+uv run gh-analysis update-labels --org myorg --repo myrepo --data-dir /path/to/data
 ```
 
 ## Understanding the Output
@@ -279,7 +279,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          uv run github-analysis update-labels \
+          uv run gh-analysis update-labels \
             --org ${{ github.repository_owner }} \
             --repo ${{ github.event.repository.name }} \
             --min-confidence 0.9 \

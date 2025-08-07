@@ -52,26 +52,26 @@ def process_issues(issues: List[Dict[str, Any]]) -> Optional[str]:
 **CLI Usage:**
 ```bash
 # Collect GitHub issues (various modes)
-uv run github-analysis collect --org myorg --repo myrepo                    # Repository-specific
-uv run github-analysis collect --org myorg                                  # Organization-wide  
-uv run github-analysis collect --org myorg --repo myrepo --issue-number 123 # Single issue
+uv run gh-analysis collect --org myorg --repo myrepo                    # Repository-specific
+uv run gh-analysis collect --org myorg                                  # Organization-wide  
+uv run gh-analysis collect --org myorg --repo myrepo --issue-number 123 # Single issue
 
 # Show storage statistics
-uv run github-analysis status
+uv run gh-analysis status
 
 # Show version information
-uv run github-analysis version
+uv run gh-analysis version
 
 # AI processing commands (BATCH PROCESSING RECOMMENDED)
 # Use batch processing for cost-effective analysis (50% cheaper than individual processing)
-uv run github-analysis batch submit product-labeling --org myorg --repo myrepo   # Batch process all issues for repo
-uv run github-analysis batch submit product-labeling --org myorg               # Batch process all org issues
-uv run github-analysis batch status <job-id>                                   # Check batch job progress
-uv run github-analysis batch collect <job-id>                                  # Collect completed results
-uv run github-analysis batch list                                              # List all batch jobs
+uv run gh-analysis batch submit product-labeling --org myorg --repo myrepo   # Batch process all issues for repo
+uv run gh-analysis batch submit product-labeling --org myorg               # Batch process all org issues
+uv run gh-analysis batch status <job-id>                                   # Check batch job progress
+uv run gh-analysis batch collect <job-id>                                  # Collect completed results
+uv run gh-analysis batch list                                              # List all batch jobs
 
 # Individual processing (use only for single issues or testing)
-uv run github-analysis process product-labeling --org myorg --repo myrepo --issue-number 123  # Single issue only
+uv run gh-analysis process product-labeling --org myorg --repo myrepo --issue-number 123  # Single issue only
 ```
 
 ## Architecture
@@ -164,7 +164,7 @@ GITHUB_TOKEN=$GITHUB_PERSONAL_ACCESS_TOKEN gh pr create --title "Title" --body "
 GITHUB_TOKEN=$GITHUB_PERSONAL_ACCESS_TOKEN gh repo view
 
 # Testing the CLI tool (use GITHUB_TOKEN for test repo access)
-uv run github-analysis collect --org YOUR_ORG --repo YOUR_REPO --issue-number 123
+uv run gh-analysis collect --org YOUR_ORG --repo YOUR_REPO --issue-number 123
 ```
 
 **Why Two Tokens:**
