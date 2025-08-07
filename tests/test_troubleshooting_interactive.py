@@ -42,8 +42,8 @@ class TestMultilineInput:
         # Verify prompts change for continuation lines
         expected_calls = [
             (">>> ", ""),  # First call args
-            ("    ", ""),  # Continuation prompt
-            ("    ", ""),  # Continuation prompt
+            ("... ", ""),  # Continuation prompt
+            ("... ", ""),  # Continuation prompt
         ]
         actual_calls = [
             (call.args[0], call.kwargs.get("default", ""))
@@ -387,7 +387,7 @@ class TestInteractiveIntegration:
             "\n[bold blue]── Interactive Mode ─────────────────────────[/bold blue]",
             "Ask follow-up questions about this issue.",
             "• Type 'exit' or press Ctrl+C to end",
-            "• Use '\\' at line end for multi-line input",
+            "• Multi-line: Use '\\' at line end to continue to next line",
         ]
 
         for expected_print in expected_prints:

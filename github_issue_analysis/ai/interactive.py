@@ -29,7 +29,8 @@ async def run_interactive_session(
     )
     console.print("Ask follow-up questions about this issue.")
     console.print("• Type 'exit' or press Ctrl+C to end")
-    console.print("• Use '\\' at line end for multi-line input")
+    console.print("• Single line: Type and press Enter")
+    console.print("• Multi-line: Use '\\' at line end to continue to next line")
     console.print("[bold blue]" + "─" * 55 + "[/bold blue]\n")
 
     message_history = initial_result.new_messages()
@@ -43,7 +44,11 @@ async def run_interactive_session(
                 console.print("Session ended. Thank you!")
                 break
 
+            # Skip empty input and continue asking
             if not user_input.strip():
+                console.print(
+                    "[dim]Please enter a question or type 'exit' to end.[/dim]"
+                )
                 continue
 
             # Run with context
@@ -67,7 +72,11 @@ async def run_interactive_session(
 
 
 def get_multiline_input() -> str:
-    """Get input with backslash continuation support.
+    r"""Get input with backslash continuation support.
+
+    Usage:
+    - For single line: Type and press Enter
+    - For multi-line: End lines with \ to continue to next line
 
     Returns:
         The complete multi-line input string
@@ -80,7 +89,7 @@ def get_multiline_input() -> str:
 
         if line.endswith("\\"):
             lines.append(line[:-1])  # Remove backslash
-            prompt = "    "  # Indent continuation
+            prompt = "... "  # Clearer continuation prompt
         else:
             lines.append(line)
             break
