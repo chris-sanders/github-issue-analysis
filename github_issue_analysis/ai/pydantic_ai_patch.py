@@ -39,4 +39,4 @@ def apply_pydantic_ai_patch() -> None:
     # Replace the problematic method with our patched version
     setattr(
         openai_model.OpenAIModel, "_map_tool_call", staticmethod(patched_map_tool_call)
-    )  # type: ignore[attr-defined]
+    )
