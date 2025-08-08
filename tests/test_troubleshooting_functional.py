@@ -345,4 +345,3 @@ class TestEndToEnd:
                 "recommend the most appropriate product label"
                 not in captured_prompt.lower()
             )
-
