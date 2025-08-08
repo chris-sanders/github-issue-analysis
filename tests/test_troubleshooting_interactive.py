@@ -4,12 +4,10 @@ These tests focus on real behavior with minimal mocking as specified in the task
 Only mock external services (API calls) where absolutely necessary.
 """
 
-import os
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from pydantic_ai import Agent
 
 from github_issue_analysis.ai.interactive import (
     get_multiline_input,
