@@ -202,7 +202,7 @@ class TestTroubleshootingSchemaValidation:
                 agent = create_troubleshooting_agent("gpt5_mini_medium", "test-token")
                 assert agent is not None
                 # Just verify the agent was created successfully
-                assert hasattr(agent, 'output_type')
+                assert hasattr(agent, "output_type")
 
                 # Verify the Union type is properly set
                 from typing import get_origin

@@ -44,7 +44,7 @@ class TestTroubleshootFunctional:
                 agent = create_troubleshooting_agent(agent_type, "test-token", None)
                 assert agent is not None
                 # Just verify the agent was created successfully
-                assert hasattr(agent, 'output_type')
+                assert hasattr(agent, "output_type")
 
             except TypeError as e:
                 # Fail if we get the Union instantiation error
