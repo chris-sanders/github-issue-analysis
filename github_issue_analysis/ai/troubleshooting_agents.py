@@ -90,7 +90,7 @@ def create_gpt5_medium_agent(
         toolsets=[troubleshoot_mcp_server(sbctl_token, github_token)],
         model_settings={
             "timeout": 1800.0,
-            "openai_reasoning_effort": "medium",
+            "reasoning_effort": "medium",
             "stream": False,
             "parallel_tool_calls": True,
         },
@@ -119,7 +119,7 @@ def create_gpt5_high_agent(
         toolsets=[troubleshoot_mcp_server(sbctl_token, github_token)],
         model_settings={
             "timeout": 2400.0,
-            "openai_reasoning_effort": "high",
+            "reasoning_effort": "high",
             "stream": False,
             "parallel_tool_calls": True,
         },
@@ -148,7 +148,7 @@ def create_gpt5_mini_medium_agent(
         toolsets=[troubleshoot_mcp_server(sbctl_token, github_token)],
         model_settings={
             "timeout": 1200.0,
-            "openai_reasoning_effort": "medium",
+            "reasoning_effort": "medium",
             "stream": False,
             "parallel_tool_calls": True,
         },
@@ -177,7 +177,7 @@ def create_gpt5_mini_high_agent(
         toolsets=[troubleshoot_mcp_server(sbctl_token, github_token)],
         model_settings={
             "timeout": 1800.0,
-            "openai_reasoning_effort": "high",
+            "reasoning_effort": "high",
             "stream": False,
             "parallel_tool_calls": True,
         },
