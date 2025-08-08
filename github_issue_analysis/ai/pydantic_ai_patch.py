@@ -24,7 +24,9 @@ def patched_map_tool_call(t: ToolCallPart) -> Any:
     """
     # Use the specific function variant instead of the Union
     # Access _guard_tool_call_id through the module
-    tool_call_id = getattr(openai_model, "_guard_tool_call_id", lambda t: t.tool_call_id)(t)
+    tool_call_id = getattr(
+        openai_model, "_guard_tool_call_id", lambda t: t.tool_call_id
+    )(t)
     return chat.ChatCompletionMessageFunctionToolCallParam(
         id=tool_call_id,
         type="function",
@@ -35,4 +37,6 @@ def patched_map_tool_call(t: ToolCallPart) -> Any:
 def apply_pydantic_ai_patch() -> None:
     """Apply the patch to fix Union instantiation error."""
     # Replace the problematic method with our patched version
-    setattr(openai_model.OpenAIModel, "_map_tool_call", staticmethod(patched_map_tool_call))  # type: ignore[attr-defined]
+    setattr(
+        openai_model.OpenAIModel, "_map_tool_call", staticmethod(patched_map_tool_call)
+    )  # type: ignore[attr-defined]

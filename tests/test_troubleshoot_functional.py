@@ -134,9 +134,7 @@ class TestTroubleshootFunctional:
             # This should complete without Union errors
             try:
                 # Create agent directly to test the workflow
-                agent = create_troubleshooting_agent(
-                    "o3_medium", "test-token", None
-                )
+                agent = create_troubleshooting_agent("o3_medium", "test-token", None)
                 assert agent is not None
 
                 # The workflow would call analyze_troubleshooting_issue
