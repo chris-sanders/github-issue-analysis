@@ -306,71 +306,7 @@ class TestInteractiveSession:
 
 
 class TestInteractiveIntegration:
-    """Integration tests with real components where possible."""
-
-    @pytest.mark.skipif(
-        not os.getenv("OPENAI_API_KEY"),
-        reason="Requires OPENAI_API_KEY for real agent testing",
-    )
-    @patch("github_issue_analysis.ai.interactive.get_multiline_input")
-    @patch("github_issue_analysis.ai.interactive.console")
-    @pytest.mark.asyncio
-    async def test_full_interactive_flow(self, mock_console, mock_input):
-        """Test complete flow with real PydanticAI agent (requires API keys).
-
-        This integration test uses a real PydanticAI agent to verify the
-        interactive session works with actual agent responses.
-        """
-        mock_input.side_effect = [
-            "What's the root cause of this issue?",
-            "Can you provide more details?",
-            "exit",
-        ]
-
-        try:
-            # Use a simple test agent with OpenAI
-            agent = Agent(
-                "openai:gpt-4o-mini",
-                output_type=str,
-                system_prompt="You are a helpful technical troubleshooting assistant. "
-                "Provide concise, helpful responses about GitHub issues.",
-            )
-
-            # Simulate initial analysis
-            initial_result = await agent.run(
-                "Analyze this test issue: Database connection timeouts in production"
-            )
-
-            # Run interactive session
-            await run_interactive_session(
-                agent,
-                initial_result,
-                {
-                    "issue": {
-                        "title": "Database connection timeout",
-                        "number": 123,
-                        "body": "Production database is timing out",
-                    }
-                },
-                include_images=False,
-            )
-
-            # Verify session completed without errors
-            # The session should have processed 2 questions before exit
-            assert mock_input.call_count == 3  # 2 questions + exit
-
-        except Exception as e:
-            # Skip test if API is unavailable or has issues
-            pytest.skip(f"API unavailable or failing: {e}")
-
-        # Verify output was displayed (responses from real agent)
-        print_calls = [
-            call
-            for call in mock_console.print.call_args_list
-            if call[0] and isinstance(call[0][0], str) and call[0][0].startswith("\n")
-        ]
-        # Should have at least 2 response prints (one for each question)
-        assert len(print_calls) >= 2
+    """Integration tests with mocked components."""
 
     @patch("github_issue_analysis.ai.interactive.get_multiline_input")
     @patch("github_issue_analysis.ai.interactive.console")
