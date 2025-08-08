@@ -3,43 +3,47 @@ name: Test
 on:
   pull_request:
     branches: [ main ]
+  push:
+    branches: [ main ]
 
 jobs:
-  lint:
+  quality-checks:
+    name: Quality Checks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
     
     - name: Install uv
       uses: astral-sh/setup-uv@v3
       with:
         version: "latest"
-    
-    - name: Set up Python
-      run: uv python install
+        enable-cache: true
     
     - name: Install dependencies
       run: uv sync --all-extras
     
-    - name: Run linting
-      run: uv run ruff format --check . && uv run ruff check && uv run mypy .
-
-  test:
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-    - uses: actions/checkout@v4
+    - name: Check code formatting (ruff format)
+      run: uv run ruff format --check .
     
-    - name: Install uv
-      uses: astral-sh/setup-uv@v3
-      with:
-        version: "latest"
+    - name: Run linting (ruff check)  
+      run: uv run ruff check .
     
-    - name: Set up Python
-      run: uv python install
+    - name: Run type checking (mypy)
+      run: uv run mypy .
     
-    - name: Install dependencies
-      run: uv sync --all-extras
-    
-    - name: Run tests
-      run: uv run pytest
+    - name: Run tests (pytest)
+      run: uv run pytest --tb=short
+      env:
+        # Integration tests that require these will be skipped automatically
+        OPENAI_API_KEY: ""
+        ANTHROPIC_API_KEY: ""
+        GITHUB_TOKEN: ""
+        SBCTL_TOKEN: ""
