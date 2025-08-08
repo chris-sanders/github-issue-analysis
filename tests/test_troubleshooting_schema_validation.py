@@ -20,7 +20,6 @@ from pydantic import ValidationError
 
 from github_issue_analysis.ai.analysis import analyze_troubleshooting_issue
 from github_issue_analysis.ai.models import (
-    NeedsDataAnalysis,
     ResolvedAnalysis,
     TechnicalAnalysis,
     TroubleshootingResponse,
