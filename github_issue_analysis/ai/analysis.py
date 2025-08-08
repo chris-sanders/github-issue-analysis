@@ -245,6 +245,11 @@ async def analyze_troubleshooting_issue(
         result = await agent.run(message_parts, **kwargs)
         return result.output
     except Exception as e:
+        print(f"DEBUG: Exception caught in analyze_troubleshooting_issue: {e}")
+        print(f"DEBUG: Exception type: {type(e)}")
+        if hasattr(e, "__cause__") and e.__cause__:
+            print(f"DEBUG: Exception cause: {e.__cause__}")
+
         # If multimodal fails and we have images, try text-only as fallback
         if include_images and len(message_parts) > 1:
             print(f"Multimodal processing failed, falling back to text-only: {e}")

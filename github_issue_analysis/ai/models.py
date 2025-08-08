@@ -1,6 +1,7 @@
 """Pydantic models for AI processing responses."""
 
 from enum import Enum
+from typing import Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -109,23 +110,58 @@ class ProductLabelingResponse(BaseModel):
         return v
 
 
-class TechnicalAnalysis(BaseModel):
-    """Structured technical analysis output."""
+class ResolvedAnalysis(BaseModel):
+    """Analysis result when root cause is identified."""
 
     model_config = ConfigDict(
         validate_assignment=True,
         extra="forbid",
         use_enum_values=True,
-        # Allow arbitrary types for Union handling
         arbitrary_types_allowed=True,
     )
 
-    root_cause: str = Field(description="Primary cause of the issue")
-    key_findings: list[str] = Field(
-        description="Important discoveries and observations"
+    status: Literal["resolved"] = "resolved"
+    root_cause: str = Field(
+        description="The fundamental underlying cause identified through analysis"
     )
-    remediation: str = Field(description="Recommended solution steps")
-    explanation: str = Field(description="Detailed technical explanation")
+    evidence: list[str] = Field(
+        description="Specific findings from multiple sources that support conclusion"
+    )
+    solution: str = Field(
+        description="Recommended corrective actions with specific commands and steps"
+    )
+    validation: str = Field(
+        description="How evidence supports root cause and what was ruled out"
+    )
+
+
+class NeedsDataAnalysis(BaseModel):
+    """Analysis result when insufficient data is available for definitive conclusion."""
+
+    model_config = ConfigDict(
+        validate_assignment=True,
+        extra="forbid",
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+    )
+
+    status: Literal["needs_data"] = "needs_data"
+    current_hypothesis: str = Field(
+        description="Best assessment based on available evidence with confidence level"
+    )
+    missing_evidence: list[str] = Field(
+        description="Specific data needed to confirm or deny potential root causes"
+    )
+    next_steps: list[str] = Field(
+        description="Prioritized investigation actions with exact commands"
+    )
+    eliminated: list[str] = Field(
+        description="Ruled-out possibilities and the evidence that eliminated them"
+    )
+
+
+# Discriminated union for the two analysis types
+TechnicalAnalysis = Union[ResolvedAnalysis, NeedsDataAnalysis]
 
 
 class TroubleshootingResponse(BaseModel):

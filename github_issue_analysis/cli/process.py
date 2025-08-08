@@ -796,8 +796,7 @@ async def _run_troubleshoot(
         end_time = datetime.utcnow()
         processing_time = (end_time - start_time).total_seconds()
 
-        # Update processing time in result
-        result.processing_time_seconds = processing_time
+        # Processing time calculated but not stored in discriminated union
 
         console.print(f"[green]✓ Analysis completed in {processing_time:.1f}s[/green]")
 
@@ -805,26 +804,44 @@ async def _run_troubleshoot(
         console.print(f"[red]❌ Analysis failed: {e}[/red]")
         return
 
-    # Display results
+    # Display results based on discriminated union status
     console.print("\n[bold blue]🔍 Troubleshoot Analysis Results[/bold blue]")
-    console.print(f"[blue]Confidence Score: {result.confidence_score:.2f}[/blue]")
 
-    if result.tools_used:
-        console.print(f"[blue]Tools Used: {', '.join(result.tools_used)}[/blue]")
+    if result.status == "resolved":
+        console.print("\n[bold green]✅ Root Cause Identified[/bold green]")
+        console.print("\n[bold]Root Cause:[/bold]")
+        console.print(result.root_cause)
 
-    console.print("\n[bold]Root Cause:[/bold]")
-    console.print(result.analysis.root_cause)
+        if result.evidence:
+            console.print("\n[bold]Evidence:[/bold]")
+            for i, evidence in enumerate(result.evidence, 1):
+                console.print(f"{i}. {evidence}")
 
-    if result.analysis.key_findings:
-        console.print("\n[bold]Key Findings:[/bold]")
-        for i, finding in enumerate(result.analysis.key_findings, 1):
-            console.print(f"{i}. {finding}")
+        console.print("\n[bold]Recommended Solution:[/bold]")
+        console.print(result.solution)
 
-    console.print("\n[bold]Recommended Solution:[/bold]")
-    console.print(result.analysis.remediation)
+        console.print("\n[bold]Analysis Validation:[/bold]")
+        console.print(result.validation)
 
-    console.print("\n[bold]Technical Explanation:[/bold]")
-    console.print(result.analysis.explanation)
+    elif result.status == "needs_data":
+        console.print("\n[bold yellow]📋 Additional Data Needed[/bold yellow]")
+        console.print("\n[bold]Current Hypothesis:[/bold]")
+        console.print(result.current_hypothesis)
+
+        if result.missing_evidence:
+            console.print("\n[bold]Missing Evidence Needed:[/bold]")
+            for i, missing in enumerate(result.missing_evidence, 1):
+                console.print(f"{i}. {missing}")
+
+        if result.next_steps:
+            console.print("\n[bold]Next Steps:[/bold]")
+            for i, step in enumerate(result.next_steps, 1):
+                console.print(f"{i}. {step}")
+
+        if result.eliminated:
+            console.print("\n[bold]Ruled Out:[/bold]")
+            for i, eliminated in enumerate(result.eliminated, 1):
+                console.print(f"{i}. {eliminated}")
 
     # Save results
     results_dir = base_data_dir / "results" / "troubleshoot"

@@ -44,5 +44,5 @@ def troubleshoot_mcp_server(
         "sh",
         args=["-c", f"uv run troubleshoot-mcp-server 2>{log_file}"],
         env=env,
-        timeout=30.0,
+        timeout=120.0,  # Increased timeout for GPT-5 compatibility
     )

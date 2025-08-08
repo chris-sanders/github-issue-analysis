@@ -5,7 +5,7 @@ import os
 from pydantic_ai import Agent
 
 from .mcp_server import troubleshoot_mcp_server
-from .models import TroubleshootingResponse
+from .models import TechnicalAnalysis
 from .prompts import TROUBLESHOOTING_PROMPT
 from .pydantic_ai_patch import apply_pydantic_ai_patch
 
@@ -16,7 +16,7 @@ apply_pydantic_ai_patch()
 def create_o3_medium_agent(
     sbctl_token: str,
     github_token: str | None = None,
-) -> Agent[None, TroubleshootingResponse]:
+) -> Agent[None, TechnicalAnalysis]:
     """Create O3 medium reasoning agent for troubleshooting.
 
     Note: Model should be specified at runtime (e.g., 'o3').
@@ -29,7 +29,7 @@ def create_o3_medium_agent(
 
     return Agent(  # type: ignore[call-overload,no-any-return]
         model="o3",  # Specify the model directly
-        output_type=TroubleshootingResponse,
+        output_type=TechnicalAnalysis,
         instructions=TROUBLESHOOTING_PROMPT,
         toolsets=[troubleshoot_mcp_server(sbctl_token, github_token)],
         model_settings={
@@ -44,7 +44,7 @@ def create_o3_medium_agent(
 def create_o3_high_agent(
     sbctl_token: str,
     github_token: str | None = None,
-) -> Agent[None, TroubleshootingResponse]:
+) -> Agent[None, TechnicalAnalysis]:
     """Create O3 high reasoning agent for troubleshooting.
 
     Note: Model should be specified at runtime (e.g., 'o3').
@@ -57,7 +57,7 @@ def create_o3_high_agent(
 
     return Agent(  # type: ignore[call-overload,no-any-return]
         model="o3",  # Specify the model directly
-        output_type=TroubleshootingResponse,
+        output_type=TechnicalAnalysis,
         instructions=TROUBLESHOOTING_PROMPT,
         toolsets=[troubleshoot_mcp_server(sbctl_token, github_token)],
         model_settings={
@@ -72,7 +72,7 @@ def create_o3_high_agent(
 def create_gpt5_medium_agent(
     sbctl_token: str,
     github_token: str | None = None,
-) -> Agent[None, TroubleshootingResponse]:
+) -> Agent[None, TechnicalAnalysis]:
     """Create GPT-5 with medium reasoning agent for troubleshooting.
 
     Note: Model should be specified at runtime (e.g., 'gpt-5').
@@ -85,12 +85,12 @@ def create_gpt5_medium_agent(
 
     return Agent(  # type: ignore[call-overload,no-any-return]
         model="gpt-5",  # Specify the model directly
-        output_type=TroubleshootingResponse,
+        output_type=TechnicalAnalysis,
         instructions=TROUBLESHOOTING_PROMPT,
         toolsets=[troubleshoot_mcp_server(sbctl_token, github_token)],
         model_settings={
             "timeout": 1800.0,
-            "reasoning_effort": "medium",
+            "openai_reasoning_effort": "medium",
             "stream": False,
             "parallel_tool_calls": True,
         },
@@ -101,7 +101,7 @@ def create_gpt5_medium_agent(
 def create_gpt5_high_agent(
     sbctl_token: str,
     github_token: str | None = None,
-) -> Agent[None, TroubleshootingResponse]:
+) -> Agent[None, TechnicalAnalysis]:
     """Create GPT-5 with high reasoning agent for troubleshooting.
 
     Note: Model should be specified at runtime (e.g., 'gpt-5').
@@ -114,12 +114,12 @@ def create_gpt5_high_agent(
 
     return Agent(  # type: ignore[call-overload,no-any-return]
         model="gpt-5",  # Specify the model directly
-        output_type=TroubleshootingResponse,
+        output_type=TechnicalAnalysis,
         instructions=TROUBLESHOOTING_PROMPT,
         toolsets=[troubleshoot_mcp_server(sbctl_token, github_token)],
         model_settings={
             "timeout": 2400.0,
-            "reasoning_effort": "high",
+            "openai_reasoning_effort": "high",
             "stream": False,
             "parallel_tool_calls": True,
         },
@@ -130,7 +130,7 @@ def create_gpt5_high_agent(
 def create_gpt5_mini_medium_agent(
     sbctl_token: str,
     github_token: str | None = None,
-) -> Agent[None, TroubleshootingResponse]:
+) -> Agent[None, TechnicalAnalysis]:
     """Create GPT-5-mini with medium reasoning agent for troubleshooting.
 
     Note: Model should be specified at runtime (e.g., 'gpt-5-mini').
@@ -143,12 +143,12 @@ def create_gpt5_mini_medium_agent(
 
     return Agent(  # type: ignore[call-overload,no-any-return]
         model="gpt-5-mini",  # Specify the model directly
-        output_type=TroubleshootingResponse,
+        output_type=TechnicalAnalysis,
         instructions=TROUBLESHOOTING_PROMPT,
         toolsets=[troubleshoot_mcp_server(sbctl_token, github_token)],
         model_settings={
             "timeout": 1200.0,
-            "reasoning_effort": "medium",
+            "openai_reasoning_effort": "medium",
             "stream": False,
             "parallel_tool_calls": True,
         },
@@ -159,7 +159,7 @@ def create_gpt5_mini_medium_agent(
 def create_gpt5_mini_high_agent(
     sbctl_token: str,
     github_token: str | None = None,
-) -> Agent[None, TroubleshootingResponse]:
+) -> Agent[None, TechnicalAnalysis]:
     """Create GPT-5-mini with high reasoning agent for troubleshooting.
 
     Note: Model should be specified at runtime (e.g., 'gpt-5-mini').
@@ -172,12 +172,12 @@ def create_gpt5_mini_high_agent(
 
     return Agent(  # type: ignore[call-overload,no-any-return]
         model="gpt-5-mini",  # Specify the model directly
-        output_type=TroubleshootingResponse,
+        output_type=TechnicalAnalysis,
         instructions=TROUBLESHOOTING_PROMPT,
         toolsets=[troubleshoot_mcp_server(sbctl_token, github_token)],
         model_settings={
             "timeout": 1800.0,
-            "reasoning_effort": "high",
+            "openai_reasoning_effort": "high",
             "stream": False,
             "parallel_tool_calls": True,
         },
@@ -190,7 +190,7 @@ def create_troubleshooting_agent(
     agent_name: str,
     sbctl_token: str,
     github_token: str | None = None,
-) -> Agent[None, TroubleshootingResponse]:
+) -> Agent[None, TechnicalAnalysis]:
     """Create troubleshooting agent based on agent name.
 
     Args:
