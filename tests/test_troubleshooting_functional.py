@@ -272,30 +272,16 @@ class TestEndToEnd:
             async def mock_run(message_parts, **kwargs):
                 nonlocal captured_prompt
                 captured_prompt = message_parts[0] if message_parts else None
-                # Return minimal valid response structure
-                from types import SimpleNamespace
+                # Return minimal valid response structure - using new discriminated union
+                from github_issue_analysis.ai.models import ResolvedAnalysis
 
-                mock_result = SimpleNamespace()
-                mock_result.analysis = SimpleNamespace()
-                mock_result.analysis.root_cause = "Test root cause"
-                mock_result.analysis.key_findings = ["Test finding"]
-                mock_result.analysis.remediation = "Test remediation"
-                mock_result.analysis.explanation = "Test explanation"
-                mock_result.confidence_score = 0.8
-                mock_result.tools_used = []
-                mock_result.processing_time_seconds = 1.0
-                # Add model_dump method for CLI compatibility
-                mock_result.model_dump = lambda: {
-                    "analysis": {
-                        "root_cause": "Test root cause",
-                        "key_findings": ["Test finding"],
-                        "remediation": "Test remediation",
-                        "explanation": "Test explanation",
-                    },
-                    "confidence_score": 0.8,
-                    "tools_used": [],
-                    "processing_time_seconds": 1.0,
-                }
+                mock_result = ResolvedAnalysis(
+                    status="resolved",
+                    root_cause="Test root cause",
+                    evidence=["Test finding"],
+                    solution="Test remediation",
+                    validation="Test explanation",
+                )
                 return SimpleNamespace(output=mock_result)
 
             # Mock agent creation to return our spy agent

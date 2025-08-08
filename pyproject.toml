@@ -77,13 +77,6 @@ module = "tests.*"
 disallow_untyped_defs = false
 check_untyped_defs = true
 
-[[tool.mypy.overrides]]
-module = "tests.test_troubleshooting_schema_validation"
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = "tests.test_troubleshoot_functional"
-ignore_errors = true
 
 [dependency-groups]
 dev = [
