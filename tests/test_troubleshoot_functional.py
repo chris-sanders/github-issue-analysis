@@ -30,7 +30,14 @@ class TestTroubleshootFunctional:
         os.environ["ANTHROPIC_API_KEY"] = "sk-ant-test-key"
         os.environ["SBCTL_TOKEN"] = "test-token"
 
-        for agent_type in ["o3_medium", "o3_high", "opus_41"]:
+        for agent_type in [
+            "gpt5_mini_medium",
+            "gpt5_mini_high",
+            "gpt5_medium",
+            "gpt5_high",
+            "o3_medium",
+            "o3_high",
+        ]:
             try:
                 agent = create_troubleshooting_agent(agent_type, "test-token", None)
                 assert agent is not None

@@ -5,11 +5,16 @@ Only mock external services (API calls) where absolutely necessary.
 """
 
 import os
+from unittest.mock import patch
 
 import pytest
 
 from github_issue_analysis.ai.mcp_server import troubleshoot_mcp_server
 from github_issue_analysis.ai.troubleshooting_agents import (
+    create_gpt5_high_agent,
+    create_gpt5_medium_agent,
+    create_gpt5_mini_high_agent,
+    create_gpt5_mini_medium_agent,
     create_troubleshooting_agent,
 )
 
@@ -71,16 +76,98 @@ class TestAgentCreation:
         os.environ.pop("OPENAI_API_KEY", None)
         os.environ.pop("ANTHROPIC_API_KEY", None)
 
-        # O3 agents should require OPENAI_API_KEY
-        with pytest.raises(ValueError, match="OPENAI_API_KEY"):
-            create_troubleshooting_agent("o3_medium", "token")
+        # GPT-5 and O3 agents should require OPENAI_API_KEY
+        for agent_name in [
+            "gpt5_mini_medium",
+            "gpt5_mini_high",
+            "gpt5_medium",
+            "gpt5_high",
+            "o3_medium",
+            "o3_high",
+        ]:
+            with pytest.raises(ValueError, match="OPENAI_API_KEY"):
+                create_troubleshooting_agent(agent_name, "token")
 
-        with pytest.raises(ValueError, match="OPENAI_API_KEY"):
-            create_troubleshooting_agent("o3_high", "token")
 
-        # Opus should require ANTHROPIC_API_KEY
-        with pytest.raises(ValueError, match="ANTHROPIC_API_KEY"):
-            create_troubleshooting_agent("opus_41", "token")
+class TestGPT5AgentCreation:
+    """Test GPT-5 agent creation functions."""
+
+    def test_create_gpt5_mini_medium_agent(self):
+        """Test GPT-5-mini medium agent creation."""
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
+            agent = create_gpt5_mini_medium_agent("test-token")
+            assert agent is not None
+            assert hasattr(agent, "model")
+            assert hasattr(agent, "run")
+            assert hasattr(agent, "output_type")
+
+    def test_create_gpt5_mini_high_agent(self):
+        """Test GPT-5-mini high agent creation."""
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
+            agent = create_gpt5_mini_high_agent("test-token")
+            assert agent is not None
+            assert hasattr(agent, "model")
+            assert hasattr(agent, "run")
+            assert hasattr(agent, "output_type")
+
+    def test_create_gpt5_medium_agent(self):
+        """Test GPT-5 medium agent creation."""
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
+            agent = create_gpt5_medium_agent("test-token")
+            assert agent is not None
+            assert hasattr(agent, "model")
+            assert hasattr(agent, "run")
+            assert hasattr(agent, "output_type")
+
+    def test_create_gpt5_high_agent(self):
+        """Test GPT-5 high agent creation."""
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
+            agent = create_gpt5_high_agent("test-token")
+            assert agent is not None
+            assert hasattr(agent, "model")
+            assert hasattr(agent, "run")
+            assert hasattr(agent, "output_type")
+
+    def test_create_gpt5_agents_require_openai_key(self):
+        """Test that all GPT-5 agents require OPENAI_API_KEY."""
+        with patch.dict(os.environ, {}, clear=True):
+            with pytest.raises(
+                ValueError, match="OPENAI_API_KEY environment variable required"
+            ):
+                create_gpt5_mini_medium_agent("test-token")
+
+            with pytest.raises(
+                ValueError, match="OPENAI_API_KEY environment variable required"
+            ):
+                create_gpt5_mini_high_agent("test-token")
+
+            with pytest.raises(
+                ValueError, match="OPENAI_API_KEY environment variable required"
+            ):
+                create_gpt5_medium_agent("test-token")
+
+            with pytest.raises(
+                ValueError, match="OPENAI_API_KEY environment variable required"
+            ):
+                create_gpt5_high_agent("test-token")
+
+    def test_factory_function_supports_new_agents(self):
+        """Test factory function creates all new agent types."""
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
+            agents_to_test = [
+                "gpt5_mini_medium",
+                "gpt5_mini_high",
+                "gpt5_medium",
+                "gpt5_high",
+            ]
+            for agent_name in agents_to_test:
+                agent = create_troubleshooting_agent(agent_name, "test-token")
+                assert agent is not None
+
+    def test_factory_function_rejects_opus(self):
+        """Test that opus_41 is no longer available."""
+        with pytest.raises(ValueError, match="opus_41 agent is no longer supported"):
+            create_troubleshooting_agent("opus_41", "test-token")
 
 
 class TestEndToEnd:
@@ -153,7 +240,7 @@ class TestEndToEnd:
         import json
         import os
         import tempfile
-        from unittest.mock import AsyncMock, patch
+        from unittest.mock import AsyncMock
 
         # Create test issue file
         test_issue = {
@@ -277,7 +364,7 @@ class TestEndToEnd:
 
         import json
         import tempfile
-        from unittest.mock import AsyncMock, patch
+        from unittest.mock import AsyncMock
 
         # Skip if tokens not available
         if not os.getenv("SBCTL_TOKEN") or not os.getenv("OPENAI_API_KEY"):

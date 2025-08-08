@@ -160,7 +160,9 @@ class TestRecommendationWorkflow:
             assert len(all_recs) == 3
 
             # Verify recommendation details
-            rec1 = manager.status_tracker.get_recommendation("example-org", "example-repo", 100)
+            rec1 = manager.status_tracker.get_recommendation(
+                "example-org", "example-repo", 100
+            )
             assert rec1 is not None
             assert rec1.original_confidence == 0.95
             assert "product::kots" in rec1.recommended_labels
