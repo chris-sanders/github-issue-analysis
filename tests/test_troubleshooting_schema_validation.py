@@ -1,5 +1,7 @@
 """Schema validation tests for troubleshooting agents.
 
+# type: ignore
+
 This test catches issues that our current tests miss:
 1. Response schema validation failures
 2. Agent output format mismatches
@@ -17,7 +19,12 @@ import pytest
 from pydantic import ValidationError
 
 from github_issue_analysis.ai.analysis import analyze_troubleshooting_issue
-from github_issue_analysis.ai.models import TechnicalAnalysis, TroubleshootingResponse
+from github_issue_analysis.ai.models import (
+    NeedsDataAnalysis,
+    ResolvedAnalysis,
+    TechnicalAnalysis,
+    TroubleshootingResponse,
+)
 from github_issue_analysis.ai.troubleshooting_agents import create_troubleshooting_agent
 
 
@@ -40,28 +47,24 @@ class TestTroubleshootingSchemaValidation:
             },
         }
 
-    def test_troubleshooting_response_schema_valid(self):
-        """Test that a valid response passes schema validation."""
-        valid_response = {
-            "analysis": {
-                "root_cause": "Database connection pool exhaustion",
-                "key_findings": [
-                    "Connection timeout after 30 seconds",
-                    "Max connections reached",
-                ],
-                "remediation": "Increase connection pool size and monitoring",
-                "explanation": "Database rejects new connections - pool limit reached.",
-            },
-            "confidence_score": 0.85,
-            "tools_used": ["kubectl", "psql"],
-            "processing_time_seconds": 15.2,
+    def test_resolved_analysis_schema_valid(self):
+        """Test that a valid resolved analysis passes schema validation."""
+        valid_resolved = {
+            "status": "resolved",
+            "root_cause": "Database connection pool exhaustion",
+            "evidence": [
+                "Connection timeout after 30 seconds",
+                "Max connections reached",
+            ],
+            "solution": "Increase connection pool size and monitoring",
+            "validation": "Evidence confirms pool exhaustion as root cause.",
         }
 
         # This should not raise an exception
-        response = TroubleshootingResponse(**valid_response)
-        assert response.confidence_score == 0.85
-        assert len(response.analysis.key_findings) == 2
-        assert response.tools_used == ["kubectl", "psql"]
+        response = ResolvedAnalysis(**valid_resolved)
+        assert response.status == "resolved"
+        assert len(response.evidence) == 2
+        assert "pool exhaustion" in response.root_cause
 
     def test_troubleshooting_response_schema_invalid_missing_fields(self):
         """Test that responses missing required fields fail validation."""

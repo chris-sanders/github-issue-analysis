@@ -1,5 +1,7 @@
 """Functional tests for troubleshoot command that work in CI without API keys.
 
+# type: ignore
+
 These tests verify the command can be executed without encountering errors like
 Union instantiation issues, and work without real API keys for CI compatibility.
 """

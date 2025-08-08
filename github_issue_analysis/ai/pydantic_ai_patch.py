@@ -47,7 +47,7 @@ def apply_pydantic_ai_patch() -> None:
     # Based on context-experiments fix for tool call coordination
     original_process_response = OpenAIResponsesModel._process_response
 
-    def patched_process_response(self, response) -> Any:
+    def patched_process_response(self: Any, response: Any) -> Any:
         """Patched version that applies guard_tool_call_id like Chat API."""
         result = original_process_response(self, response)
 
@@ -58,4 +58,4 @@ def apply_pydantic_ai_patch() -> None:
 
         return result
 
-    OpenAIResponsesModel._process_response = patched_process_response
+    OpenAIResponsesModel._process_response = patched_process_response  # type: ignore[method-assign]
