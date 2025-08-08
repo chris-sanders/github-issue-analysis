@@ -437,6 +437,7 @@ dependencies = [
     { name = "pygithub" },
     { name = "python-dotenv" },
     { name = "rich" },
+    { name = "toml" },
     { name = "troubleshoot-mcp-server" },
     { name = "typer" },
 ]
@@ -465,10 +466,10 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.24.0" },
     { name = "mcp" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.16.1" },
-    { name = "openai", specifier = ">=1.0.0" },
+    { name = "openai", specifier = ">=1.99.3" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.0.0" },
     { name = "pydantic", specifier = ">=2.5.0" },
-    { name = "pydantic-ai", specifier = ">=0.4.0" },
+    { name = "pydantic-ai", specifier = ">=0.6.2" },
     { name = "pygithub", specifier = ">=2.6.1" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.4.1" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=1.0.0" },
@@ -477,6 +478,7 @@ requires-dist = [
     { name = "pyyaml", marker = "extra == 'export'", specifier = ">=6.0.0" },
     { name = "rich", specifier = ">=13.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.12.1" },
+    { name = "toml", specifier = ">=0.10.2" },
     { name = "troubleshoot-mcp-server", specifier = ">=1.11.0" },
     { name = "typer", specifier = ">=0.9.0" },
 ]
@@ -902,7 +904,7 @@ wheels = [
 
 [[package]]
 name = "openai"
-version = "1.99.3"
+version = "1.99.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -914,9 +916,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/72/d3/c372420c8ca1c60e785fd8c19e536cea8f16b0cfdcdad6458e1d8884f2ea/openai-1.99.3.tar.gz", hash = "sha256:1a0e2910e4545d828c14218f2ac3276827c94a043f5353e43b9413b38b497897", size = 504932, upload-time = "2025-08-07T20:35:15.893Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d4/f6/5c3d07ad1d81f0df095086b190915d23ba7f77ea6b11dec78729f3a04d1b/openai-1.99.4.tar.gz", hash = "sha256:d177e6bd98dbce5a26ec584fbe6e91568a5b8b6f422f0ec7a4871adcaa9e3c51", size = 505251, upload-time = "2025-08-08T13:49:42.846Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/92/bc/e52f49940b4e320629da7db09c90a2407a48c612cff397b4b41b7e58cdf9/openai-1.99.3-py3-none-any.whl", hash = "sha256:c786a03f6cddadb5ee42c6d749aa4f6134fe14fdd7d69a667e5e7ce7fd29a719", size = 785776, upload-time = "2025-08-07T20:35:13.653Z" },
+    { url = "https://files.pythonhosted.org/packages/50/f5/34422ce00ccbf36ddba93a0ce6a368f5a1cc4235fd65982af6f944f4a3db/openai-1.99.4-py3-none-any.whl", hash = "sha256:5a26181011252de3510d3c2dfdfaa97a08bb89ab700c1d054371a9df078a1fd2", size = 786229, upload-time = "2025-08-08T13:49:40.642Z" },
 ]
 
 [[package]]
@@ -1647,6 +1649,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/0a/42348c995c67e2e6e5c89ffb9cfd68507cbaeb84ff39c49ee6e0a6dd0fd2/tokenizers-0.21.4-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:c212aa4e45ec0bb5274b16b6f31dd3f1c41944025c2358faaa5782c754e84c24", size = 9461980, upload-time = "2025-07-28T15:48:52.325Z" },
     { url = "https://files.pythonhosted.org/packages/3d/d3/dacccd834404cd71b5c334882f3ba40331ad2120e69ded32cf5fda9a7436/tokenizers-0.21.4-cp39-abi3-win32.whl", hash = "sha256:6c42a930bc5f4c47f4ea775c91de47d27910881902b0f20e4990ebe045a415d0", size = 2329871, upload-time = "2025-07-28T15:48:56.841Z" },
     { url = "https://files.pythonhosted.org/packages/41/f2/fd673d979185f5dcbac4be7d09461cbb99751554ffb6718d0013af8604cb/tokenizers-0.21.4-cp39-abi3-win_amd64.whl", hash = "sha256:475d807a5c3eb72c59ad9b5fcdb254f6e17f53dfcbb9903233b0dfa9c943b597", size = 2507568, upload-time = "2025-07-28T15:48:55.456Z" },
+]
+
+[[package]]
+name = "toml"
+version = "0.10.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f", size = 22253, upload-time = "2020-11-01T01:40:22.204Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/44/6f/7120676b6d73228c96e17f1f794d8ab046fc910d781c8d151120c3f1569e/toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b", size = 16588, upload-time = "2020-11-01T01:40:20.672Z" },
 ]
 
 [[package]]

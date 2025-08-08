@@ -11,12 +11,13 @@ dependencies = [
     "anthropic>=0.7.0",
     "httpx>=0.24.0",
     "mcp", # Model Context Protocol support
-    "openai>=1.0.0",
+    "openai>=1.99.3",
     "pydantic>=2.5.0",
-    "pydantic-ai>=0.4.0",
+    "pydantic-ai>=0.6.2",
     "pygithub>=2.6.1",
     "python-dotenv>=1.0.0",
     "rich>=13.0.0",
+    "toml>=0.10.2",
     "troubleshoot-mcp-server>=1.11.0",
     "typer>=0.9.0",
 ]
@@ -50,6 +51,7 @@ exclude = ["github_issue_analysis/ai/prompts.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["UP007"]  # Allow Optional[X] instead of X | None to avoid Union instantiation issues
 
 [tool.ruff.format]
 # Ruff's formatter (replaces Black)

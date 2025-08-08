@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ProductLabel(str, Enum):
@@ -49,6 +49,14 @@ class ImageAnalysis(BaseModel):
 
 class ProductLabelingResponse(BaseModel):
     """Structured response for product labeling analysis."""
+
+    model_config = ConfigDict(
+        validate_assignment=True,
+        extra="forbid",
+        use_enum_values=True,
+        # Allow arbitrary types for Union handling
+        arbitrary_types_allowed=True,
+    )
 
     root_cause_analysis: str = Field(
         default="Root cause unclear",
@@ -104,6 +112,14 @@ class ProductLabelingResponse(BaseModel):
 class TechnicalAnalysis(BaseModel):
     """Structured technical analysis output."""
 
+    model_config = ConfigDict(
+        validate_assignment=True,
+        extra="forbid",
+        use_enum_values=True,
+        # Allow arbitrary types for Union handling
+        arbitrary_types_allowed=True,
+    )
+
     root_cause: str = Field(description="Primary cause of the issue")
     key_findings: list[str] = Field(
         description="Important discoveries and observations"
@@ -114,6 +130,14 @@ class TechnicalAnalysis(BaseModel):
 
 class TroubleshootingResponse(BaseModel):
     """Response model for troubleshooting analysis."""
+
+    model_config = ConfigDict(
+        validate_assignment=True,
+        extra="forbid",
+        use_enum_values=True,
+        # Allow arbitrary types for Union handling
+        arbitrary_types_allowed=True,
+    )
 
     analysis: TechnicalAnalysis
     confidence_score: float = Field(
@@ -127,6 +151,14 @@ class TroubleshootingResponse(BaseModel):
 
 class InteractiveTroubleshootingResponse(BaseModel):
     """Response model for interactive follow-up questions."""
+
+    model_config = ConfigDict(
+        validate_assignment=True,
+        extra="forbid",
+        use_enum_values=True,
+        # Allow arbitrary types for Union handling
+        arbitrary_types_allowed=True,
+    )
 
     answer: str = Field(description="Direct answer to the user's question")
     additional_findings: list[str] = Field(

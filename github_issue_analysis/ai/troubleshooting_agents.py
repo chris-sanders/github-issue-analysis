@@ -7,6 +7,10 @@ from pydantic_ai import Agent
 from .mcp_server import troubleshoot_mcp_server
 from .models import TroubleshootingResponse
 from .prompts import TROUBLESHOOTING_PROMPT
+from .pydantic_ai_patch import apply_pydantic_ai_patch
+
+# Apply the patch for OpenAI 1.99.2+ compatibility
+apply_pydantic_ai_patch()
 
 
 def create_o3_medium_agent(

@@ -10,6 +10,10 @@ from .models import (
     RecommendedLabel,
 )
 from .prompts import PRODUCT_LABELING_PROMPT
+from .pydantic_ai_patch import apply_pydantic_ai_patch
+
+# Apply the patch for OpenAI 1.99.2+ compatibility
+apply_pydantic_ai_patch()
 
 __all__ = [
     # Models
