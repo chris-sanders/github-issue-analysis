@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 import pytest
 
-from github_issue_analysis.ai.models import ResolvedAnalysis, TechnicalAnalysis
+from github_issue_analysis.ai.models import ResolvedAnalysis
 from github_issue_analysis.ai.troubleshooting_agents import create_troubleshooting_agent
 
 

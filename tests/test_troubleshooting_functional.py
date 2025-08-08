@@ -5,6 +5,7 @@ Only mock external services (API calls) where absolutely necessary.
 """
 
 import os
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -272,7 +273,7 @@ class TestEndToEnd:
             async def mock_run(message_parts, **kwargs):
                 nonlocal captured_prompt
                 captured_prompt = message_parts[0] if message_parts else None
-                # Return minimal valid response structure - using new discriminated union
+                # Return minimal valid response - using new discriminated union
                 from github_issue_analysis.ai.models import ResolvedAnalysis
 
                 mock_result = ResolvedAnalysis(
