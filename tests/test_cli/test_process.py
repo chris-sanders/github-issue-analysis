@@ -102,8 +102,10 @@ class TestConcurrentProcessing:
 
         # Mock the runner analysis
         async def mock_analyze(self, data):
-            return type("MockResult", (), {"model_dump": lambda self: {"test": "result"}})()
-        
+            return type(
+                "MockResult", (), {"model_dump": lambda self: {"test": "result"}}
+            )()
+
         with patch("github_issue_analysis.runners.get_runner") as mock_get_runner:
             mock_runner = type("MockRunner", (), {"analyze": mock_analyze})()
             mock_get_runner.return_value = mock_runner

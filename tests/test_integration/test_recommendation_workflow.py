@@ -274,23 +274,23 @@ class TestRecommendationWorkflow:
                         image_impact="",
                     )
 
-                with patch("github_issue_analysis.runners.get_runner") as mock_get_runner:
-                    mock_runner = type(
-                        "MockRunner", (), {"analyze": mock_analyze_fn}
-                    )()
+                with patch(
+                    "github_issue_analysis.runners.get_runner"
+                ) as mock_get_runner:
+                    mock_runner = type("MockRunner", (), {"analyze": mock_analyze_fn})()
                     mock_get_runner.return_value = mock_runner
 
                     # Run process command without --reprocess
                     runner.invoke(
                         app,
-                    [
-                        "process",
-                        "product-labeling",
-                        "--org",
-                        "org",
-                        "--repo",
-                        "repo",
-                    ]
+                        [
+                            "process",
+                            "product-labeling",
+                            "--org",
+                            "org",
+                            "--repo",
+                            "repo",
+                        ],
                     )
 
                 # Verify PENDING/APPROVED/REJECTED issues are skipped

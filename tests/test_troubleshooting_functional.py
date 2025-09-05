@@ -295,8 +295,11 @@ class TestEndToEnd:
                 "OPENAI_API_KEY": "test_openai_key",
             }
             with patch.dict(os.environ, env_patches):
-                with patch("github_issue_analysis.runners.get_runner") as mock_get_runner:
+                with patch(
+                    "github_issue_analysis.runners.get_runner"
+                ) as mock_get_runner:
                     from github_issue_analysis.ai.models import ResolvedAnalysis
+
                     mock_result = ResolvedAnalysis(
                         status="resolved",
                         root_cause="Test root cause",
@@ -304,13 +307,17 @@ class TestEndToEnd:
                         solution="Test remediation",
                         validation="Test explanation",
                     )
-                    
+
                     async def mock_analyze(self, data):
                         nonlocal captured_prompt
                         # Capture the prompt from GitHub context
-                        from github_issue_analysis.runners.utils.github_context import build_github_context
+                        from github_issue_analysis.runners.utils.github_context import (
+                            build_github_context,
+                        )
+
                         captured_prompt = build_github_context(data["issue"])
                         return mock_result
+
                     mock_runner = type(
                         "MockRunner", (), {"agent": mock_agent, "analyze": mock_analyze}
                     )()
