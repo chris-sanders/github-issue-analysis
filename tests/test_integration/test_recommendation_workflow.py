@@ -215,8 +215,7 @@ class TestRecommendationWorkflow:
             assert rec3_updated is not None
             assert rec3_updated.status == RecommendationStatus.PENDING  # Not reviewed
 
-    @patch("github_issue_analysis.cli.process.analyze_issue")
-    def test_reprocessing_integration_with_ai_processor(self, mock_analyze):
+    def test_reprocessing_integration_with_ai_processor(self):
         """Test that AI processing respects recommendation status."""
         # Save original env var if it exists
         original_data_dir = os.environ.get("GITHUB_ANALYSIS_DATA_DIR")
@@ -260,13 +259,7 @@ class TestRecommendationWorkflow:
                 # Mock AI agent analysis to track which issues are processed
                 processed_issues = []
 
-                async def mock_analyze_fn(
-                    agent,
-                    issue_data,
-                    include_images=True,
-                    model=None,
-                    model_settings=None,
-                ):
+                async def mock_analyze_fn(self, issue_data):
                     processed_issues.append(issue_data["issue"]["number"])
                     return ProductLabelingResponse(
                         root_cause_analysis="Test",
@@ -281,11 +274,15 @@ class TestRecommendationWorkflow:
                         image_impact="",
                     )
 
-                mock_analyze.side_effect = mock_analyze_fn
+                with patch("github_issue_analysis.runners.get_runner") as mock_get_runner:
+                    mock_runner = type(
+                        "MockRunner", (), {"analyze": mock_analyze_fn}
+                    )()
+                    mock_get_runner.return_value = mock_runner
 
-                # Run process command without --reprocess
-                runner.invoke(
-                    app,
+                    # Run process command without --reprocess
+                    runner.invoke(
+                        app,
                     [
                         "process",
                         "product-labeling",
@@ -293,8 +290,8 @@ class TestRecommendationWorkflow:
                         "org",
                         "--repo",
                         "repo",
-                    ],
-                )
+                    ]
+                    )
 
                 # Verify PENDING/APPROVED/REJECTED issues are skipped
                 assert 1 not in processed_issues  # PENDING - skipped

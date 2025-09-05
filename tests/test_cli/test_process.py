@@ -100,12 +100,13 @@ class TestConcurrentProcessing:
         results_dir = tmp_path / "results"
         results_dir.mkdir()
 
-        # Mock the AI analysis
-        with patch("github_issue_analysis.cli.process.analyze_issue") as mock_analyze:
-            mock_result = type(
-                "MockResult", (), {"model_dump": lambda self: {"test": "result"}}
-            )()
-            mock_analyze.return_value = mock_result
+        # Mock the runner analysis
+        async def mock_analyze(self, data):
+            return type("MockResult", (), {"model_dump": lambda self: {"test": "result"}})()
+        
+        with patch("github_issue_analysis.runners.get_runner") as mock_get_runner:
+            mock_runner = type("MockRunner", (), {"analyze": mock_analyze})()
+            mock_get_runner.return_value = mock_runner
 
             semaphore = asyncio.Semaphore(1)
             result = await _process_single_issue(
@@ -178,8 +179,8 @@ class TestConcurrentProcessing:
         active_tasks = []
         max_concurrent = 0
 
-        async def mock_analyze_with_tracking(*args, **kwargs):
-            """Mock analyze_issue that tracks concurrency."""
+        async def mock_analyze_with_tracking(self, *args, **kwargs):
+            """Mock runner analyze that tracks concurrency."""
             nonlocal max_concurrent
             active_tasks.append(asyncio.current_task())
             max_concurrent = max(max_concurrent, len(active_tasks))
@@ -198,10 +199,11 @@ class TestConcurrentProcessing:
         ) as mock_mgr:
             mock_mgr.return_value.should_reprocess_issue.return_value = True
 
-            with patch(
-                "github_issue_analysis.cli.process.analyze_issue",
-                mock_analyze_with_tracking,
-            ):
+            with patch("github_issue_analysis.runners.get_runner") as mock_get_runner:
+                mock_runner = type(
+                    "MockRunner", (), {"analyze": mock_analyze_with_tracking}
+                )()
+                mock_get_runner.return_value = mock_runner
                 # Test with concurrency limit of 2
                 semaphore = asyncio.Semaphore(2)
                 tasks = []
