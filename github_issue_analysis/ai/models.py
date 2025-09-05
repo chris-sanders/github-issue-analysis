@@ -206,6 +206,22 @@ class InteractiveTroubleshootingResponse(BaseModel):
     )
 
 
+class ProductResult(BaseModel):
+    """Product identification result."""
+
+    product: list[str] = Field(
+        description="List of products directly involved in the evidence, symptoms, or cause"
+    )
+
+
+class SymptomsResult(BaseModel):
+    """Symptoms identification result."""
+
+    symptoms: list[str] = Field(
+        description="High-level, human-observable failure descriptions"
+    )
+
+
 # Future: Easy to add new response types for different analysis tasks
 class IssueClassificationResponse(BaseModel):
     """Future: General issue classification beyond just product labels."""

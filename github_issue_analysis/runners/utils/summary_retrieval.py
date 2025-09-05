@@ -3,19 +3,20 @@ Summary retrieval client for Snowflake Cortex operations.
 Provides hybrid product+symptom retrieval for case summaries from exp05.
 """
 
+from typing import List, Dict, Any
 from .snowflake_dev_client import SnowflakeDevClient
 
 
 class SummaryRetrievalClient:
     """Client for retrieving case summaries using vector similarity search."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the summary retrieval client."""
         self.client = SnowflakeDevClient(schema="EXP05")
 
     def search_by_product(
         self, product_text: str, limit: int = 5, threshold: float = 0.7
-    ) -> list[dict]:
+    ) -> List[Dict[str, Any]]:
         """
         Vector similarity search using PRODUCT_EMBEDDING.
 
@@ -47,7 +48,7 @@ class SummaryRetrievalClient:
             """
 
             # Use the client's _get_connection method with parameterized query
-            with self.client._get_connection() as conn:
+            with self.client._get_connection() as conn:  # type: ignore[no-untyped-call]
                 cursor = conn.cursor()
                 cursor.execute(search_sql, (product_text, threshold, limit))
                 results = cursor.fetchall()
@@ -60,7 +61,7 @@ class SummaryRetrievalClient:
 
     def search_by_symptoms(
         self, symptoms_text: str, limit: int = 5, threshold: float = 0.7
-    ) -> list[dict]:
+    ) -> List[Dict[str, Any]]:
         """
         Vector similarity search using SYMPTOMS_EMBEDDING.
 
@@ -92,7 +93,7 @@ class SummaryRetrievalClient:
             """
 
             # Use the client's _get_connection method with parameterized query
-            with self.client._get_connection() as conn:
+            with self.client._get_connection() as conn:  # type: ignore[no-untyped-call]
                 cursor = conn.cursor()
                 cursor.execute(search_sql, (symptoms_text, threshold, limit))
                 results = cursor.fetchall()
@@ -105,7 +106,7 @@ class SummaryRetrievalClient:
 
     def search_by_evidence(
         self, evidence_text: str, limit: int = 5, threshold: float = 0.7
-    ) -> list[dict]:
+    ) -> List[Dict[str, Any]]:
         """
         Vector similarity search using EVIDENCE_EMBEDDING.
 
@@ -137,7 +138,7 @@ class SummaryRetrievalClient:
             """
 
             # Use the client's _get_connection method with parameterized query
-            with self.client._get_connection() as conn:
+            with self.client._get_connection() as conn:  # type: ignore[no-untyped-call]
                 cursor = conn.cursor()
                 cursor.execute(search_sql, (evidence_text, threshold, limit))
                 results = cursor.fetchall()
@@ -150,13 +151,13 @@ class SummaryRetrievalClient:
 
     def retrieve_similar_cases(
         self,
-        product: list[str],
-        symptoms: list[str],
+        product: List[str],
+        symptoms: List[str],
         limit: int = 2,
         threshold: float = 0.7,
         product_weight: float = 0.4,
         symptom_weight: float = 0.6,
-    ) -> list[dict]:
+    ) -> List[Dict[str, Any]]:
         """
         Combine product and symptom searches with weighted scoring.
 
@@ -219,7 +220,7 @@ class SummaryRetrievalClient:
             """
 
             # Use the client's _get_connection method with parameterized query
-            with self.client._get_connection() as conn:
+            with self.client._get_connection() as conn:  # type: ignore[no-untyped-call]
                 cursor = conn.cursor()
                 cursor.execute(
                     combined_sql,
@@ -248,7 +249,7 @@ class SummaryRetrievalClient:
             print(f"❌ Combined search failed: {e}")
             return []
 
-    def format_memory_context(self, cases: list[dict]) -> str:
+    def format_memory_context(self, cases: List[Dict[str, Any]]) -> str:
         """
         Format retrieved cases for prompt injection using XML.
 
@@ -273,7 +274,7 @@ class SummaryRetrievalClient:
             )
 
             # Add structured fields - handle both arrays and string representations
-            def parse_array_field(field_value):
+            def parse_array_field(field_value: Any) -> List[Any]:
                 """Parse array field that might be returned as string from Snowflake."""
                 if isinstance(field_value, str):
                     # Try to parse as JSON array if it looks like one
@@ -283,7 +284,8 @@ class SummaryRetrievalClient:
                         import json
 
                         try:
-                            return json.loads(field_value)
+                            parsed = json.loads(field_value)
+                            return parsed if isinstance(parsed, list) else [parsed]
                         except json.JSONDecodeError:
                             return [field_value]  # Return as single item if can't parse
                     else:

@@ -5,8 +5,7 @@ This module contains tool functions that can be used across different agents
 and experiments to enhance their analytical capabilities.
 """
 
-from typing import Any
-
+from typing import List, Dict, Any
 from .summary_retrieval import SummaryRetrievalClient
 
 
@@ -58,7 +57,7 @@ def search_evidence(query: str, limit: int = 2, threshold: float = 0.6) -> str:
 
 
 def _format_evidence_search_results(
-    results: list[dict[str, Any]], query: str, threshold: float
+    results: List[Dict[str, Any]], query: str, threshold: float
 ) -> str:
     """Format evidence search results for agent consumption using XML format.
 
@@ -73,7 +72,7 @@ def _format_evidence_search_results(
     if not results:
         return "No similar evidence found."
 
-    def parse_array_field(field_value):
+    def parse_array_field(field_value: Any) -> List[str]:
         """Parse array field that might be returned as string from Snowflake."""
         if isinstance(field_value, str):
             # Try to parse as JSON array if it looks like one
@@ -83,13 +82,17 @@ def _format_evidence_search_results(
                 import json
 
                 try:
-                    return json.loads(field_value)
+                    parsed = json.loads(field_value)
+                    if isinstance(parsed, list):
+                        return [str(item) for item in parsed]
+                    else:
+                        return [str(parsed)]
                 except json.JSONDecodeError:
                     return [field_value]  # Return as single item if can't parse
             else:
                 return [field_value]  # Single string item
         elif isinstance(field_value, list):
-            return field_value
+            return [str(item) for item in field_value]
         else:
             return []
 

@@ -263,3 +263,254 @@ kubectl and file operations are separate data sources:
 2. **Host commands**: Look for `*-info.json` and `*.txt` files in `host-collectors/run-host/`
 3. **Host command details**: Read `*-info.json` files for exact commands that were run
 4. **Host command output**: Read `*.txt` files for command results"""
+
+# Support Bundle Overview
+SUPPORT_BUNDLE_OVERVIEW = """
+<bundle_discovery>
+IMPORTANT: Before attempting any bundle operations:
+1. Search the case text for bundle URLs (pattern: "https://vendor.replicated.com/troubleshoot/analyze/...")
+2. When multiple bundle URLs are found, prefer URLs from later comments as they often contain corrected/updated bundles
+3. Only if URLs are found, use `initialize_bundle(url)` to load the bundle you want to work with
+4. If no URLs exist in the case, skip all bundle operations and work with case text only
+</bundle_discovery>
+
+<bundle_structure>
+<directories>
+- support-bundle-{timestamp}/cluster-resources/ (Kubernetes data - use kubectl)
+- support-bundle-{timestamp}/host-collectors/system/ (Standard system info)  
+- support-bundle-{timestamp}/host-collectors/run-host/{collector}/ (Custom command outputs)
+- support-bundle-{timestamp}/{collector-name}/ (Custom collector data)
+</directories>
+</bundle_structure>
+
+<data_access>
+<kubernetes_data>
+cluster-resources/: Use kubectl commands for pods, logs, events, resources, etc
+
+kubectl and file operations are separate data sources:
+- kubectl commands query the Kubernetes API (e.g., `kubectl get pods -n kube-system` returns pod names)
+- File operations access the bundle filesystem (e.g., `cluster-resources/pods/kube-system.json` contains pod data)
+- Pod/namespace names from kubectl do NOT correspond to directory names in the bundle
+- Avoid using json output unless absolutely necessary it's unnecessarily verbose
+- Example: `kubectl get pods` might return a pod named "kube-system-dns", but this does NOT mean there's a directory at `cluster-resources/pods/kube-system-dns/`
+</kubernetes_data>
+
+<host_system_data>
+host-collectors/system/:
+- `node_list.json` - Available cluster nodes
+- `hostos_info.json` - Host OS information  
+- `memory.json`, `cpu.json` - System resources
+</host_system_data>
+
+<host_commands>
+host-collectors/run-host/:
+- `{collector}.txt` - Command output
+- `{collector}-info.json` - Command metadata (what was run)
+- `{collector}/` - Optional subdirectory for additional command output files
+- Note: `{collector}` is the collector name (e.g., "disk-usage-check"), not the command (e.g., "du")
+</host_commands>
+
+<specialized_collectors>
+{collector-name}/: Custom collector data
+- Example: `mysql/mysql.json` - MySQL connection info and version
+</specialized_collectors>
+</data_access>
+
+<discovery_steps>
+<step_1>
+Initialize Support Bundle Access:
+- Start by using `initialize_bundle` to load a support bundle by url 
+- Look for URLs like "https://vendor.replicated.com/troubleshoot/analyze/..." in the issue
+</step_1>
+
+<step_2>
+Explore Available Data:
+- Use `list_files` to see what diagnostic data is available in the bundle
+- Look for folders other than `cluster-resources` and `host-collectors` (specialized collectors)
+- Check `host-collectors/run-host/` for `*-info.json` and `*.txt` files (host commands)
+</step_2>
+
+<step_3>
+Examine System State:
+- Use `kubectl` commands to query Kubernetes API data (pods, services, events, logs), avoiding json output as much as possible
+- Use `read_file` to examine specific configuration files or logs from the bundle, limit reads where possible
+- Use `grep_files` to search across multiple files for error patterns or specific conditions
+- Look for pod logs, controller logs, and system events related to the reported issue
+</step_3>
+
+<step_4>
+Analyze Evidence:
+- Read `*-info.json` files to understand what commands were run
+- Read `*.txt` files for command results and outputs  
+- Examine any error logs or diagnostic output files in the bundle
+- Use `grep_files` to search for specific error messages mentioned in the case
+- Cross-reference kubectl data with bundle files to build complete picture
+</step_4>
+</discovery_steps>
+"""
+
+PRODUCT_PROMPT = """
+You are an expert at identifying products involved in Kubernetes failures. Your job is to identify the minimal list of products that were directly related to the evidence, symptoms, or root cause.
+
+**IMPORTANT**: Focus on problem-specific components, not general deployment platforms. Avoid including broad terms like "Kubernetes" or "kURL" unless they are the specific failing component.
+
+It is important products are as specific as possible and include the minimal list of actually involved products.
+<product examples>
+* Issue: Certificate expired on Ingress
+  Product: Nginx Ingress Controller (or whatever Ingress is in use)
+* Issue: ImagePull Backoff due to lack of network connectivity
+  Product: Containerd (if containerd logs show the error), CoreDNS (if DNS resolution fails)
+* Issue: Storage volume not mounting
+  Product: OpenEBS LocalPV (if using OpenEBS), Rook Ceph (if using Ceph), CSI driver name
+* Issue: Pod networking failures between nodes
+  Product: Weave Net CNI (if using Weave), Calico (if using Calico), specific CNI component
+* Issue: Application-specific storage or networking problems
+  Product: The specific application component having issues (e.g., "worker pods", "database service")
+* Issue: Storage provisioning issues
+  Product: OpenEBS LocalPV provisioner, Ceph RBD volumes, specific CSI driver
+* Issue: Cross-node networking failure
+  Product: Weave Net (CNI), iptables/firewall (if blocking traffic)
+</product examples>
+
+<review process>
+1. Look for support bundle URLs in the case:
+    - Search the case text and comments for bundle URLs (e.g., "https://vendor.replicated.com/troubleshoot/analyze/...")
+    - When multiple bundle URLs are found, prefer URLs from later comments as they often contain corrected/updated bundles
+    - If bundle URLs are found, initialize them with `initialize_bundle(url)`
+    - If no bundle URLs are found in the case, proceed with case-based analysis only
+
+2. If support bundles were successfully initialized:
+    - Use `list_files` to explore the bundle structure and see what diagnostic data is available
+    - Use `kubectl` commands to check what products/components are present (e.g., "kubectl get pods -A", "kubectl get deployments")
+    - Use `grep_files` to search for product-specific configurations, logs, or error patterns
+    - Use `read_file` to examine specific configuration files that identify products in use
+    - Continue using tools until you have thoroughly identified all involved products
+   
+3. If no support bundles could be initialized:
+    - Base your analysis on the case description and comments only
+    - Identify products mentioned in the case description
+    - Look for product names in error messages or logs quoted in comments
+    - Make reasonable inferences based on the deployment type mentioned
+
+4. Prefer fewer products over more - only include products directly involved in the failure
+5. Be as specific as possible (e.g., "Nginx Ingress Controller" not just "Ingress")
+
+IMPORTANT: If no bundle URLs are found in the case text, do not attempt to use any bundle-related commands. Proceed immediately with case-based analysis.
+</review process>
+"""
+
+SYMPTOMS_PROMPT = """
+You are an expert at identifying user-perceived symptoms in Kubernetes failures. Your job is to identify high-level, human-observable failure descriptions from the perspective of someone operating the software who doesn't have deep kubernetes experience.
+
+**CRITICAL**: Use specific technical terminology that clearly differentiates problem domains. Avoid generic language that could apply to multiple technical areas.
+
+**DOMAIN TAGS (OPTIONAL)**: You may prefix symptoms with domain tags when it adds clarity:
+- [STORAGE] - for data persistence, volume, file system issues
+- [NETWORK] - for connectivity, DNS, inter-service communication  
+- [COMPUTE] - for memory, CPU, pod resource issues
+- [SECURITY] - for certificates, authentication, authorization
+- [PLATFORM] - for cluster management, node, control plane issues
+
+**CRITICAL - AVOID THESE GENERIC TERMS**:
+- "cross-node issues" → use "services timeout connecting between different nodes"
+- "multi-node problems" → use "inter-service communication fails across node boundaries"  
+- "storage problems" → use "PersistentVolumeClaims use local provisioner instead of shared storage"
+- "pods failing" → use "containers terminated due to memory limits"
+- "cluster issues" → use "control plane components unavailable" 
+- "networking problems" → use "DNS resolution timeouts" or "connection refused errors"
+
+**USE BALANCED TECHNICAL SPECIFICITY**:
+- Storage: "PersistentVolumes stuck in Pending status", "local disk usage grows requiring cleanup", "volume mounts fail with permission errors"
+- Network: "HTTP requests timeout between services", "DNS queries fail after 30 seconds", "ingress returns upstream unavailable"  
+- Compute: "containers killed with OOMKilled status", "CPU usage hits throttling limits", "pod scheduling fails due to resource constraints"
+
+It is important that Symptoms describe how failures are perceived, not the evidence of the root cause.
+<symptom examples>
+* Issue: Certificate expired on Ingress
+  Symptom: HTTPS requests return "certificate expired" errors and browsers display security warnings
+* Issue: ImagePull Backoff due to lack of network connectivity
+  Symptom: Pods remain in "ImagePullBackOff" status with "connection timeout" errors to container registry
+* Issue: Host renamed after k8s install
+  Symptom: Kubelet service fails to start with "node name mismatch" errors after system restart
+* Issue: CoreDNS is unable to resolve upstream DNS
+  Symptom: DNS queries for external domains timeout after 5 seconds while internal cluster DNS works
+* Issue: Storage capacity exhaustion
+  Symptom: Pods fail with "no space left on device" despite PVC showing available capacity
+* Issue: Inter-service networking failure
+  Symptom: HTTP requests between services return "connection refused" when pods are on different nodes
+* Issue: Persistent data loss
+  Symptom: Application state resets to default configuration after pod restart or update
+* Issue: DNS service discovery failure
+  Symptom: Services report "name resolution timeout" when attempting to connect to dependent services
+* Issue: Volume provisioning failure
+  Symptom: Pods stuck in "ContainerCreating" with "FailedMount" events showing volume attachment errors
+</symptom examples>
+
+<review process>
+1. Look for support bundle URLs in the case:
+    - Search the case text and comments for bundle URLs (e.g., "https://vendor.replicated.com/troubleshoot/analyze/...")
+    - When multiple bundle URLs are found, prefer URLs from later comments as they often contain corrected/updated bundles
+    - If bundle URLs are found, initialize them with `initialize_bundle(url)`
+    - If no bundle URLs are found in the case, proceed with case-based analysis only
+
+2. Review the comments on the case to understand what users experienced
+
+3. If support bundles were successfully initialized:
+    - Use `list_files` to explore the bundle structure and see what diagnostic data is available
+    - Use `kubectl` commands to check application status, pod status, events (e.g., "kubectl get pods -A", "kubectl get events")
+    - Use `grep_files` to search for user-facing error messages or application failures
+    - Use `read_file` to examine application logs that show user-visible problems
+    - Continue using tools until you have thoroughly understood the user experience
+   
+4. If no support bundles could be initialized:
+    - Base your analysis on the case description and comments only
+    - Extract user-reported symptoms from the case text
+    - Focus on what users described as their experience
+
+5. Focus on how the failure would have appeared to non-technical operators
+6. Describe symptoms in terms of observable application behavior, not technical root causes
+
+IMPORTANT: If no bundle URLs are found in the case text, do not attempt to use any bundle-related commands. Proceed immediately with case-based analysis.
+</review process>
+"""
+
+PRODUCT_FULL_PROMPT = PRODUCT_PROMPT + "\n\n" + SUPPORT_BUNDLE_OVERVIEW
+
+SYMPTOMS_FULL_PROMPT = SYMPTOMS_PROMPT + "\n\n" + SUPPORT_BUNDLE_OVERVIEW
+
+# Tool-enhanced runner instructions (only appended to runners with search_evidence tool)
+TOOL_INSTRUCTIONS = """
+<evidence_search_requirement>
+CRITICAL: You have access to a search_evidence tool that searches past resolved cases. You MUST use this tool during your analysis.
+
+Required workflow:
+1. After gathering initial technical evidence from support bundles or case description
+2. IMMEDIATELY search for similar patterns using search_evidence tool
+3. Include results from similar cases in your evidence analysis
+4. Compare your findings with proven patterns from past resolved cases
+
+<search_query_format>
+Create comprehensive, narrative descriptions that include multiple related concepts:
+- Combine symptoms, error patterns, and affected components
+- Include technical context and failure modes  
+- Avoid single error messages or overly literal strings
+
+GOOD search examples:
+- "Pod stuck ImagePullBackOff registry authentication failed private repository credentials secret missing"
+- "PersistentVolumeClaim pending no storage class available provisioner timeout CSI driver not ready" 
+- "Ingress controller certificate expired HTTPS termination failing SSL handshake errors browser security warnings"
+- "Database connection pool exhausted timeout errors application unable to establish connection"
+
+POOR search examples:
+- "error: file not found" (too literal, single error)
+- "connection refused" (too generic, no context)
+- "timeout" (lacks specificity and components)
+</search_query_format>
+
+<search_strategy>
+If your first search returns no results, try broader queries that combine multiple symptoms and include affected component names.
+</search_strategy>
+
+DO NOT complete your evidence analysis without using the search_evidence tool. Past cases contain critical patterns that inform proper root cause identification.
+</evidence_search_requirement>
+"""

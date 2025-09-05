@@ -49,6 +49,32 @@ def process_issues(issues: List[Dict[str, Any]]) -> Optional[str]:
     return result
 ```
 
+## Memory-Enhanced Troubleshooting Setup
+
+The memory+tool runners (suffix "_mt") require Snowflake access for enhanced troubleshooting with historical case retrieval and evidence search capabilities:
+
+**Required Environment Variables:**
+```bash
+export SNOWFLAKE_ACCOUNT="your_account"
+export SNOWFLAKE_USER="your_user"  
+export SNOWFLAKE_PRIVATE_KEY_PATH="~/.snowflake/rsa_key.pem"
+export SNOWFLAKE_WAREHOUSE="COMPUTE_WH"
+```
+
+**Available Memory+Tool Agents:**
+- `claude_sonnet_mt`: Claude Sonnet 4 with memory injection and evidence search tools
+- `gpt5_mini_medium_mt`: GPT-5 Mini (medium reasoning) with memory and evidence search
+- `gpt5_mini_high_mt`: GPT-5 Mini (high reasoning) with memory and evidence search
+- `gpt5_medium_mt`: GPT-5 (medium reasoning) with memory and evidence search
+- `gpt5_high_mt`: GPT-5 (high reasoning) with memory and evidence search
+- `gemini_25_pro_mt`: Gemini 2.5 Pro with memory injection and evidence search tools
+
+**Test Memory Retrieval:**
+```bash
+# Test that Snowflake connection works
+uv run python -c "from github_issue_analysis.runners.utils.summary_retrieval import SummaryRetrievalClient; client = SummaryRetrievalClient(); print('Connected to Snowflake')"
+```
+
 **CLI Usage:**
 ```bash
 # Collect GitHub issues (various modes) - ask user for org/repo/issue values

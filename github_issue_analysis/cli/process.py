@@ -474,7 +474,9 @@ def troubleshoot(
         "--agent",
         "-a",
         help="Troubleshoot agent to use (gpt5_mini_medium, gpt5_mini_high, "
-        "gpt5_medium, gpt5_high, o3_medium, o3_high)",
+        "gpt5_medium, gpt5_high, o3_medium, o3_high, claude_sonnet_mt, "
+        "gpt5_mini_medium_mt, gpt5_mini_high_mt, gpt5_medium_mt, gpt5_high_mt, "
+        "gemini_25_pro_mt)",
         rich_help_panel="AI Configuration",
     ),
     include_images: bool = typer.Option(
@@ -611,6 +613,10 @@ async def _run_troubleshoot(
         "gpt5_mini_high",
         "gpt5_medium",
         "gpt5_high",
+        "gpt5_mini_medium_mt",
+        "gpt5_mini_high_mt",
+        "gpt5_medium_mt",
+        "gpt5_high_mt",
         "o3_medium",
         "o3_high",
     ]:
@@ -627,11 +633,19 @@ async def _run_troubleshoot(
                 "for Claude agents[/red]"
             )
             return
+    elif agent_name.startswith("gemini_"):
+        if not os.environ.get("GOOGLE_API_KEY"):
+            console.print(
+                "[red]❌ GOOGLE_API_KEY environment variable is required "
+                "for Gemini agents[/red]"
+            )
+            return
     else:
         console.print(
             f"[red]❌ Unknown agent: {agent_name}. Available: "
             f"gpt5_mini_medium, gpt5_mini_high, gpt5_medium, gpt5_high, "
-            f"o3_medium, o3_high[/red]"
+            f"o3_medium, o3_high, claude_sonnet_mt, gpt5_mini_medium_mt, "
+            f"gpt5_mini_high_mt, gpt5_medium_mt, gpt5_high_mt, gemini_25_pro_mt[/red]"
         )
         return
 
