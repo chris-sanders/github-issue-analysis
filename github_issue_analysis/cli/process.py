@@ -12,10 +12,7 @@ from pydantic_ai.settings import ModelSettings
 from rich.console import Console
 from rich.table import Table
 
-from ..ai.agents import product_labeling_agent
-from ..ai.analysis import analyze_issue, analyze_troubleshooting_issue
 from ..ai.settings_validator import get_valid_settings_help, validate_settings
-from ..ai.troubleshooting_agents import create_troubleshooting_agent
 from ..recommendation.manager import RecommendationManager
 
 app = typer.Typer(
@@ -402,14 +399,15 @@ async def _process_single_issue(
                 if attachment_count > 0:
                     console.print(f"  Found {attachment_count} image(s) to analyze")
 
-            # Analyze with AI using simplified interface
-            result = await analyze_issue(
-                product_labeling_agent,
-                issue_data,
-                include_images=include_images,
-                model=model,
-                model_settings=model_settings,
+            # Use runner instead of direct agent
+            from ..runners import get_runner
+
+            runner = get_runner(
+                "product-labeling", model_name=model, model_settings=model_settings
             )
+
+            # Analyze using runner
+            result: Any = await runner.analyze(issue_data)
 
             # Save result
             result_file = results_dir / f"{file_path.stem}_product-labeling.json"
@@ -652,15 +650,17 @@ async def _run_troubleshoot(
         console.print("[red]❌ --repo is required when specifying --issue-number[/red]")
         return
 
-    # Create troubleshoot agent
+    # Use runner instead of create_troubleshooting_agent
+    from ..runners import get_runner
+
     try:
-        github_token = os.environ.get("GITHUB_TOKEN")
-        troubleshoot_agent = create_troubleshooting_agent(
-            agent_name, sbctl_token, github_token
-        )
-        console.print(f"[blue]✓ Created {agent_name} troubleshoot agent[/blue]")
+        runner = get_runner(agent_name)
+        console.print(f"[blue]✓ Created {agent_name} troubleshoot runner[/blue]")
+    except ValueError as e:
+        console.print(f"[red]❌ {e}[/red]")
+        return
     except Exception as e:
-        console.print(f"[red]❌ Failed to create agent: {e}[/red]")
+        console.print(f"[red]❌ Failed to create runner: {e}[/red]")
         return
 
     # Find and load issue file (with auto-collection)
@@ -758,39 +758,22 @@ async def _run_troubleshoot(
     start_time = datetime.utcnow()
 
     try:
-        # For interactive mode, we need the full RunResult, not just the output
+        # Analyze using runner
+        with console.status(
+            "[dim]🤔 Analyzing issue with troubleshooting runner...[/dim]",
+            spinner="dots",
+        ):
+            result: Any = await runner.analyze(processed_issue_data)
+
+        # For interactive mode compatibility, create a simple agent_result-like object
         if interactive:
-            # Import analysis helper and run agent directly
-            from pydantic_ai.usage import UsageLimits
+            # Create a minimal result object for interactive mode compatibility
+            class SimpleAgentResult:
+                def __init__(self, output: Any) -> None:
+                    self.output = output
 
-            from ..ai.analysis import prepare_issue_for_troubleshooting
-
-            message_parts = prepare_issue_for_troubleshooting(
-                processed_issue_data, include_images
-            )
-
-            # Run agent directly to get full RunResult with thinking indicator
-            with console.status(
-                "[dim]🤔 Analyzing issue with troubleshooting agent...[/dim]",
-                spinner="dots",
-            ):
-                agent_result = await troubleshoot_agent.run(
-                    message_parts, usage_limits=UsageLimits(request_limit=150)
-                )
-
-            # Extract the output for display and saving
-            result = agent_result.output
+            agent_result = SimpleAgentResult(result)
         else:
-            # Non-interactive mode uses the helper function with thinking indicator
-            with console.status(
-                "[dim]🤔 Analyzing issue with troubleshooting agent...[/dim]",
-                spinner="dots",
-            ):
-                result = await analyze_troubleshooting_issue(
-                    troubleshoot_agent,
-                    processed_issue_data,
-                    include_images=include_images,
-                )
             agent_result = None
 
         end_time = datetime.utcnow()
@@ -881,7 +864,7 @@ async def _run_troubleshoot(
         from ..ai.interactive import run_interactive_session
 
         await run_interactive_session(
-            troubleshoot_agent,
+            runner.agent,  # Access the internal agent from runner
             agent_result,  # The RunResult from initial analysis
             processed_issue_data,
             include_images=include_images,
