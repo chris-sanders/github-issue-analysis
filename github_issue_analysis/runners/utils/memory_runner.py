@@ -1,6 +1,5 @@
 """Memory-aware GitHub runner that injects relevant past cases into context."""
 
-import asyncio
 from typing import TypeVar, Dict, Any, Optional
 
 from pydantic import BaseModel
@@ -116,55 +115,42 @@ class MemoryAwareGitHubRunner(GitHubIssueRunner):
 
         print(f"🧠 Generating independent memory context for {issue_key}...")
 
-        # Step 1: Generate product/symptoms using specialized agents
-        from github_issue_analysis.runners.specialized.product_agent import (
-            ProductAgentRunner,
-        )
+        # Step 1: Generate symptoms using specialized agent
         from github_issue_analysis.runners.specialized.symptoms_agent import (
             SymptomsAgentRunner,
         )
 
-        # Create specialized agents for memory context extraction
-        product_agent = ProductAgentRunner(f"memory-{issue_key}")
+        # Create specialized agent for memory context extraction
         symptoms_agent = SymptomsAgentRunner(f"memory-{issue_key}")
 
-        # Run agents in parallel for efficiency
-        print("   🤖 Running specialized agents for memory context...")
-        product_result: Any
-        symptoms_result: Any
-        product_result, symptoms_result = await asyncio.gather(
-            product_agent.analyze(github_issue), symptoms_agent.analyze(github_issue)
-        )
+        # Extract symptoms for memory search
+        print("   🤖 Running symptoms agent for memory context...")
+        symptoms_result: Any = await symptoms_agent.analyze(github_issue)
 
-        # Step 2: Extract fields
-        product = product_result.product if hasattr(product_result, "product") else []
+        # Step 2: Extract symptom fields
         symptoms = (
             symptoms_result.symptoms if hasattr(symptoms_result, "symptoms") else []
         )
 
-        print(f"   📦 Product terms: {len(product)}")
         print(f"   🚨 Symptom terms: {len(symptoms)}")
 
-        # Step 3: Search for similar cases
-        similar_cases = self.summary_client.retrieve_similar_cases(
-            product=product,
-            symptoms=symptoms,
+        # Step 3: Search for similar cases using symptoms only
+        symptoms_text = " ".join(symptoms) if symptoms else ""
+        similar_cases = self.summary_client.search_by_symptoms(
+            symptoms_text=symptoms_text,
             limit=2,
             threshold=0.7,
-            product_weight=0.4,
-            symptom_weight=0.6,
         )
 
         # Step 4: Track metrics
         self.memory_stats = {
             "cases_retrieved": len(similar_cases),
             "avg_similarity": (
-                sum(c.get("COMBINED_SCORE", 0) for c in similar_cases)
+                sum(c.get("SYMPTOM_SIMILARITY", 0) for c in similar_cases)
                 / len(similar_cases)
                 if similar_cases
                 else 0
             ),
-            "product_terms": len(product),
             "symptom_terms": len(symptoms),
         }
 
@@ -231,9 +217,6 @@ class MemoryAwareGitHubRunner(GitHubIssueRunner):
                     "memory.avg_similarity", stats.get("avg_similarity", 0)
                 )
                 span.set_attribute("memory.context_length", len(memory_context))
-                span.set_attribute(
-                    "memory.product_terms", stats.get("product_terms", 0)
-                )
                 span.set_attribute(
                     "memory.symptom_terms", stats.get("symptom_terms", 0)
                 )
