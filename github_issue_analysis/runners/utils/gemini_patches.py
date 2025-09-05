@@ -6,7 +6,7 @@ Import this module to apply necessary patches for Gemini model issues:
 - Handles MALFORMED_FUNCTION_CALL finish reason with proper retries
 
 Usage:
-    from utils.gemini_patches import apply_gemini_patches
+    from .gemini_patches import apply_gemini_patches
     apply_gemini_patches()
 """
 

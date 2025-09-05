@@ -96,7 +96,7 @@ def _setup_tracing_phoenix(experiment_name: str) -> None:
     to ensure optimal Phoenix integration and data quality.
     """
     try:
-        from utils.phoenix_integration import setup_phoenix_tracing
+        from .phoenix_integration import setup_phoenix_tracing
 
         # Set up Phoenix with simplified integration
         phoenix = setup_phoenix_tracing(experiment_name)

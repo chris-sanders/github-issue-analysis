@@ -249,7 +249,7 @@ def get_phoenix_integration():
     """
     try:
         if os.getenv("PHOENIX_INTEGRATION_INITIALIZED") == "true":
-            from utils.phoenix_integration import PhoenixIntegration
+            from .phoenix_integration import PhoenixIntegration
 
             experiment_name = os.getenv("PHOENIX_EXPERIMENT_NAME", "experiment")
             phoenix = PhoenixIntegration(experiment_name)

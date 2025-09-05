@@ -7,11 +7,11 @@ to various backends (Phoenix, MLflow, file) without using global variables.
 import os
 from typing import Any
 
-from utils.phoenix_evaluation_upload import (
+from .phoenix_evaluation_upload import (
     upload_agent_comparison_to_phoenix,
     upload_evaluation_results_to_phoenix,
 )
-from utils.phoenix_results import create_run_summary
+from .phoenix_results import create_run_summary
 
 
 class ObservabilityManager:

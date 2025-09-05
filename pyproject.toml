@@ -13,6 +13,7 @@ dependencies = [
     "httpx>=0.24.0",
     "mcp", # Model Context Protocol support
     "openai>=1.99.3",
+    "openinference-instrumentation-pydantic-ai>=0.1.4",
     "pydantic>=2.5.0",
     "pydantic-ai>=0.6.2",
     "pygithub>=2.6.1",

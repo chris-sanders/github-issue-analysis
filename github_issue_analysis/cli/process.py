@@ -470,7 +470,7 @@ def troubleshoot(
         rich_help_panel="Target Selection",
     ),
     agent: str = typer.Option(
-        "gpt5_mini_medium",
+        "gpt5_mini_high_mt",
         "--agent",
         "-a",
         help="Troubleshoot agent to use (gpt5_mini_medium, gpt5_mini_high, "
@@ -512,18 +512,29 @@ def troubleshoot(
     Currently supports single-issue analysis for in-depth investigation.
 
     Agents available:
-    - gpt5_mini_medium: GPT-5 Mini with medium reasoning (default, balanced
-      speed/quality)
-    - gpt5_mini_high: GPT-5 Mini with high reasoning (more thorough)
-    - gpt5_medium: GPT-5 with medium reasoning (higher capability)
-    - gpt5_high: GPT-5 with high reasoning (most capable)
-    - o3_medium: OpenAI O3 with medium reasoning (balanced speed/quality)
-    - o3_high: OpenAI O3 with high reasoning (slower but more thorough)
+    - gpt5_mini_high_mt: GPT-5 Mini (high reasoning) with memory+tools (default, 
+      enhanced with historical case retrieval and evidence search)
+    - claude_sonnet_mt: Claude Sonnet 4 with memory+tools (alternative enhanced option)
+    - gpt5_mini_medium: GPT-5 Mini with medium reasoning (basic, no memory)
+    - gpt5_mini_high: GPT-5 Mini with high reasoning (basic, no memory)
+    - gpt5_medium: GPT-5 with medium reasoning (basic, no memory)
+    - gpt5_high: GPT-5 with high reasoning (basic, no memory)
+    - o3_medium: OpenAI O3 with medium reasoning (basic, no memory)
+    - o3_high: OpenAI O3 with high reasoning (basic, no memory)
+    
+    Memory+Tool agents (*_mt) provide enhanced analysis with:
+    - Historical case retrieval from similar resolved issues
+    - Dynamic evidence search during analysis
+    - Improved root cause identification accuracy
 
     Required environment variables:
     - SBCTL_TOKEN: Required for all agents (MCP tool access)
     - OPENAI_API_KEY: Required for gpt5_* and o3_* agents
-    - ANTHROPIC_API_KEY: Required for claude_* agents (if available)
+    - ANTHROPIC_API_KEY: Required for claude_* agents
+    - GOOGLE_API_KEY: Required for gemini_* agents
+    
+    Additional requirements for Memory+Tool agents (*_mt):
+    - SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PRIVATE_KEY_PATH: For historical case retrieval
 
     Examples:
 

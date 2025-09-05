@@ -124,9 +124,9 @@ class MemoryAwareGitHubRunner(GitHubIssueRunner):
             SymptomsAgentRunner,
         )
 
-        # Use the same experiment_name as this runner
-        product_agent = ProductAgentRunner(self.experiment_name)
-        symptoms_agent = SymptomsAgentRunner(self.experiment_name)
+        # Create specialized agents for memory context extraction
+        product_agent = ProductAgentRunner(f"memory-{issue_key}")
+        symptoms_agent = SymptomsAgentRunner(f"memory-{issue_key}")
 
         # Run agents in parallel for efficiency
         print("   🤖 Running specialized agents for memory context...")
@@ -246,8 +246,16 @@ class MemoryAwareGitHubRunner(GitHubIssueRunner):
         self._current_memory_context = memory_context
 
         # Step 3: Continue with standard analysis
+        # Extract GitHub issue for parent class (same logic as memory retrieval)
+        if "issue" in issue and isinstance(issue["issue"], dict):
+            # This is a StoredIssueDict from our CLI
+            github_issue_for_analysis = issue["issue"]
+        else:
+            # This is a raw GitHub issue (from experiments)
+            github_issue_for_analysis = issue
+
         try:
-            result: T = await super().analyze(issue)
+            result: T = await super().analyze(github_issue_for_analysis)
             return result
         finally:
             # Clean up temporary context
