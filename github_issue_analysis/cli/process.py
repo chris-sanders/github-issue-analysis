@@ -798,6 +798,10 @@ async def _run_troubleshoot(
                 def __init__(self, output: Any) -> None:
                     self.output = output
 
+                def new_messages(self) -> list[Any]:
+                    """Return empty message history for interactive mode compatibility."""
+                    return []
+
             agent_result = SimpleAgentResult(result)
         else:
             agent_result = None
