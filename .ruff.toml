@@ -1,0 +1,6 @@
+# Ruff configuration for github-issue-analysis
+line-length = 88
+
+[lint.per-file-ignores]
+# Exclude exp05 utils files from line length checks since they must remain unmodified
+"github_issue_analysis/runners/utils/*.py" = ["E501"]

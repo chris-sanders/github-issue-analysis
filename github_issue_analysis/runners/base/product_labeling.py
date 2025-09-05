@@ -3,7 +3,6 @@
 from typing import Any
 
 from pydantic_ai import Agent
-from pydantic_ai.settings import ModelSettings
 
 from ...ai.models import ProductLabelingResponse
 from ...ai.prompts import PRODUCT_LABELING_PROMPT

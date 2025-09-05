@@ -3,7 +3,7 @@
 import logging
 import os
 import tempfile
-from typing import Any, Optional
+from typing import Any
 
 from pydantic_ai.mcp import MCPServerStdio
 
