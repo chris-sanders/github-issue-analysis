@@ -121,27 +121,42 @@ class BaseAgentRunner(ABC):
                     except Exception as e:
                         # Log detailed exception information including TaskGroup errors
                         logger.error(f"Exception caught: {type(e).__name__}: {str(e)}")
-                        
+
                         # Check for TaskGroup errors and try to extract the underlying exception
                         if "TaskGroup" in str(e):
-                            logger.error("TaskGroup error detected - attempting to extract underlying exceptions")
+                            logger.error(
+                                "TaskGroup error detected - attempting to extract underlying exceptions"
+                            )
                             # Try to get the underlying exception from TaskGroup
-                            if hasattr(e, '__cause__') and e.__cause__:
-                                logger.error(f"Underlying cause: {type(e.__cause__).__name__}: {e.__cause__}")
-                            if hasattr(e, '__context__') and e.__context__:
-                                logger.error(f"Exception context: {type(e.__context__).__name__}: {e.__context__}")
-                            if hasattr(e, 'exceptions'):
-                                logger.error(f"TaskGroup exceptions: {[str(ex) for ex in e.exceptions]}")
+                            if hasattr(e, "__cause__") and e.__cause__:
+                                logger.error(
+                                    f"Underlying cause: {type(e.__cause__).__name__}: {e.__cause__}"
+                                )
+                            if hasattr(e, "__context__") and e.__context__:
+                                logger.error(
+                                    f"Exception context: {type(e.__context__).__name__}: {e.__context__}"
+                                )
+                            if hasattr(e, "exceptions"):
+                                logger.error(
+                                    f"TaskGroup exceptions: {[str(ex) for ex in e.exceptions]}"
+                                )
                             # For TaskGroup, also try to access the task exceptions
                             try:
                                 import asyncio
+
                                 if isinstance(e, asyncio.exceptions.ExceptionGroup):
-                                    logger.error(f"ExceptionGroup with {len(e.exceptions)} exceptions:")
+                                    logger.error(
+                                        f"ExceptionGroup with {len(e.exceptions)} exceptions:"
+                                    )
                                     for i, ex in enumerate(e.exceptions):
-                                        logger.error(f"  Exception {i}: {type(ex).__name__}: {ex}")
+                                        logger.error(
+                                            f"  Exception {i}: {type(ex).__name__}: {ex}"
+                                        )
                             except Exception as extract_error:
-                                logger.error(f"Failed to extract TaskGroup exceptions: {extract_error}")
-                        
+                                logger.error(
+                                    f"Failed to extract TaskGroup exceptions: {extract_error}"
+                                )
+
                         if (
                             "MALFORMED_FUNCTION_CALL" in str(e)
                             and retry_count < max_retries

@@ -20,14 +20,18 @@ class GitHubIssueRunner(BaseAgentRunner):
     def _build_context(self, issue_data) -> str:
         """Build context string from GitHub issue data."""
         # Extract the issue from the stored issue data
-        issue = issue_data["issue"] if isinstance(issue_data, dict) and "issue" in issue_data else issue_data
+        issue = (
+            issue_data["issue"]
+            if isinstance(issue_data, dict) and "issue" in issue_data
+            else issue_data
+        )
         return build_github_context(issue)
 
     def _get_logging_id(self, issue_data) -> str:
         """Extract issue number from GitHub issue for logging."""
         if isinstance(issue_data, dict) and "issue" in issue_data:
             issue = issue_data["issue"]
-            if hasattr(issue, 'number'):
+            if hasattr(issue, "number"):
                 return str(issue.number)
             else:
                 return str(issue.get("number", "unknown"))

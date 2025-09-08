@@ -1,0 +1,55 @@
+name: MCP Functional Tests
+
+on:
+  pull_request:
+    paths:
+      - 'Containerfile'
+      - 'github_issue_analysis/runners/adapters/mcp_adapter.py'
+      - 'github_issue_analysis/cli/process.py'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - 'tests/test_mcp_functional.py'
+      - 'scripts/test-container-functional.sh'
+      - '.github/workflows/test-mcp-integration.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'Containerfile'
+      - 'github_issue_analysis/runners/adapters/mcp_adapter.py'
+      - 'github_issue_analysis/cli/process.py'
+      - 'pyproject.toml'  
+      - 'uv.lock'
+      - 'tests/test_mcp_functional.py'
+      - 'scripts/test-container-functional.sh'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/gh-analysis
+
+jobs:
+  test-mcp-functional:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build container image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Containerfile
+        push: false
+        tags: gh-analysis:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Run Comprehensive Functional Tests  
+      run: |
+        # Run the complete functional test suite that focuses on end-to-end behavior
+        # Tests MCP server connectivity, CLI validation, data structure handling,
+        # and tool communication without requiring real bundle URLs or specific implementation details
+        ./scripts/test-container-functional.sh
