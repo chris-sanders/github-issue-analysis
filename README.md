@@ -81,6 +81,137 @@ uv run python -c "from github_issue_analysis.runners.utils.summary_retrieval imp
 
 **Note:** Basic agents (`gpt5_mini_medium`, `gpt5_mini_high`, `gpt5_medium`, `gpt5_high`) work without Snowflake and provide standard troubleshooting analysis.
 
+## Container Usage
+
+For parallel processing and deployment scenarios, the CLI is available as a containerized solution:
+
+### Quick Start with Pre-built Container
+
+```bash
+# Pull from GitHub Container Registry
+podman pull ghcr.io/chris-sanders/github-issue-analysis:latest
+
+# Process a single issue
+podman run --rm \
+  -e GITHUB_TOKEN=$GITHUB_TOKEN \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -e SBCTL_TOKEN=$SBCTL_TOKEN \
+  -e ISSUE_URL="https://github.com/your-org/your-repo/issues/123" \
+  -e CLI_ARGS="--agent gpt5_mini_medium" \
+  ghcr.io/chris-sanders/github-issue-analysis:latest
+```
+
+### Build Container Locally
+
+```bash
+# Build the container
+podman build -f Containerfile -t gh-analysis .
+
+# Test the build
+podman run --rm \
+  -e ISSUE_URL="https://github.com/test/repo/issues/1" \
+  -e CLI_ARGS="--help" \
+  gh-analysis
+```
+
+### Environment Variables
+
+**Required:**
+- `ISSUE_URL`: Full GitHub issue URL (e.g., `https://github.com/org/repo/issues/123`)
+- `GITHUB_TOKEN`: GitHub personal access token
+- `SBCTL_TOKEN`: Required for all troubleshooting agents (MCP tool access)
+
+**AI API Keys (at least one required):**
+- `OPENAI_API_KEY`: For GPT-5 agents
+- `ANTHROPIC_API_KEY`: For Claude agents  
+- `GOOGLE_API_KEY`: For Gemini agents
+
+**Optional:**
+- `CLI_ARGS`: Additional command-line arguments (e.g., `--agent gpt5_high --interactive`)
+
+**Memory+Tool Agents (Snowflake required):**
+- `SNOWFLAKE_ACCOUNT`: Snowflake account identifier
+- `SNOWFLAKE_USER`: Snowflake username
+- `SNOWFLAKE_PRIVATE_KEY_PATH`: Path to RSA private key file
+- `SNOWFLAKE_WAREHOUSE`: Snowflake warehouse (default: `COMPUTE_WH`)
+
+### Parallel Processing
+
+Process multiple issues simultaneously:
+
+```bash
+# Process multiple issues in parallel
+declare -a issues=(
+  "https://github.com/org/repo/issues/101"
+  "https://github.com/org/repo/issues/102"
+  "https://github.com/org/repo/issues/103"
+)
+
+for issue_url in "${issues[@]}"; do
+  podman run --rm -d \
+    -e GITHUB_TOKEN=$GITHUB_TOKEN \
+    -e OPENAI_API_KEY=$OPENAI_API_KEY \
+    -e SBCTL_TOKEN=$SBCTL_TOKEN \
+    -e ISSUE_URL="$issue_url" \
+    -e CLI_ARGS="--agent gpt5_mini_medium" \
+    ghcr.io/chris-sanders/github-issue-analysis:latest \
+    > "results-$(basename $issue_url).json" &
+done
+
+# Wait for all containers to complete
+wait
+echo "All parallel processing completed"
+```
+
+### Advanced Usage
+
+**Interactive Mode:**
+```bash
+podman run --rm -it \
+  -e GITHUB_TOKEN=$GITHUB_TOKEN \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -e ISSUE_URL="$ISSUE_URL" \
+  -e CLI_ARGS="--agent gpt5_mini_medium --interactive" \
+  ghcr.io/chris-sanders/github-issue-analysis:latest
+```
+
+**Memory+Tool Agent with Snowflake:**
+```bash
+podman run --rm \
+  -e GITHUB_TOKEN=$GITHUB_TOKEN \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -e SNOWFLAKE_ACCOUNT=$SNOWFLAKE_ACCOUNT \
+  -e SNOWFLAKE_USER=$SNOWFLAKE_USER \
+  -v ~/.snowflake:/home/appuser/.snowflake:ro \
+  -e SNOWFLAKE_PRIVATE_KEY_PATH=/home/appuser/.snowflake/rsa_key.pem \
+  -e ISSUE_URL="$ISSUE_URL" \
+  -e CLI_ARGS="--agent gpt5_mini_medium_mt" \
+  ghcr.io/chris-sanders/github-issue-analysis:latest
+```
+
+**Resource Limits:**
+```bash
+podman run --rm \
+  --memory=512m \
+  --cpus=1.0 \
+  -e GITHUB_TOKEN=$GITHUB_TOKEN \
+  -e ISSUE_URL="$ISSUE_URL" \
+  ghcr.io/chris-sanders/github-issue-analysis:latest
+```
+
+### Container Testing
+
+Run the included test script to validate container functionality:
+
+```bash
+# Run comprehensive container tests
+./scripts/test-container-examples.sh
+
+# Test specific functionality
+podman run --rm gh-analysis  # Should exit with code 2 (missing ISSUE_URL)
+podman run --rm -e ISSUE_URL="test" -e CLI_ARGS="--help" gh-analysis  # Should show help
+```
+
 ## For AI Agents
 
 **All agent instructions are in `CLAUDE.md`** - this is the single source of truth for development workflow, commands, and requirements.
