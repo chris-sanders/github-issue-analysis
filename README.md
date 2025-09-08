@@ -85,13 +85,37 @@ uv run python -c "from github_issue_analysis.runners.utils.summary_retrieval imp
 
 For parallel processing and deployment scenarios, the CLI is available as a containerized solution:
 
-### Quick Start with Pre-built Container
+### Build and Test Locally
+
+**Note:** Pre-built containers are only available after tagged releases. For development and testing, build locally first.
 
 ```bash
-# Pull from GitHub Container Registry
+# Build the container locally
+podman build -f Containerfile -t gh-analysis .
+
+# Test the build works
+podman run --rm \
+  -e ISSUE_URL="https://github.com/test/repo/issues/1" \
+  -e CLI_ARGS="--help" \
+  gh-analysis
+
+# Process a single issue (using local build)
+podman run --rm \
+  -e GITHUB_TOKEN=$GITHUB_TOKEN \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -e SBCTL_TOKEN=$SBCTL_TOKEN \
+  -e ISSUE_URL="https://github.com/your-org/your-repo/issues/123" \
+  -e CLI_ARGS="--agent gpt5_mini_medium" \
+  gh-analysis
+```
+
+### Pre-built Container (Available After Release)
+
+```bash
+# Pull from GitHub Container Registry (only available after tagged releases)
 podman pull ghcr.io/chris-sanders/github-issue-analysis:latest
 
-# Process a single issue
+# Use pre-built container
 podman run --rm \
   -e GITHUB_TOKEN=$GITHUB_TOKEN \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
@@ -99,19 +123,6 @@ podman run --rm \
   -e ISSUE_URL="https://github.com/your-org/your-repo/issues/123" \
   -e CLI_ARGS="--agent gpt5_mini_medium" \
   ghcr.io/chris-sanders/github-issue-analysis:latest
-```
-
-### Build Container Locally
-
-```bash
-# Build the container
-podman build -f Containerfile -t gh-analysis .
-
-# Test the build
-podman run --rm \
-  -e ISSUE_URL="https://github.com/test/repo/issues/1" \
-  -e CLI_ARGS="--help" \
-  gh-analysis
 ```
 
 ### Environment Variables
@@ -154,7 +165,7 @@ for issue_url in "${issues[@]}"; do
     -e SBCTL_TOKEN=$SBCTL_TOKEN \
     -e ISSUE_URL="$issue_url" \
     -e CLI_ARGS="--agent gpt5_mini_medium" \
-    ghcr.io/chris-sanders/github-issue-analysis:latest \
+    gh-analysis \
     > "results-$(basename $issue_url).json" &
 done
 
@@ -172,7 +183,7 @@ podman run --rm -it \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
   -e ISSUE_URL="$ISSUE_URL" \
   -e CLI_ARGS="--agent gpt5_mini_medium --interactive" \
-  ghcr.io/chris-sanders/github-issue-analysis:latest
+  gh-analysis
 ```
 
 **Memory+Tool Agent with Snowflake:**
@@ -186,7 +197,7 @@ podman run --rm \
   -e SNOWFLAKE_PRIVATE_KEY_PATH=/home/appuser/.snowflake/rsa_key.pem \
   -e ISSUE_URL="$ISSUE_URL" \
   -e CLI_ARGS="--agent gpt5_mini_medium_mt" \
-  ghcr.io/chris-sanders/github-issue-analysis:latest
+  gh-analysis
 ```
 
 **Resource Limits:**
@@ -196,7 +207,7 @@ podman run --rm \
   --cpus=1.0 \
   -e GITHUB_TOKEN=$GITHUB_TOKEN \
   -e ISSUE_URL="$ISSUE_URL" \
-  ghcr.io/chris-sanders/github-issue-analysis:latest
+  gh-analysis
 ```
 
 ### Container Testing
