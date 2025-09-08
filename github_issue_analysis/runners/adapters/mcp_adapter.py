@@ -37,10 +37,10 @@ def create_troubleshoot_mcp_server(log_handler: Any | None = None) -> MCPServerS
         env["GITHUB_TOKEN"] = github_token
         logger.debug("GitHub token provided to MCP server")
 
-    # Use our local uv run approach (preserving current behavior)
+    # Use our local uv run approach (preserving current behavior)  
     log_file = f"{isolated_temp}/mcp-server.log"
     return MCPServerStdio(
-        "sh",
+        "/bin/sh",  # Use absolute path to shell for container compatibility
         args=["-c", f"uv run troubleshoot-mcp-server 2>{log_file}"],
         env=env,
         timeout=120.0,  # Longer timeout for GPT-5 compatibility

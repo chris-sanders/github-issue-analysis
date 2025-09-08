@@ -8,8 +8,8 @@ if [ -z "$ISSUE_URL" ]; then
     exit 2
 fi
 
-# Activate virtual environment
-export PATH="/app/.venv/bin:$PATH"
+# Set up PATH for UV and virtual environment
+export PATH="/app/.venv/bin:/usr/local/bin:$PATH"
 
 # Build command with required --url flag
 CMD="gh-analysis process troubleshoot --url \"$ISSUE_URL\""

@@ -756,12 +756,14 @@ async def _run_troubleshoot(
     processed_issue_data = issue_data
     if limit_comments is not None:
         processed_issue_data = issue_data.copy()
-        processed_issue_data["issue"] = issue_data["issue"].copy()
-        original_comments = issue_data["issue"].get("comments", [])
+        # Extract issue from StoredIssue dictionary format
+        issue_model = issue_data["issue"]
+        original_comments = issue_model.get('comments', [])
         if len(original_comments) > limit_comments:
-            processed_issue_data["issue"]["comments"] = original_comments[
-                :limit_comments
-            ]
+            # Create a new dictionary with limited comments
+            limited_issue = issue_model.copy()
+            limited_issue['comments'] = original_comments[:limit_comments]
+            processed_issue_data["issue"] = limited_issue
             console.print(
                 f"[yellow]Limiting analysis to first {limit_comments} comment(s) "
                 f"out of {len(original_comments)} total[/yellow]"

@@ -100,6 +100,7 @@ podman run --rm \
   -e GITHUB_TOKEN=$GITHUB_TOKEN \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
   -e SBCTL_TOKEN=$SBCTL_TOKEN \
+  -v $(pwd)/data:/app/data \
   -e ISSUE_URL="https://github.com/your-org/your-repo/issues/123" \
   -e CLI_ARGS="--agent gpt5_mini_medium" \
   gh-analysis
@@ -128,8 +129,9 @@ podman run --rm \
 - `SNOWFLAKE_WAREHOUSE`: Snowflake warehouse name
 - `SNOWFLAKE_PRIVATE_KEY_PATH`: Path to private key file (local system path, will be mapped into container)
 
-**Volume Mount Required for Snowflake:**
-- Mount directory containing the private key: `-v $(dirname $(eval echo $SNOWFLAKE_PRIVATE_KEY_PATH)):/home/appuser/.ssh:ro`
+**Volume Mounts:**
+- **Data caching**: `-v $(pwd)/data:/app/data` - Persistent storage for collected issues and results across container runs
+- **Snowflake SSH keys**: `-v $(dirname $(eval echo $SNOWFLAKE_PRIVATE_KEY_PATH)):/home/appuser/.ssh:ro` - Mount directory containing the private key
 - Map the key path: `-e SNOWFLAKE_PRIVATE_KEY_PATH=/home/appuser/.ssh/$(basename $SNOWFLAKE_PRIVATE_KEY_PATH)`
 
 **Note:** Memory+Tool agents (`*_mt`) require Snowflake. If you don't have Snowflake access, use basic agents like `gpt5_mini_medium` instead of `gpt5_mini_medium_mt`.
@@ -162,6 +164,7 @@ podman run --rm \
   -e SNOWFLAKE_WAREHOUSE=$SNOWFLAKE_WAREHOUSE \
   -v $(dirname $(eval echo $SNOWFLAKE_PRIVATE_KEY_PATH)):/home/appuser/.ssh:ro \
   -e SNOWFLAKE_PRIVATE_KEY_PATH=/home/appuser/.ssh/$(basename $SNOWFLAKE_PRIVATE_KEY_PATH) \
+  -v $(pwd)/data:/app/data \
   -e ISSUE_URL="$ISSUE_URL" \
   -e CLI_ARGS="--agent gpt5_mini_medium_mt" \
   gh-analysis
@@ -171,6 +174,7 @@ podman run --rm \
   -e GITHUB_TOKEN=$GITHUB_TOKEN \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
   -e SBCTL_TOKEN=$SBCTL_TOKEN \
+  -v $(pwd)/data:/app/data \
   -e ISSUE_URL="$ISSUE_URL" \
   -e CLI_ARGS="--agent gpt5_mini_medium" \
   gh-analysis

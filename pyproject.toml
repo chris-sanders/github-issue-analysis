@@ -21,7 +21,7 @@ dependencies = [
     "rich>=13.0.0",
     "snowflake-connector-python==3.12.0",
     "toml>=0.10.2",
-    "troubleshoot-mcp-server>=1.11.0",
+    "troubleshoot-mcp-server>=1.13.1",
     "typer>=0.9.0",
 ]
 
