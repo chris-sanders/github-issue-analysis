@@ -140,11 +140,13 @@ podman run --rm \
 **Optional:**
 - `CLI_ARGS`: Additional command-line arguments (e.g., `--agent gpt5_high --interactive`)
 
-**Memory+Tool Agents (Snowflake required):**
+**Memory+Tool Agents (optional, for `_mt` agents only):**
 - `SNOWFLAKE_ACCOUNT`: Snowflake account identifier
-- `SNOWFLAKE_USER`: Snowflake username
-- `SNOWFLAKE_PRIVATE_KEY_PATH`: Path to RSA private key file
+- `SNOWFLAKE_USER`: Snowflake username  
+- `SNOWFLAKE_PRIVATE_KEY_PATH`: Path to RSA private key file (inside container)
 - `SNOWFLAKE_WAREHOUSE`: Snowflake warehouse (default: `COMPUTE_WH`)
+
+**Note:** Memory+Tool agents (`*_mt`) require Snowflake. If you don't have Snowflake access, use basic agents like `gpt5_mini_medium` instead of `gpt5_mini_medium_mt`.
 
 ### Parallel Processing
 
@@ -188,15 +190,24 @@ podman run --rm -it \
 
 **Memory+Tool Agent with Snowflake:**
 ```bash
+# Option 1: If you have Snowflake private key file
 podman run --rm \
   -e GITHUB_TOKEN=$GITHUB_TOKEN \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
   -e SNOWFLAKE_ACCOUNT=$SNOWFLAKE_ACCOUNT \
   -e SNOWFLAKE_USER=$SNOWFLAKE_USER \
-  -v ~/.snowflake:/home/appuser/.snowflake:ro \
+  -v /path/to/your/snowflake:/home/appuser/.snowflake:ro \
   -e SNOWFLAKE_PRIVATE_KEY_PATH=/home/appuser/.snowflake/rsa_key.pem \
   -e ISSUE_URL="$ISSUE_URL" \
   -e CLI_ARGS="--agent gpt5_mini_medium_mt" \
+  gh-analysis
+
+# Option 2: Without Snowflake (use basic agents instead)
+podman run --rm \
+  -e GITHUB_TOKEN=$GITHUB_TOKEN \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -e ISSUE_URL="$ISSUE_URL" \
+  -e CLI_ARGS="--agent gpt5_mini_medium" \
   gh-analysis
 ```
 
