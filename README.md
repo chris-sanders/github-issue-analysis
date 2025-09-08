@@ -85,10 +85,6 @@ uv run python -c "from github_issue_analysis.runners.utils.summary_retrieval imp
 
 For parallel processing and deployment scenarios, the CLI is available as a containerized solution:
 
-### Build and Test Locally
-
-**Note:** Pre-built containers are only available after tagged releases. For development and testing, build locally first.
-
 ```bash
 # Build the container locally
 podman build -f Containerfile -t gh-analysis .
@@ -99,7 +95,7 @@ podman run --rm \
   -e CLI_ARGS="--help" \
   gh-analysis
 
-# Process a single issue (using local build)
+# Process a single issue
 podman run --rm \
   -e GITHUB_TOKEN=$GITHUB_TOKEN \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
@@ -109,21 +105,7 @@ podman run --rm \
   gh-analysis
 ```
 
-### Pre-built Container (Available After Release)
-
-```bash
-# Pull from GitHub Container Registry (only available after tagged releases)
-podman pull ghcr.io/chris-sanders/github-issue-analysis:latest
-
-# Use pre-built container
-podman run --rm \
-  -e GITHUB_TOKEN=$GITHUB_TOKEN \
-  -e OPENAI_API_KEY=$OPENAI_API_KEY \
-  -e SBCTL_TOKEN=$SBCTL_TOKEN \
-  -e ISSUE_URL="https://github.com/your-org/your-repo/issues/123" \
-  -e CLI_ARGS="--agent gpt5_mini_medium" \
-  ghcr.io/chris-sanders/github-issue-analysis:latest
-```
+**Note:** Use `gh-analysis` for local builds or `ghcr.io/chris-sanders/github-issue-analysis:latest` for tagged releases.
 
 ### Environment Variables
 
