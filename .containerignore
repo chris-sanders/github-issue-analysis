@@ -1,0 +1,58 @@
+# Development files
+.git
+.github
+.gitignore
+.pre-commit-config.yaml
+README.md
+docs/
+
+# Virtual environments
+.venv
+venv/
+env/
+
+# Cache and temporary files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data and output directories
+data/
+results/
+logs/
+*.log
+
+# Test files and coverage
+tests/
+.coverage
+coverage.xml
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Worktrees (development artifacts)
+trees/
+
+# Task files (not needed in container)
+tasks/

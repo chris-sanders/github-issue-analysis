@@ -47,3 +47,30 @@ jobs:
         ANTHROPIC_API_KEY: ""
         GITHUB_TOKEN: ""
         SBCTL_TOKEN: ""
+
+  container-build:
+    name: Container Build Test
+    runs-on: ubuntu-latest
+    needs: quality-checks  # Only run if tests pass
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build container
+        run: podman build -f Containerfile -t test-container .
+      
+      - name: Test container runs and shows help
+        run: |
+          # Only test that container builds and can show help
+          # No API tokens available in CI, so can't test actual processing
+          podman run --rm \
+            -e ISSUE_URL="https://github.com/test/repo/issues/1" \
+            -e CLI_ARGS="--help" \
+            test-container
+      
+      - name: Test missing ISSUE_URL error handling
+        run: |
+          # Should exit with code 2 when ISSUE_URL is missing
+          podman run --rm test-container || [ $? -eq 2 ]
