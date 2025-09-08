@@ -25,8 +25,8 @@ RUN uv sync --frozen --no-dev
 FROM python:3.13-slim
 WORKDIR /app
 
-# Create non-root user
-RUN useradd -m -u 1000 appuser
+# Create non-root user and SSH directory for Snowflake keys
+RUN useradd -m -u 1000 appuser && mkdir -p /home/appuser/.ssh && chown appuser:appuser /home/appuser/.ssh
 
 # Copy uv and dependencies from builder
 COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv

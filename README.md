@@ -129,8 +129,8 @@ podman run --rm \
 - `SNOWFLAKE_PRIVATE_KEY_PATH`: Path to private key file (local system path, will be mapped into container)
 
 **Volume Mount Required for Snowflake:**
-- Mount directory containing the private key: `-v $(dirname $(eval echo $SNOWFLAKE_PRIVATE_KEY_PATH)):/home/appuser/keys:ro`
-- Map the key path: `-e SNOWFLAKE_PRIVATE_KEY_PATH=/home/appuser/keys/$(basename $SNOWFLAKE_PRIVATE_KEY_PATH)`
+- Mount directory containing the private key: `-v $(dirname $(eval echo $SNOWFLAKE_PRIVATE_KEY_PATH)):/home/appuser/.ssh:ro`
+- Map the key path: `-e SNOWFLAKE_PRIVATE_KEY_PATH=/home/appuser/.ssh/$(basename $SNOWFLAKE_PRIVATE_KEY_PATH)`
 
 **Note:** Memory+Tool agents (`*_mt`) require Snowflake. If you don't have Snowflake access, use basic agents like `gpt5_mini_medium` instead of `gpt5_mini_medium_mt`.
 
@@ -160,8 +160,8 @@ podman run --rm \
   -e SNOWFLAKE_ACCOUNT=$SNOWFLAKE_ACCOUNT \
   -e SNOWFLAKE_USER=$SNOWFLAKE_USER \
   -e SNOWFLAKE_WAREHOUSE=$SNOWFLAKE_WAREHOUSE \
-  -v $(dirname $(eval echo $SNOWFLAKE_PRIVATE_KEY_PATH)):/home/appuser/keys:ro \
-  -e SNOWFLAKE_PRIVATE_KEY_PATH=/home/appuser/keys/$(basename $SNOWFLAKE_PRIVATE_KEY_PATH) \
+  -v $(dirname $(eval echo $SNOWFLAKE_PRIVATE_KEY_PATH)):/home/appuser/.ssh:ro \
+  -e SNOWFLAKE_PRIVATE_KEY_PATH=/home/appuser/.ssh/$(basename $SNOWFLAKE_PRIVATE_KEY_PATH) \
   -e ISSUE_URL="$ISSUE_URL" \
   -e CLI_ARGS="--agent gpt5_mini_medium_mt" \
   gh-analysis
