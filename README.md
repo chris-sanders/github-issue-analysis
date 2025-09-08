@@ -143,8 +143,12 @@ podman run --rm \
 **Memory+Tool Agents (optional, for `_mt` agents only):**
 - `SNOWFLAKE_ACCOUNT`: Snowflake account identifier
 - `SNOWFLAKE_USER`: Snowflake username  
-- `SNOWFLAKE_PRIVATE_KEY_PATH`: Path to RSA private key file (inside container)
-- `SNOWFLAKE_WAREHOUSE`: Snowflake warehouse (default: `COMPUTE_WH`)
+- `SNOWFLAKE_WAREHOUSE`: Snowflake warehouse name
+- `SNOWFLAKE_PRIVATE_KEY_PATH`: Path to private key file (local system path, will be mapped into container)
+
+**Volume Mount Required for Snowflake:**
+- Mount your SSH directory containing the private key: `-v $HOME/.ssh:/home/appuser/.ssh:ro`
+- Map the key path: `-e SNOWFLAKE_PRIVATE_KEY_PATH=/home/appuser/.ssh/$(basename $SNOWFLAKE_PRIVATE_KEY_PATH)`
 
 **Note:** Memory+Tool agents (`*_mt`) require Snowflake. If you don't have Snowflake access, use basic agents like `gpt5_mini_medium` instead of `gpt5_mini_medium_mt`.
 
@@ -188,16 +192,18 @@ podman run --rm -it \
   gh-analysis
 ```
 
-**Memory+Tool Agent with Snowflake:**
+**Memory+Tool Agent with Snowflake (TESTED):**
 ```bash
-# Option 1: If you have Snowflake private key file
+# Option 1: With Snowflake (requires private key file)
 podman run --rm \
   -e GITHUB_TOKEN=$GITHUB_TOKEN \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -e SBCTL_TOKEN=$SBCTL_TOKEN \
   -e SNOWFLAKE_ACCOUNT=$SNOWFLAKE_ACCOUNT \
   -e SNOWFLAKE_USER=$SNOWFLAKE_USER \
-  -v /path/to/your/snowflake:/home/appuser/.snowflake:ro \
-  -e SNOWFLAKE_PRIVATE_KEY_PATH=/home/appuser/.snowflake/rsa_key.pem \
+  -e SNOWFLAKE_WAREHOUSE=$SNOWFLAKE_WAREHOUSE \
+  -v $HOME/.ssh:/home/appuser/.ssh:ro \
+  -e SNOWFLAKE_PRIVATE_KEY_PATH=/home/appuser/.ssh/$(basename $SNOWFLAKE_PRIVATE_KEY_PATH) \
   -e ISSUE_URL="$ISSUE_URL" \
   -e CLI_ARGS="--agent gpt5_mini_medium_mt" \
   gh-analysis
@@ -206,6 +212,7 @@ podman run --rm \
 podman run --rm \
   -e GITHUB_TOKEN=$GITHUB_TOKEN \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -e SBCTL_TOKEN=$SBCTL_TOKEN \
   -e ISSUE_URL="$ISSUE_URL" \
   -e CLI_ARGS="--agent gpt5_mini_medium" \
   gh-analysis
