@@ -176,15 +176,6 @@ podman run --rm \
   gh-analysis
 ```
 
-**Resource Limits:**
-```bash
-podman run --rm \
-  --memory=512m \
-  --cpus=1.0 \
-  -e GITHUB_TOKEN=$GITHUB_TOKEN \
-  -e ISSUE_URL="$ISSUE_URL" \
-  gh-analysis
-```
 
 ### Container Testing
 
