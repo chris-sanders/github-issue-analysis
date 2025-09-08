@@ -136,31 +136,7 @@ podman run --rm \
 
 ### Parallel Processing
 
-Process multiple issues simultaneously:
-
-```bash
-# Process multiple issues in parallel
-declare -a issues=(
-  "https://github.com/org/repo/issues/101"
-  "https://github.com/org/repo/issues/102"
-  "https://github.com/org/repo/issues/103"
-)
-
-for issue_url in "${issues[@]}"; do
-  podman run --rm -d \
-    -e GITHUB_TOKEN=$GITHUB_TOKEN \
-    -e OPENAI_API_KEY=$OPENAI_API_KEY \
-    -e SBCTL_TOKEN=$SBCTL_TOKEN \
-    -e ISSUE_URL="$issue_url" \
-    -e CLI_ARGS="--agent gpt5_mini_medium" \
-    gh-analysis \
-    > "results-$(basename $issue_url).json" &
-done
-
-# Wait for all containers to complete
-wait
-echo "All parallel processing completed"
-```
+Run multiple containers simultaneously with different `ISSUE_URL` values to process multiple issues in parallel.
 
 ### Advanced Usage
 
@@ -174,7 +150,7 @@ podman run --rm -it \
   gh-analysis
 ```
 
-**Memory+Tool Agent with Snowflake (TESTED):**
+**Memory+Tool Agent with Snowflake:**
 ```bash
 # Option 1: With Snowflake (requires private key file)
 podman run --rm \
