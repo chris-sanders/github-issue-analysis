@@ -58,8 +58,11 @@ COPY --from=builder /usr/local/bin/sbctl /usr/local/bin/sbctl
 COPY --from=builder /usr/local/bin/kubectl /usr/local/bin/kubectl
 COPY --from=builder /app/.venv /app/.venv
 
-# Copy application code
-COPY . .
+# Copy application code and configuration files
+COPY gh_analysis ./gh_analysis
+COPY scripts ./scripts
+COPY pyproject.toml uv.lock ./
+COPY tests ./tests
 
 # Fix ownership of .venv and application directory for appuser
 RUN chown -R appuser:appuser /app/.venv /app
