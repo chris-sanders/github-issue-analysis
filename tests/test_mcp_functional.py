@@ -215,7 +215,7 @@ async def run_functional_tests():
 
     for test_name, test_func in tests:
         try:
-            if await test_func():
+            if await test_func():  # type: ignore[no-untyped-call]
                 passed += 1
                 print(f"✅ {test_name}: PASSED")
             else:
