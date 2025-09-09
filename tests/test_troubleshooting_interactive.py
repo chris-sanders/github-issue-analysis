@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from github_issue_analysis.ai.interactive import (
+from gh_analysis.ai.interactive import (
     get_multiline_input,
     run_interactive_session,
 )
@@ -83,8 +83,8 @@ class TestMultilineInput:
 class TestInteractiveSession:
     """Test interactive session flow."""
 
-    @patch("github_issue_analysis.ai.interactive.get_multiline_input")
-    @patch("github_issue_analysis.ai.interactive.console")
+    @patch("gh_analysis.ai.interactive.get_multiline_input")
+    @patch("gh_analysis.ai.interactive.console")
     @pytest.mark.asyncio
     async def test_exit_command(self, mock_console, mock_input):
         """Test that 'exit' command properly ends the session."""
@@ -120,8 +120,8 @@ class TestInteractiveSession:
         # Verify session end message was printed
         mock_console.print.assert_any_call("Session ended. Thank you!")
 
-    @patch("github_issue_analysis.ai.interactive.get_multiline_input")
-    @patch("github_issue_analysis.ai.interactive.console")
+    @patch("gh_analysis.ai.interactive.get_multiline_input")
+    @patch("gh_analysis.ai.interactive.console")
     @pytest.mark.asyncio
     async def test_keyboard_interrupt(self, mock_console, mock_input):
         """Test Ctrl+C handling gracefully exits the session."""
@@ -145,8 +145,8 @@ class TestInteractiveSession:
         # Verify graceful exit message was printed
         mock_console.print.assert_any_call("\nSession ended. Thank you!")
 
-    @patch("github_issue_analysis.ai.interactive.get_multiline_input")
-    @patch("github_issue_analysis.ai.interactive.console")
+    @patch("gh_analysis.ai.interactive.get_multiline_input")
+    @patch("gh_analysis.ai.interactive.console")
     @pytest.mark.asyncio
     async def test_empty_input_handling(self, mock_console, mock_input):
         """Test that empty inputs are skipped and session continues."""
@@ -178,8 +178,8 @@ class TestInteractiveSession:
         call_args = mock_agent.run.call_args
         assert call_args[0][0] == "What's wrong?"
 
-    @patch("github_issue_analysis.ai.interactive.get_multiline_input")
-    @patch("github_issue_analysis.ai.interactive.console")
+    @patch("gh_analysis.ai.interactive.get_multiline_input")
+    @patch("gh_analysis.ai.interactive.console")
     @pytest.mark.asyncio
     async def test_error_handling_continues_session(self, mock_console, mock_input):
         """Test that errors during agent calls don't crash the session."""
@@ -226,8 +226,8 @@ class TestInteractiveSession:
             "Expected at least one Markdown object to be printed after recovery"
         )
 
-    @patch("github_issue_analysis.ai.interactive.get_multiline_input")
-    @patch("github_issue_analysis.ai.interactive.console")
+    @patch("gh_analysis.ai.interactive.get_multiline_input")
+    @patch("gh_analysis.ai.interactive.console")
     @pytest.mark.asyncio
     async def test_message_history_continuity(self, mock_console, mock_input):
         """Test that message history is properly maintained across questions."""
@@ -275,8 +275,8 @@ class TestInteractiveSession:
         # Second call should use updated message history from first result
         assert second_call[1]["message_history"] == ["msg1", "msg2"]
 
-    @patch("github_issue_analysis.ai.interactive.get_multiline_input")
-    @patch("github_issue_analysis.ai.interactive.console")
+    @patch("gh_analysis.ai.interactive.get_multiline_input")
+    @patch("gh_analysis.ai.interactive.console")
     @pytest.mark.asyncio
     async def test_case_insensitive_exit(self, mock_console, mock_input):
         """Test that exit command is case-insensitive."""
@@ -306,8 +306,8 @@ class TestInteractiveSession:
 class TestInteractiveIntegration:
     """Integration tests with mocked components."""
 
-    @patch("github_issue_analysis.ai.interactive.get_multiline_input")
-    @patch("github_issue_analysis.ai.interactive.console")
+    @patch("gh_analysis.ai.interactive.get_multiline_input")
+    @patch("gh_analysis.ai.interactive.console")
     @pytest.mark.asyncio
     async def test_session_header_display(self, mock_console, mock_input):
         """Test that interactive session displays proper header and instructions."""
@@ -335,8 +335,8 @@ class TestInteractiveIntegration:
         for expected_print in expected_prints:
             mock_console.print.assert_any_call(expected_print)
 
-    @patch("github_issue_analysis.ai.interactive.get_multiline_input")
-    @patch("github_issue_analysis.ai.interactive.console")
+    @patch("gh_analysis.ai.interactive.get_multiline_input")
+    @patch("gh_analysis.ai.interactive.console")
     @pytest.mark.asyncio
     async def test_output_formatting(self, mock_console, mock_input):
         """Test that agent responses are properly formatted with newlines."""

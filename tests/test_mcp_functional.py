@@ -17,7 +17,7 @@ import sys
 # Add the project root to the path so we can import modules
 sys.path.insert(0, "/app")
 
-from github_issue_analysis.runners.adapters.mcp_adapter import (
+from gh_analysis.runners.adapters.mcp_adapter import (
     create_troubleshoot_mcp_server,
 )
 from mcp import ClientSession
@@ -141,7 +141,7 @@ async def test_troubleshoot_runner_integration():
 
     try:
         # Import the actual troubleshoot runner
-        from github_issue_analysis.runners.troubleshoot_runner import TroubleshootRunner
+        from gh_analysis.runners.troubleshoot_runner import TroubleshootRunner
 
         # Create a mock issue for testing
 
@@ -177,7 +177,7 @@ async def test_cli_process_command():
 
     try:
         # Import CLI module to verify it loads correctly
-        from github_issue_analysis.cli.process import process_cmd
+        from gh_analysis.cli.process import process_cmd
 
         # Just test that the command function exists and can be imported
         # We won't actually invoke it since that requires real arguments

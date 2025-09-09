@@ -18,12 +18,12 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from pydantic import ValidationError
 
-from github_issue_analysis.ai.analysis import analyze_troubleshooting_issue
-from github_issue_analysis.ai.models import (
+from gh_analysis.ai.analysis import analyze_troubleshooting_issue
+from gh_analysis.ai.models import (
     NeedsDataAnalysis,
     ResolvedAnalysis,
 )
-from github_issue_analysis.ai.troubleshooting_agents import create_troubleshooting_agent
+from gh_analysis.ai.troubleshooting_agents import create_troubleshooting_agent
 
 
 class TestTroubleshootingSchemaValidation:

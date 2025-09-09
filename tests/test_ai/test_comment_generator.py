@@ -2,8 +2,8 @@
 
 import pytest
 
-from github_issue_analysis.ai.change_detector import IssueUpdatePlan, LabelChange
-from github_issue_analysis.ai.comment_generator import CommentGenerator
+from gh_analysis.ai.change_detector import IssueUpdatePlan, LabelChange
+from gh_analysis.ai.comment_generator import CommentGenerator
 
 
 @pytest.fixture

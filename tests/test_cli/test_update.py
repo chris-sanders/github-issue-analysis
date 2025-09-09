@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from github_issue_analysis.cli.main import app
+from gh_analysis.cli.main import app
 
 
 def strip_ansi(text: str) -> str:

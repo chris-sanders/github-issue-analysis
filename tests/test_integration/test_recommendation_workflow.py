@@ -11,15 +11,15 @@ import pytest
 
 from typer.testing import CliRunner
 
-from github_issue_analysis.ai.models import (
+from gh_analysis.ai.models import (
     LabelAssessment,
     ProductLabel,
     ProductLabelingResponse,
     RecommendedLabel,
 )
-from github_issue_analysis.cli.main import app
-from github_issue_analysis.recommendation.manager import RecommendationManager
-from github_issue_analysis.recommendation.models import (
+from gh_analysis.cli.main import app
+from gh_analysis.recommendation.manager import RecommendationManager
+from gh_analysis.recommendation.models import (
     RecommendationMetadata,
     RecommendationStatus,
 )
@@ -174,10 +174,10 @@ class TestRecommendationWorkflow:
 
             # Run review-session and simulate approving/rejecting
             with patch(
-                "github_issue_analysis.recommendation.review_session.Confirm.ask"
+                "gh_analysis.recommendation.review_session.Confirm.ask"
             ) as mock_confirm:
                 with patch(
-                    "github_issue_analysis.recommendation.review_session.Prompt.ask"
+                    "gh_analysis.recommendation.review_session.Prompt.ask"
                 ) as mock_prompt:
                     mock_confirm.return_value = True
                     # Approve first, reject second, quit on third
@@ -282,7 +282,7 @@ class TestRecommendationWorkflow:
 
                 # Mock at the module level for CLI context
                 with patch(
-                    "github_issue_analysis.runners.ProductLabelingRunner"
+                    "gh_analysis.runners.ProductLabelingRunner"
                 ) as mock_runner_class:
                     mock_runner = type("MockRunner", (), {"analyze": mock_analyze_fn})()
                     mock_runner_class.return_value = mock_runner

@@ -6,14 +6,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from github_issue_analysis.ai.models import (
+from gh_analysis.ai.models import (
     LabelAssessment,
     ProductLabel,
     ProductLabelingResponse,
     RecommendedLabel,
 )
-from github_issue_analysis.recommendation.manager import RecommendationManager
-from github_issue_analysis.recommendation.models import RecommendationStatus
+from gh_analysis.recommendation.manager import RecommendationManager
+from gh_analysis.recommendation.models import RecommendationStatus
 
 
 class TestRecommendationManager:
@@ -154,7 +154,7 @@ class TestRecommendationManager:
             assert manager.should_reprocess_issue("org", "repo", 1) is True
 
             # Create recommendations with different statuses
-            from github_issue_analysis.recommendation.models import (
+            from gh_analysis.recommendation.models import (
                 RecommendationMetadata,
             )
 
@@ -242,7 +242,7 @@ class TestRecommendationManager:
             manager = RecommendationManager(Path(temp_dir))
 
             # Create recommendations with various statuses, products, confidence
-            from github_issue_analysis.recommendation.models import (
+            from gh_analysis.recommendation.models import (
                 RecommendationMetadata,
             )
 
@@ -402,7 +402,7 @@ class TestRecommendationManager:
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = RecommendationManager(Path(temp_dir))
 
-            from github_issue_analysis.recommendation.models import (
+            from gh_analysis.recommendation.models import (
                 RecommendationMetadata,
             )
 

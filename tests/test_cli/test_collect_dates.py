@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 
 from typer.testing import CliRunner
 
-from github_issue_analysis.cli.collect import app
+from gh_analysis.cli.collect import app
 
 
 class TestCollectDateFiltering:
@@ -23,10 +23,10 @@ class TestCollectDateFiltering:
         self.mock_issue.repository_name = "test-repo"
         self.mock_issue.attachments = []  # Add empty attachments to avoid processing
 
-    @patch("github_issue_analysis.cli.collect.AttachmentDownloader")
-    @patch("github_issue_analysis.cli.collect.GitHubClient")
-    @patch("github_issue_analysis.cli.collect.GitHubSearcher")
-    @patch("github_issue_analysis.cli.collect.StorageManager")
+    @patch("gh_analysis.cli.collect.AttachmentDownloader")
+    @patch("gh_analysis.cli.collect.GitHubClient")
+    @patch("gh_analysis.cli.collect.GitHubSearcher")
+    @patch("gh_analysis.cli.collect.StorageManager")
     def test_collect_with_created_after(
         self,
         mock_storage: Any,
@@ -88,9 +88,9 @@ class TestCollectDateFiltering:
         assert call_args.kwargs["created_after"] == "2024-01-01"
         assert call_args.kwargs["created_before"] is None
 
-    @patch("github_issue_analysis.cli.collect.GitHubClient")
-    @patch("github_issue_analysis.cli.collect.GitHubSearcher")
-    @patch("github_issue_analysis.cli.collect.StorageManager")
+    @patch("gh_analysis.cli.collect.GitHubClient")
+    @patch("gh_analysis.cli.collect.GitHubSearcher")
+    @patch("gh_analysis.cli.collect.StorageManager")
     def test_collect_with_date_range(
         self, mock_storage: Any, mock_searcher_class: Any, mock_client_class: Any
     ) -> None:
@@ -141,9 +141,9 @@ class TestCollectDateFiltering:
         assert call_args.kwargs["created_after"] == "2024-01-01"
         assert call_args.kwargs["created_before"] == "2024-06-30"
 
-    @patch("github_issue_analysis.cli.collect.GitHubClient")
-    @patch("github_issue_analysis.cli.collect.GitHubSearcher")
-    @patch("github_issue_analysis.cli.collect.StorageManager")
+    @patch("gh_analysis.cli.collect.GitHubClient")
+    @patch("gh_analysis.cli.collect.GitHubSearcher")
+    @patch("gh_analysis.cli.collect.StorageManager")
     def test_collect_with_updated_dates(
         self, mock_storage: Any, mock_searcher_class: Any, mock_client_class: Any
     ) -> None:
@@ -194,9 +194,9 @@ class TestCollectDateFiltering:
         assert call_args.kwargs["updated_after"] == "2024-06-01"
         assert call_args.kwargs["updated_before"] == "2024-06-30"
 
-    @patch("github_issue_analysis.cli.collect.GitHubClient")
-    @patch("github_issue_analysis.cli.collect.GitHubSearcher")
-    @patch("github_issue_analysis.cli.collect.StorageManager")
+    @patch("gh_analysis.cli.collect.GitHubClient")
+    @patch("gh_analysis.cli.collect.GitHubSearcher")
+    @patch("gh_analysis.cli.collect.StorageManager")
     def test_collect_with_last_days(
         self, mock_storage: Any, mock_searcher_class: Any, mock_client_class: Any
     ) -> None:
@@ -247,9 +247,9 @@ class TestCollectDateFiltering:
         )  # Should be calculated relative date
         assert call_args.kwargs["created_before"] is None
 
-    @patch("github_issue_analysis.cli.collect.GitHubClient")
-    @patch("github_issue_analysis.cli.collect.GitHubSearcher")
-    @patch("github_issue_analysis.cli.collect.StorageManager")
+    @patch("gh_analysis.cli.collect.GitHubClient")
+    @patch("gh_analysis.cli.collect.GitHubSearcher")
+    @patch("gh_analysis.cli.collect.StorageManager")
     def test_collect_with_last_months(
         self, mock_storage: Any, mock_searcher_class: Any, mock_client_class: Any
     ) -> None:
@@ -299,9 +299,9 @@ class TestCollectDateFiltering:
             call_args.kwargs["created_after"] is not None
         )  # Should be calculated relative date
 
-    @patch("github_issue_analysis.cli.collect.GitHubClient")
-    @patch("github_issue_analysis.cli.collect.GitHubSearcher")
-    @patch("github_issue_analysis.cli.collect.StorageManager")
+    @patch("gh_analysis.cli.collect.GitHubClient")
+    @patch("gh_analysis.cli.collect.GitHubSearcher")
+    @patch("gh_analysis.cli.collect.StorageManager")
     def test_collect_organization_with_dates(
         self, mock_storage: Any, mock_searcher_class: Any, mock_client_class: Any
     ) -> None:

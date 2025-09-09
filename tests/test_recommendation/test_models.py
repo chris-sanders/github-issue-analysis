@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from github_issue_analysis.recommendation.models import (
+from gh_analysis.recommendation.models import (
     RecommendationFilter,
     RecommendationMetadata,
     RecommendationStatus,

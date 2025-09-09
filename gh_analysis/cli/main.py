@@ -40,7 +40,7 @@ app.add_typer(recommendations.app, name="recommendations")
 @app.command(context_settings={"help_option_names": ["-h", "--help"]})
 def version() -> None:
     """Show version information."""
-    from github_issue_analysis import __version__
+    from gh_analysis import __version__
 
     console.print(f"GitHub Issue Analysis v{__version__}")
 

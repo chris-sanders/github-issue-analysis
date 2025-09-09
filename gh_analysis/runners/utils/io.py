@@ -8,9 +8,9 @@ import os
 from pathlib import Path
 from typing import Any
 
-from github_issue_analysis.github_client import GitHubClient
-from github_issue_analysis.github_client.attachments import AttachmentDownloader
-from github_issue_analysis.storage import StorageManager
+from gh_analysis.github_client import GitHubClient
+from gh_analysis.github_client.attachments import AttachmentDownloader
+from gh_analysis.storage import StorageManager
 
 from .snowflake_base import BaseSnowflakeClient
 from .types import StoredIssueDict

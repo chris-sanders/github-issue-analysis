@@ -5,8 +5,8 @@ from unittest.mock import Mock, patch
 
 from typer.testing import CliRunner
 
-from github_issue_analysis.cli.collect import app
-from github_issue_analysis.github_client.models import GitHubIssue
+from gh_analysis.cli.collect import app
+from gh_analysis.github_client.models import GitHubIssue
 
 
 class TestCollectCommand:
@@ -17,9 +17,9 @@ class TestCollectCommand:
         self.runner = CliRunner()
 
     @patch.dict(os.environ, {"GITHUB_TOKEN": "test_token"})
-    @patch("github_issue_analysis.cli.collect.GitHubClient")
-    @patch("github_issue_analysis.cli.collect.GitHubSearcher")
-    @patch("github_issue_analysis.cli.collect.StorageManager")
+    @patch("gh_analysis.cli.collect.GitHubClient")
+    @patch("gh_analysis.cli.collect.GitHubSearcher")
+    @patch("gh_analysis.cli.collect.StorageManager")
     def test_collect_organization_with_exclusions(
         self, mock_storage: Mock, mock_searcher_class: Mock, mock_client_class: Mock
     ) -> None:
@@ -87,9 +87,9 @@ class TestCollectCommand:
         ]
 
     @patch.dict(os.environ, {"GITHUB_TOKEN": "test_token"})
-    @patch("github_issue_analysis.cli.collect.GitHubClient")
-    @patch("github_issue_analysis.cli.collect.GitHubSearcher")
-    @patch("github_issue_analysis.cli.collect.StorageManager")
+    @patch("gh_analysis.cli.collect.GitHubClient")
+    @patch("gh_analysis.cli.collect.GitHubSearcher")
+    @patch("gh_analysis.cli.collect.StorageManager")
     def test_collect_organization_single_exclusion(
         self, mock_storage: Mock, mock_searcher_class: Mock, mock_client_class: Mock
     ) -> None:
@@ -157,9 +157,9 @@ class TestCollectCommand:
         )
 
     @patch.dict(os.environ, {"GITHUB_TOKEN": "test_token"})
-    @patch("github_issue_analysis.cli.collect.GitHubClient")
-    @patch("github_issue_analysis.cli.collect.GitHubSearcher")
-    @patch("github_issue_analysis.cli.collect.StorageManager")
+    @patch("gh_analysis.cli.collect.GitHubClient")
+    @patch("gh_analysis.cli.collect.GitHubSearcher")
+    @patch("gh_analysis.cli.collect.StorageManager")
     def test_collect_organization_no_exclusions(
         self, mock_storage: Mock, mock_searcher_class: Mock, mock_client_class: Mock
     ) -> None:
@@ -223,9 +223,9 @@ class TestCollectCommand:
         )
 
     @patch.dict(os.environ, {"GITHUB_TOKEN": "test_token"})
-    @patch("github_issue_analysis.cli.collect.GitHubClient")
-    @patch("github_issue_analysis.cli.collect.GitHubSearcher")
-    @patch("github_issue_analysis.cli.collect.StorageManager")
+    @patch("gh_analysis.cli.collect.GitHubClient")
+    @patch("gh_analysis.cli.collect.GitHubSearcher")
+    @patch("gh_analysis.cli.collect.StorageManager")
     def test_collect_repository_exclusions_ignored(
         self, mock_storage: Mock, mock_searcher_class: Mock, mock_client_class: Mock
     ) -> None:
@@ -296,9 +296,9 @@ class TestCollectCommand:
         mock_searcher.search_organization_issues.assert_not_called()
 
     @patch.dict(os.environ, {"GITHUB_TOKEN": "test_token"})
-    @patch("github_issue_analysis.cli.collect.GitHubClient")
-    @patch("github_issue_analysis.cli.collect.GitHubSearcher")
-    @patch("github_issue_analysis.cli.collect.StorageManager")
+    @patch("gh_analysis.cli.collect.GitHubClient")
+    @patch("gh_analysis.cli.collect.GitHubSearcher")
+    @patch("gh_analysis.cli.collect.StorageManager")
     def test_collect_duplicate_exclusions_handled(
         self, mock_storage: Mock, mock_searcher_class: Mock, mock_client_class: Mock
     ) -> None:

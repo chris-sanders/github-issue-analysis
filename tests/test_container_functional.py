@@ -103,9 +103,9 @@ def test_import_core_modules():
     print("\n=== Testing Core Module Imports ===")
 
     modules_to_test = [
-        "github_issue_analysis.cli.process",
-        "github_issue_analysis.runners.adapters.mcp_adapter",
-        "github_issue_analysis.storage.file_storage",
+        "gh_analysis.cli.process",
+        "gh_analysis.runners.adapters.mcp_adapter",
+        "gh_analysis.storage.file_storage",
     ]
 
     for module_name in modules_to_test:

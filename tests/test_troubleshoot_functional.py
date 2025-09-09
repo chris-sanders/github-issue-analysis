@@ -14,8 +14,8 @@ from unittest.mock import patch
 
 import pytest
 
-from github_issue_analysis.ai.models import ResolvedAnalysis
-from github_issue_analysis.ai.troubleshooting_agents import create_troubleshooting_agent
+from gh_analysis.ai.models import ResolvedAnalysis
+from gh_analysis.ai.troubleshooting_agents import create_troubleshooting_agent
 
 
 class TestTroubleshootFunctional:
@@ -67,7 +67,7 @@ class TestTroubleshootFunctional:
         from pydantic_ai.models.openai import OpenAIModel
 
         # The patch should already be applied on import
-        from github_issue_analysis.ai import troubleshooting_agents  # noqa: F401
+        from gh_analysis.ai import troubleshooting_agents  # noqa: F401
 
         # Create a tool call that would trigger the Union error
         tool_call = ToolCallPart(
@@ -95,7 +95,7 @@ class TestTroubleshootFunctional:
             else:
                 raise
 
-    @patch("github_issue_analysis.ai.analysis.analyze_troubleshooting_issue")
+    @patch("gh_analysis.ai.analysis.analyze_troubleshooting_issue")
     def test_troubleshoot_workflow_without_api_calls(self, mock_analyze):
         """Test the troubleshoot workflow without making actual API calls.
 
@@ -157,7 +157,7 @@ class TestTroubleshootFunctional:
         This ensures the models themselves don't have Union issues during
         instantiation or serialization (which PydanticAI does internally).
         """
-        from github_issue_analysis.ai.models import (
+        from gh_analysis.ai.models import (
             ProductLabel,
             ProductLabelingResponse,
             RecommendedLabel,

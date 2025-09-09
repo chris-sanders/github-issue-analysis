@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from typer.testing import CliRunner
 
-from github_issue_analysis.ai.batch.models import BatchJob
-from github_issue_analysis.cli.batch import app
+from gh_analysis.ai.batch.models import BatchJob
+from gh_analysis.cli.batch import app
 
 
 def strip_ansi(text: str) -> str:
@@ -73,7 +73,7 @@ class TestBatchSubmitCommand:
     def test_submit_with_new_options_dry_run(self, runner: CliRunner) -> None:
         """Test batch submit with new AI configuration options in dry run mode."""
         with patch(
-            "github_issue_analysis.cli.batch.BatchManager"
+            "gh_analysis.cli.batch.BatchManager"
         ) as mock_manager_class:
             # Mock the BatchManager instance and its methods
             mock_manager = MagicMock()
@@ -126,7 +126,7 @@ class TestBatchSubmitCommand:
     def test_submit_with_thinking_budget(self, runner: CliRunner) -> None:
         """Test batch submit with thinking budget parameter."""
         with patch(
-            "github_issue_analysis.cli.batch.BatchManager"
+            "gh_analysis.cli.batch.BatchManager"
         ) as mock_manager_class:
             mock_manager = MagicMock()
             mock_manager_class.return_value = mock_manager
@@ -162,7 +162,7 @@ class TestBatchSubmitCommand:
     ) -> None:
         """Test that batch job is created with new configuration format."""
         with patch(
-            "github_issue_analysis.cli.batch.BatchManager"
+            "gh_analysis.cli.batch.BatchManager"
         ) as mock_manager_class:
             mock_manager = MagicMock()
             mock_manager_class.return_value = mock_manager
@@ -177,7 +177,7 @@ class TestBatchSubmitCommand:
             # Mock async method
             mock_manager.create_batch_job = AsyncMock(return_value=sample_batch_job)
 
-            with patch("github_issue_analysis.cli.batch.RecommendationManager"):
+            with patch("gh_analysis.cli.batch.RecommendationManager"):
                 result = runner.invoke(
                     app,
                     [
@@ -216,7 +216,7 @@ class TestBatchSubmitCommand:
     def test_submit_max_items_filtering(self, runner: CliRunner) -> None:
         """Test that max_items parameter correctly limits the issues."""
         with patch(
-            "github_issue_analysis.cli.batch.BatchManager"
+            "gh_analysis.cli.batch.BatchManager"
         ) as mock_manager_class:
             mock_manager = MagicMock()
             mock_manager_class.return_value = mock_manager
@@ -274,7 +274,7 @@ class TestBatchCliBackwardCompatibility:
     def test_old_style_parameters_still_work(self, runner: CliRunner) -> None:
         """Test that existing parameters without rich help panels still function."""
         with patch(
-            "github_issue_analysis.cli.batch.BatchManager"
+            "gh_analysis.cli.batch.BatchManager"
         ) as mock_manager_class:
             mock_manager = MagicMock()
             mock_manager_class.return_value = mock_manager
@@ -309,7 +309,7 @@ class TestBatchCliBackwardCompatibility:
         job_id = str(uuid.uuid4())
 
         with patch(
-            "github_issue_analysis.cli.batch.BatchManager"
+            "gh_analysis.cli.batch.BatchManager"
         ) as mock_manager_class:
             mock_manager = AsyncMock()
             mock_manager_class.return_value = mock_manager
@@ -339,7 +339,7 @@ class TestBatchCliBackwardCompatibility:
     def test_list_command_unchanged(self, runner: CliRunner) -> None:
         """Test that list command functionality is unchanged."""
         with patch(
-            "github_issue_analysis.cli.batch.BatchManager"
+            "gh_analysis.cli.batch.BatchManager"
         ) as mock_manager_class:
             mock_manager = AsyncMock()
             mock_manager_class.return_value = mock_manager
@@ -374,7 +374,7 @@ class TestBatchErrorHandling:
     def test_batch_manager_exception_handling(self, runner: CliRunner) -> None:
         """Test error handling when batch manager throws exceptions."""
         with patch(
-            "github_issue_analysis.cli.batch.BatchManager"
+            "gh_analysis.cli.batch.BatchManager"
         ) as mock_manager_class:
             mock_manager = MagicMock()
             mock_manager_class.return_value = mock_manager

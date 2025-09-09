@@ -6,12 +6,12 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from pydantic_ai.messages import BinaryContent
 
-from github_issue_analysis.ai.analysis import (
+from gh_analysis.ai.analysis import (
     analyze_issue,
     format_issue_prompt,
     prepare_issue_for_analysis,
 )
-from github_issue_analysis.ai.models import (
+from gh_analysis.ai.models import (
     LabelAssessment,
     ProductLabel,
     ProductLabelingResponse,
@@ -148,7 +148,7 @@ def test_prepare_issue_for_analysis(sample_issue_data: dict[str, Any]) -> None:
 
     # Test with images (mocked)
     with patch(
-        "github_issue_analysis.ai.analysis.load_downloaded_images"
+        "gh_analysis.ai.analysis.load_downloaded_images"
     ) as mock_load_images:
         mock_load_images.return_value = [
             {
@@ -260,7 +260,7 @@ async def test_analyze_issue_fallback_on_multimodal_failure() -> None:
 
     # Mock image loading to return images
     with patch(
-        "github_issue_analysis.ai.analysis.load_downloaded_images"
+        "gh_analysis.ai.analysis.load_downloaded_images"
     ) as mock_load_images:
         mock_load_images.return_value = [
             {

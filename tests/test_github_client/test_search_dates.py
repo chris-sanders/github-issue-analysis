@@ -2,7 +2,7 @@
 
 from unittest.mock import Mock
 
-from github_issue_analysis.github_client.search import (
+from gh_analysis.github_client.search import (
     GitHubSearcher,
     build_github_organization_query,
     build_github_query,

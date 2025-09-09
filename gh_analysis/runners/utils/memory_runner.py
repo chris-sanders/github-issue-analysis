@@ -116,7 +116,7 @@ class MemoryAwareGitHubRunner(GitHubIssueRunner):
         print(f"🧠 Generating independent memory context for {issue_key}...")
 
         # Step 1: Generate symptoms using specialized agent
-        from github_issue_analysis.runners.specialized.symptoms_agent import (
+        from gh_analysis.runners.specialized.symptoms_agent import (
             SymptomsAgentRunner,
         )
 

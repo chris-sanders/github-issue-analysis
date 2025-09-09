@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, Mock, patch
 import httpx
 import pytest
 
-from github_issue_analysis.github_client.attachments import AttachmentDownloader
-from github_issue_analysis.github_client.models import (
+from gh_analysis.github_client.attachments import AttachmentDownloader
+from gh_analysis.github_client.models import (
     GitHubAttachment,
     GitHubComment,
     GitHubIssue,
@@ -348,7 +348,7 @@ class TestAttachmentRegexPatterns:
         """Test GitHub file URL pattern matching."""
         import re
 
-        from github_issue_analysis.github_client.attachments import GITHUB_FILE_PATTERN
+        from gh_analysis.github_client.attachments import GITHUB_FILE_PATTERN
 
         valid_urls = [
             "https://github.com/test-org/test-repo/files/12345/error.log",
@@ -363,7 +363,7 @@ class TestAttachmentRegexPatterns:
         """Test GitHub user images pattern matching."""
         import re
 
-        from github_issue_analysis.github_client.attachments import GITHUB_IMAGE_PATTERN
+        from gh_analysis.github_client.attachments import GITHUB_IMAGE_PATTERN
 
         valid_urls = [
             "https://user-images.githubusercontent.com/12345/image.png",
@@ -378,7 +378,7 @@ class TestAttachmentRegexPatterns:
         """Test GitHub assets pattern matching."""
         import re
 
-        from github_issue_analysis.github_client.attachments import GITHUB_ASSET_PATTERN
+        from gh_analysis.github_client.attachments import GITHUB_ASSET_PATTERN
 
         valid_urls = [
             "https://github.com/user-attachments/assets/6f92d22b-1555-4979-8f48-4e530b21382f",

@@ -10,7 +10,7 @@ from unittest.mock import patch
 import pytest
 from typer.testing import CliRunner
 
-from github_issue_analysis.cli.process import _process_single_issue, app
+from gh_analysis.cli.process import _process_single_issue, app
 
 
 def strip_ansi(text: str) -> str:
@@ -79,7 +79,7 @@ class TestConcurrentProcessing:
     @pytest.fixture
     def mock_recommendation_manager(self) -> Any:
         """Create mock recommendation manager."""
-        with patch("github_issue_analysis.cli.process.RecommendationManager") as mock:
+        with patch("gh_analysis.cli.process.RecommendationManager") as mock:
             mock_instance = mock.return_value
             mock_instance.should_reprocess_issue.return_value = True
             yield mock_instance
@@ -106,7 +106,7 @@ class TestConcurrentProcessing:
                 "MockResult", (), {"model_dump": lambda self: {"test": "result"}}
             )()
 
-        with patch("github_issue_analysis.runners.get_runner") as mock_get_runner:
+        with patch("gh_analysis.runners.get_runner") as mock_get_runner:
             mock_runner = type("MockRunner", (), {"analyze": mock_analyze})()
             mock_get_runner.return_value = mock_runner
 
@@ -197,11 +197,11 @@ class TestConcurrentProcessing:
             return mock_result
 
         with patch(
-            "github_issue_analysis.cli.process.RecommendationManager"
+            "gh_analysis.cli.process.RecommendationManager"
         ) as mock_mgr:
             mock_mgr.return_value.should_reprocess_issue.return_value = True
 
-            with patch("github_issue_analysis.runners.get_runner") as mock_get_runner:
+            with patch("gh_analysis.runners.get_runner") as mock_get_runner:
                 mock_runner = type(
                     "MockRunner", (), {"analyze": mock_analyze_with_tracking}
                 )()

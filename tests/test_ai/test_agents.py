@@ -2,7 +2,7 @@
 
 import pytest
 
-from github_issue_analysis.ai.agents import product_labeling_agent
+from gh_analysis.ai.agents import product_labeling_agent
 
 # Tests for model validation and thinking support have been removed
 # as we now let PydanticAI handle all model validation

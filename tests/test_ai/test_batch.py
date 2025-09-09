@@ -10,14 +10,14 @@ from unittest.mock import AsyncMock, MagicMock, mock_open, patch
 
 import pytest
 
-from github_issue_analysis.ai.batch.batch_manager import BatchManager
-from github_issue_analysis.ai.batch.config_compat import AIModelConfig
-from github_issue_analysis.ai.batch.models import (
+from gh_analysis.ai.batch.batch_manager import BatchManager
+from gh_analysis.ai.batch.config_compat import AIModelConfig
+from gh_analysis.ai.batch.models import (
     BatchJob,
     BatchJobError,
     BatchResult,
 )
-from github_issue_analysis.ai.batch.openai_provider import OpenAIBatchProvider
+from gh_analysis.ai.batch.openai_provider import OpenAIBatchProvider
 
 
 @pytest.fixture
@@ -140,7 +140,7 @@ class TestBatchManager:
             manager.find_issues(issue_number=1)
 
     @pytest.mark.asyncio
-    @patch("github_issue_analysis.ai.batch.batch_manager.OpenAIBatchProvider")
+    @patch("gh_analysis.ai.batch.batch_manager.OpenAIBatchProvider")
     async def test_create_batch_job_success(
         self,
         mock_provider_class: MagicMock,
@@ -200,7 +200,7 @@ class TestBatchManager:
                 )
 
     @pytest.mark.asyncio
-    @patch("github_issue_analysis.ai.batch.batch_manager.OpenAIBatchProvider")
+    @patch("gh_analysis.ai.batch.batch_manager.OpenAIBatchProvider")
     async def test_create_batch_job_submission_failure(
         self,
         mock_provider_class: MagicMock,
@@ -229,7 +229,7 @@ class TestBatchManager:
     @pytest.mark.asyncio
     @patch("builtins.open", new_callable=mock_open)
     @patch("pathlib.Path.exists")
-    @patch("github_issue_analysis.ai.batch.batch_manager.OpenAIBatchProvider")
+    @patch("gh_analysis.ai.batch.batch_manager.OpenAIBatchProvider")
     async def test_check_job_status(
         self,
         mock_provider_class: MagicMock,
@@ -297,7 +297,7 @@ class TestBatchManager:
     @patch("builtins.open", new_callable=mock_open)
     @patch("pathlib.Path.exists")
     @patch("pathlib.Path.mkdir")
-    @patch("github_issue_analysis.ai.batch.batch_manager.OpenAIBatchProvider")
+    @patch("gh_analysis.ai.batch.batch_manager.OpenAIBatchProvider")
     async def test_collect_results_success(
         self,
         mock_provider_class: MagicMock,
@@ -907,7 +907,7 @@ class TestBatchCancelRemove:
 
         # Mock OpenAI provider
         with patch(
-            "github_issue_analysis.ai.batch.batch_manager.OpenAIBatchProvider"
+            "gh_analysis.ai.batch.batch_manager.OpenAIBatchProvider"
         ) as mock_provider_class:
             mock_provider = AsyncMock()
             mock_provider_class.return_value = mock_provider
@@ -1304,7 +1304,7 @@ class TestBatchSimplifiedConfig:
         }
 
         with patch(
-            "github_issue_analysis.ai.batch.batch_manager.OpenAIBatchProvider"
+            "gh_analysis.ai.batch.batch_manager.OpenAIBatchProvider"
         ) as mock_provider_class:
             mock_provider = AsyncMock()
             mock_provider_class.return_value = mock_provider
@@ -1347,7 +1347,7 @@ class TestBatchSimplifiedConfig:
         }
 
         with patch(
-            "github_issue_analysis.ai.batch.batch_manager.OpenAIBatchProvider"
+            "gh_analysis.ai.batch.batch_manager.OpenAIBatchProvider"
         ) as mock_provider_class:
             mock_provider = AsyncMock()
             mock_provider_class.return_value = mock_provider
@@ -1377,7 +1377,7 @@ class TestBatchSimplifiedConfig:
         manager = BatchManager(str(temp_batch_dir))
 
         with patch(
-            "github_issue_analysis.ai.batch.batch_manager.OpenAIBatchProvider"
+            "gh_analysis.ai.batch.batch_manager.OpenAIBatchProvider"
         ) as mock_provider_class:
             mock_provider = AsyncMock()
             mock_provider_class.return_value = mock_provider
@@ -1412,7 +1412,7 @@ class TestBatchSimplifiedConfig:
         }
 
         with patch(
-            "github_issue_analysis.ai.batch.batch_manager.OpenAIBatchProvider"
+            "gh_analysis.ai.batch.batch_manager.OpenAIBatchProvider"
         ) as mock_provider_class:
             mock_provider = AsyncMock()
             mock_provider_class.return_value = mock_provider

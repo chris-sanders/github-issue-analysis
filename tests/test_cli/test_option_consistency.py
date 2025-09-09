@@ -2,7 +2,7 @@
 
 from typer.testing import CliRunner
 
-from github_issue_analysis.cli.main import app
+from gh_analysis.cli.main import app
 
 
 class TestOptionConsistency:

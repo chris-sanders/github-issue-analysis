@@ -1,6 +1,6 @@
 """Tests for settings validation module."""
 
-from github_issue_analysis.ai.settings_validator import (
+from gh_analysis.ai.settings_validator import (
     get_provider_from_model,
     get_valid_settings_help,
     validate_settings,

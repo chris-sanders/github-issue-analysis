@@ -5,18 +5,18 @@ from pathlib import Path
 
 import pytest
 
-from github_issue_analysis.ai.change_detector import (
+from gh_analysis.ai.change_detector import (
     ChangeDetector,
     IssueUpdatePlan,
     LabelChange,
 )
-from github_issue_analysis.ai.models import (
+from gh_analysis.ai.models import (
     LabelAssessment,
     ProductLabel,
     ProductLabelingResponse,
     RecommendedLabel,
 )
-from github_issue_analysis.github_client.models import (
+from gh_analysis.github_client.models import (
     GitHubIssue,
     GitHubLabel,
     GitHubUser,

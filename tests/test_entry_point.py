@@ -13,7 +13,7 @@ def test_entry_point_import():
         assert app is not None
     except ImportError:
         # Fallback for development mode
-        from github_issue_analysis.cli.main import app
+        from gh_analysis.cli.main import app
 
         assert app is not None
 

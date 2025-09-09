@@ -9,12 +9,12 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from github_issue_analysis.github_client.models import (
+from gh_analysis.github_client.models import (
     GitHubIssue,
     GitHubUser,
     StoredIssue,
 )
-from github_issue_analysis.storage.manager import StorageManager
+from gh_analysis.storage.manager import StorageManager
 
 
 class TestStorageManager:
@@ -249,7 +249,7 @@ class TestStorageManager:
         assert stats["total_size_mb"] == 0
         assert stats["repositories"] == {}
 
-    @patch("github_issue_analysis.storage.manager.console")
+    @patch("gh_analysis.storage.manager.console")
     def test_save_issue_file_error(
         self,
         mock_console: Mock,

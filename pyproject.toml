@@ -44,9 +44,6 @@ gh-analysis = "gh_analysis.cli.main:app"
 [tool.hatchling.build.targets.wheel]
 packages = ["gh_analysis"]
 
-[tool.hatchling.build.targets.wheel.sources]
-"github_issue_analysis" = "gh_analysis"
-
 [tool.hatch.metadata]
 allow-direct-references = true
 

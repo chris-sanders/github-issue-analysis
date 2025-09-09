@@ -2,9 +2,9 @@
 
 from unittest.mock import Mock
 
-from github_issue_analysis.github_client.client import GitHubClient
-from github_issue_analysis.github_client.models import GitHubIssue
-from github_issue_analysis.github_client.search import (
+from gh_analysis.github_client.client import GitHubClient
+from gh_analysis.github_client.models import GitHubIssue
+from gh_analysis.github_client.search import (
     GitHubSearcher,
     build_exclusion_list,
     build_github_query,

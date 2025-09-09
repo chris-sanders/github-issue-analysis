@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from github_issue_analysis.ai.change_detector import ChangeDetector
+from gh_analysis.ai.change_detector import ChangeDetector
 
 
 class TestChangeDetectorStatusFiltering:

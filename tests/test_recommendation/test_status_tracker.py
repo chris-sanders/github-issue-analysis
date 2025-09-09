@@ -4,12 +4,12 @@ import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from github_issue_analysis.recommendation.models import (
+from gh_analysis.recommendation.models import (
     RecommendationFilter,
     RecommendationMetadata,
     RecommendationStatus,
 )
-from github_issue_analysis.recommendation.status_tracker import StatusTracker
+from gh_analysis.recommendation.status_tracker import StatusTracker
 
 
 class TestStatusTracker:

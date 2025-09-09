@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from github_issue_analysis.github_client.models import (
+from gh_analysis.github_client.models import (
     GitHubComment,
     GitHubIssue,
     GitHubLabel,

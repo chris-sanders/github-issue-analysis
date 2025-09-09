@@ -8,14 +8,14 @@ from unittest.mock import patch
 
 from typer.testing import CliRunner
 
-from github_issue_analysis.ai.models import (
+from gh_analysis.ai.models import (
     LabelAssessment,
     ProductLabel,
     ProductLabelingResponse,
     RecommendedLabel,
 )
-from github_issue_analysis.cli.main import app
-from github_issue_analysis.recommendation.models import (
+from gh_analysis.cli.main import app
+from gh_analysis.recommendation.models import (
     RecommendationMetadata,
     RecommendationStatus,
 )
@@ -280,7 +280,7 @@ class TestRecommendationsCLI:
             assert "By Status" in result.output
             assert "By Product" in result.output
 
-    @patch("github_issue_analysis.recommendation.review_session.Confirm.ask")
+    @patch("gh_analysis.recommendation.review_session.Confirm.ask")
     def test_review_session_command_no_recommendations(self, mock_confirm):
         """Test review session with no pending recommendations."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -297,8 +297,8 @@ class TestRecommendationsCLI:
             assert result.exit_code == 0
             assert "No recommendations found" in result.output
 
-    @patch("github_issue_analysis.recommendation.review_session.Prompt.ask")
-    @patch("github_issue_analysis.recommendation.review_session.Confirm.ask")
+    @patch("gh_analysis.recommendation.review_session.Prompt.ask")
+    @patch("gh_analysis.recommendation.review_session.Confirm.ask")
     def test_review_session_command_with_filters(self, mock_confirm, mock_prompt):
         """Test review session command filters work correctly."""
         with tempfile.TemporaryDirectory() as temp_dir:

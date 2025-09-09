@@ -5,13 +5,13 @@ from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
 
-from github_issue_analysis.recommendation.manager import RecommendationManager
-from github_issue_analysis.recommendation.models import (
+from gh_analysis.recommendation.manager import RecommendationManager
+from gh_analysis.recommendation.models import (
     RecommendationFilter,
     RecommendationMetadata,
     RecommendationStatus,
 )
-from github_issue_analysis.recommendation.review_session import ReviewSession
+from gh_analysis.recommendation.review_session import ReviewSession
 
 
 class TestReviewSession:
@@ -48,7 +48,7 @@ class TestReviewSession:
 
         return recommendations
 
-    @patch("github_issue_analysis.recommendation.review_session.console")
+    @patch("gh_analysis.recommendation.review_session.console")
     def test_session_overview_display(self, mock_console):
         """Test session overview shows correct statistics."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -75,8 +75,8 @@ class TestReviewSession:
                 for call in mock_console.print.call_args_list
             )
 
-    @patch("github_issue_analysis.recommendation.review_session.Prompt.ask")
-    @patch("github_issue_analysis.recommendation.review_session.console")
+    @patch("gh_analysis.recommendation.review_session.Prompt.ask")
+    @patch("gh_analysis.recommendation.review_session.console")
     def test_review_single_recommendation_approve(self, mock_console, mock_prompt):
         """Test approving a single recommendation updates status correctly."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -119,9 +119,9 @@ class TestReviewSession:
             # Verify action returned
             assert action == "approved"
 
-    @patch("github_issue_analysis.recommendation.review_session.Prompt.ask")
-    @patch("github_issue_analysis.recommendation.review_session.Confirm.ask")
-    @patch("github_issue_analysis.recommendation.review_session.console")
+    @patch("gh_analysis.recommendation.review_session.Prompt.ask")
+    @patch("gh_analysis.recommendation.review_session.Confirm.ask")
+    @patch("gh_analysis.recommendation.review_session.console")
     def test_session_stats_tracking(self, mock_console, mock_confirm, mock_prompt):
         """Test session tracks statistics correctly."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -170,7 +170,7 @@ class TestReviewSession:
             assert results["reviewed"] == 2  # approved + rejected
             assert results["needs_modification"] == 0
 
-    @patch("github_issue_analysis.recommendation.review_session.console")
+    @patch("gh_analysis.recommendation.review_session.console")
     def test_empty_recommendations_handling(self, mock_console):
         """Test handling when no recommendations match criteria."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -189,7 +189,7 @@ class TestReviewSession:
             # Verify stats are all zero
             assert all(v == 0 for v in results.values())
 
-    @patch("github_issue_analysis.recommendation.review_session.Prompt.ask")
+    @patch("gh_analysis.recommendation.review_session.Prompt.ask")
     def test_review_actions(self, mock_prompt):
         """Test different review actions (approve, reject, modify, skip, quit)."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -246,7 +246,7 @@ class TestReviewSession:
             action = review_session._review_single_recommendation(rec)
             assert action == "quit"
 
-    @patch("github_issue_analysis.recommendation.review_session.console")
+    @patch("gh_analysis.recommendation.review_session.console")
     def test_recommendation_details_display(self, mock_console):
         """Test display of recommendation details."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -279,7 +279,7 @@ class TestReviewSession:
                 for call in mock_console.print.call_args_list
             )
 
-    @patch("github_issue_analysis.recommendation.review_session.console")
+    @patch("gh_analysis.recommendation.review_session.console")
     def test_session_summary_display(self, mock_console):
         """Test final session summary display."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -301,8 +301,8 @@ class TestReviewSession:
             assert mock_console.print.called
             # Table should show all the stats
 
-    @patch("github_issue_analysis.recommendation.review_session.Prompt.ask")
-    @patch("github_issue_analysis.recommendation.review_session.Confirm.ask")
+    @patch("gh_analysis.recommendation.review_session.Prompt.ask")
+    @patch("gh_analysis.recommendation.review_session.Confirm.ask")
     def test_filtered_review_session(self, mock_confirm, mock_prompt):
         """Test review session with filters applied."""
         with tempfile.TemporaryDirectory() as temp_dir:

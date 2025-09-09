@@ -2,7 +2,7 @@
 
 from typer.testing import CliRunner
 
-from github_issue_analysis.cli.main import app
+from gh_analysis.cli.main import app
 
 runner = CliRunner(env={"NO_COLOR": "1", "FORCE_COLOR": "0"})
 

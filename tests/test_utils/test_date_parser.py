@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from github_issue_analysis.utils.date_parser import (
+from gh_analysis.utils.date_parser import (
     format_datetime_for_github,
     parse_date_input,
     relative_date_to_absolute,
