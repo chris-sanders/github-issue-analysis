@@ -120,9 +120,9 @@ def format_troubleshooting_prompt(
     # Build context using exp03's simple format
     context = f"Title: {issue.get('title', 'No Title')}\nBody: {issue.get('body', 'No Body')}\n"
 
-    if issue.get('comments'):
+    if issue.get("comments"):
         context += "\nComments:\n"
-        for comment in issue.get('comments', []):
+        for comment in issue.get("comments", []):
             context += f"- {comment.get('body', '')}\n"
 
     # Add image context if needed (keep minimal)
@@ -146,12 +146,12 @@ def format_issue_prompt(issue_data: dict[str, Any], image_count: int = 0) -> str
 
     # Include all comments with full content
     comment_text = ""
-    if issue.get('comments'):
-        all_comments = issue.get('comments', [])
+    if issue.get("comments"):
+        all_comments = issue.get("comments", [])
         comment_entries = []
         for comment in all_comments:
-            user = comment.get('user', {}).get('login', 'Unknown')
-            body = comment.get('body', '').replace("\n", " ").strip()
+            user = comment.get("user", {}).get("login", "Unknown")
+            body = comment.get("body", "").replace("\n", " ").strip()
             comment_entries.append(f"{user}: {body}")
         comment_text = " | ".join(comment_entries)
 
@@ -181,16 +181,16 @@ string since no images were provided.
     return f"""
 Analyze this GitHub issue for product labeling:
 
-**Title:** {issue.title}
+**Title:** {issue.get("title", "No Title")}
 
-**Body:** {issue.body}
+**Body:** {issue.get("body", "No Body")}
 
 **Current Labels:** {
         json.dumps(
             [
-                label.name
-                for label in issue.labels
-                if label.name.startswith("product::")
+                label.get("name", "")
+                for label in issue.get("labels", [])
+                if label.get("name", "").startswith("product::")
             ],
             separators=(",", ":"),
         )

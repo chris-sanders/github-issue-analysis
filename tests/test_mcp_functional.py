@@ -62,7 +62,7 @@ async def test_mcp_server_connectivity():
         return False
 
 
-@pytest.mark.asyncio  
+@pytest.mark.asyncio
 async def test_mcp_error_handling():
     """Test that MCP server handles invalid requests gracefully."""
     print("\n=== Testing MCP Error Handling ===")
@@ -222,7 +222,7 @@ async def run_functional_tests():
 
     for test_name, test_func in tests:
         try:
-            if await test_func():  # type: ignore[no-untyped-call]
+            if await test_func():
                 passed += 1
                 print(f"✅ {test_name}: PASSED")
             else:

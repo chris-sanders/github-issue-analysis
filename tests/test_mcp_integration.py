@@ -359,7 +359,7 @@ async def run_all_tests():
     for test_name, test_func in tests:
         print(f"\n--- {test_name} ---")
         try:
-            if await test_func():  # type: ignore[no-untyped-call]
+            if await test_func():
                 passed += 1
                 print(f"✅ {test_name}: PASSED")
             else:
