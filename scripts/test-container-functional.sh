@@ -86,7 +86,7 @@ $CONTAINER_CMD run --rm \
   -e ISSUE_URL="https://github.com/mock/mock/issues/1" \
   --entrypoint=/bin/sh \
   gh-analysis:test \
-  -c "echo 'Testing --limit-comments flag parsing...' && gh-analysis process troubleshoot --help | grep -q 'limit-comments'" 
+  -c "echo 'Testing --limit-comments flag parsing...' && cd /app && uv run gh-analysis process troubleshoot --help | grep -q 'limit-comments'" 
 
 if [ $? -eq 0 ]; then
     echo "✓ CLI can handle --limit-comments flag"
