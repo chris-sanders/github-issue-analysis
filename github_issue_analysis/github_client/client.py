@@ -9,6 +9,7 @@ from github.Issue import Issue
 from github.IssueComment import IssueComment
 from github.Label import Label
 from github.NamedUser import NamedUser
+from github.Organization import Organization
 from github.Repository import Repository
 from rich.console import Console
 
@@ -56,7 +57,7 @@ class GitHubClient:
             # Silently continue if rate limit check fails - it's not critical
             pass
 
-    def _convert_user(self, github_user: NamedUser) -> GitHubUser:
+    def _convert_user(self, github_user: NamedUser | Organization) -> GitHubUser:
         """Convert PyGitHub user to our model."""
         return GitHubUser(login=github_user.login, id=github_user.id)
 
