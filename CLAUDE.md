@@ -56,8 +56,9 @@ The memory+tool runners (suffix "_mt") require Snowflake access for enhanced tro
 **Required Environment Variables:**
 ```bash
 export SNOWFLAKE_ACCOUNT="your_account"
-export SNOWFLAKE_USER="your_user"  
+export SNOWFLAKE_USER="your_user"
 export SNOWFLAKE_PRIVATE_KEY_PATH="~/.snowflake/rsa_key.pem"
+export SNOWFLAKE_PRIVATE_KEY_PASSPHRASE="your_passphrase"  # Optional: passphrase for private key
 export SNOWFLAKE_WAREHOUSE="COMPUTE_WH"
 ```
 
