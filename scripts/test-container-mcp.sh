@@ -7,15 +7,13 @@ set -e
 echo "🧪 Testing Containerized MCP Server Functionality"
 echo "================================================"
 
-# Check if podman/docker is available
-if command -v podman &> /dev/null; then
-    CONTAINER_CMD="podman"
-elif command -v docker &> /dev/null; then
-    CONTAINER_CMD="docker"
-else
-    echo "❌ Neither podman nor docker found. Please install one of them."
+# Check if podman is available
+if ! command -v podman &> /dev/null; then
+    echo "❌ Podman not found. Please install podman."
     exit 1
 fi
+
+CONTAINER_CMD="podman"
 
 echo "Using container runtime: $CONTAINER_CMD"
 
@@ -40,7 +38,7 @@ $CONTAINER_CMD run --rm \
   -e SBCTL_TOKEN="$SBCTL_TOKEN" \
   --entrypoint=/bin/sh \
   gh-analysis:test \
-  -c "cd /app && uv run python tests/test_mcp_integration.py"
+  -c "cd /app && uv run python tests/mcp_integration_check.py"
 
 echo ""
 echo "🔍 Testing CLI Help Commands..."

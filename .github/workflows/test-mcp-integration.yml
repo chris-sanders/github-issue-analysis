@@ -8,7 +8,7 @@ on:
       - 'gh_analysis/cli/process.py'
       - 'pyproject.toml'
       - 'uv.lock'
-      - 'tests/test_mcp_functional.py'
+      - 'tests/mcp_functional_check.py'
       - 'scripts/test-container-functional.sh'
       - '.github/workflows/test-mcp-integration.yml'
   push:
@@ -19,7 +19,7 @@ on:
       - 'gh_analysis/cli/process.py'
       - 'pyproject.toml'  
       - 'uv.lock'
-      - 'tests/test_mcp_functional.py'
+      - 'tests/mcp_functional_check.py'
       - 'scripts/test-container-functional.sh'
 
 env:
