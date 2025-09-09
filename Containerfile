@@ -27,8 +27,8 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
 
 # Copy dependency files and create package structure
 COPY pyproject.toml uv.lock ./
-# Create empty package directory for uv sync to work
-RUN mkdir -p gh_analysis
+# Create package directory with __init__.py for uv sync to work
+RUN mkdir -p gh_analysis && touch gh_analysis/__init__.py
 
 # Install dependencies
 RUN uv sync --frozen --no-dev
