@@ -48,7 +48,7 @@ echo "Test 2: Testing MCP adapter can be imported..."
 $CONTAINER_CMD run --rm \
   --entrypoint=/bin/sh \
   gh-analysis:test \
-  -c "cd /app && python3 -c 'from gh_analysis.runners.adapters.mcp_adapter import create_troubleshoot_mcp_server; print(\"✓ MCP adapter imports correctly\")'" \
+  -c "cd /app && uv run python -c 'from gh_analysis.runners.adapters.mcp_adapter import create_troubleshoot_mcp_server; print(\"✓ MCP adapter imports correctly\")'" \
   || (echo "❌ MCP adapter import failed" && exit 1)
 
 echo ""
