@@ -37,7 +37,7 @@ logs/
 *.log
 
 # Test files and coverage
-tests/
+# Note: tests/ are included for functional testing in container
 .coverage
 coverage.xml
 htmlcov/
