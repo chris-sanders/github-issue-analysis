@@ -62,7 +62,6 @@ COPY --from=builder /app/.venv /app/.venv
 COPY gh_analysis ./gh_analysis
 COPY scripts ./scripts
 COPY pyproject.toml uv.lock ./
-COPY tests ./tests
 
 # Fix ownership of .venv and application directory for appuser
 RUN chown -R appuser:appuser /app/.venv /app
