@@ -31,8 +31,8 @@ async def test_mcp_server_connectivity():
         # Create MCP server using the actual adapter code
         server = create_troubleshoot_mcp_server()
 
-        async with server as (read, write):
-            async with ClientSession(read, write) as session:
+        async with server as (read, write):  # type: ignore[misc]
+            async with ClientSession(read, write) as session:  # type: ignore[has-type]
                 await session.initialize()
 
                 # Test that we can list tools
@@ -66,8 +66,8 @@ async def test_mcp_error_handling():
     try:
         server = create_troubleshoot_mcp_server()
 
-        async with server as (read, write):
-            async with ClientSession(read, write) as session:
+        async with server as (read, write):  # type: ignore[misc]
+            async with ClientSession(read, write) as session:  # type: ignore[has-type]
                 await session.initialize()
 
                 # Test calling a tool without required parameters
@@ -101,8 +101,8 @@ async def test_mcp_tool_communication():
     try:
         server = create_troubleshoot_mcp_server()
 
-        async with server as (read, write):
-            async with ClientSession(read, write) as session:
+        async with server as (read, write):  # type: ignore[misc]
+            async with ClientSession(read, write) as session:  # type: ignore[has-type]
                 await session.initialize()
 
                 # Test list_files with no bundle (should fail gracefully)
@@ -141,7 +141,7 @@ async def test_troubleshoot_runner_integration():
 
     try:
         # Import the actual troubleshoot runner
-        from gh_analysis.runners.troubleshoot_runner import TroubleshootRunner
+        from gh_analysis.runners.troubleshoot_runner import TroubleshootRunner  # type: ignore[import-untyped]
 
         # Create a mock issue for testing
 
@@ -177,11 +177,11 @@ async def test_cli_process_command():
 
     try:
         # Import CLI module to verify it loads correctly
-        from gh_analysis.cli.process import process_cmd
+        from gh_analysis.cli.process import troubleshoot
 
         # Just test that the command function exists and can be imported
         # We won't actually invoke it since that requires real arguments
-        if callable(process_cmd):
+        if callable(troubleshoot):
             print("✓ CLI process command available")
             return True
         else:
@@ -215,7 +215,7 @@ async def run_functional_tests():
 
     for test_name, test_func in tests:
         try:
-            if await test_func():
+            if await test_func():  # type: ignore[no-untyped-call]
                 passed += 1
                 print(f"✅ {test_name}: PASSED")
             else:
@@ -236,5 +236,5 @@ async def run_functional_tests():
 
 
 if __name__ == "__main__":
-    success = asyncio.run(run_functional_tests())
+    success = asyncio.run(run_functional_tests())  # type: ignore[no-untyped-call]
     sys.exit(0 if success else 1)

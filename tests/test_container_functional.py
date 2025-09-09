@@ -140,7 +140,7 @@ def run_all_tests():
 
     for test_name, test_func in tests:
         try:
-            if test_func():
+            if test_func():  # type: ignore[no-untyped-call]
                 passed += 1
                 print(f"✅ {test_name}: PASSED")
             else:
@@ -161,5 +161,5 @@ def run_all_tests():
 
 
 if __name__ == "__main__":
-    success = run_all_tests()
+    success = run_all_tests()  # type: ignore[no-untyped-call]
     sys.exit(0 if success else 1)

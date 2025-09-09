@@ -352,7 +352,7 @@ async def run_all_tests():
     for test_name, test_func in tests:
         print(f"\n--- {test_name} ---")
         try:
-            if await test_func():
+            if await test_func():  # type: ignore[no-untyped-call]
                 passed += 1
                 print(f"✅ {test_name}: PASSED")
             else:
@@ -371,5 +371,5 @@ async def run_all_tests():
 
 
 if __name__ == "__main__":
-    success = asyncio.run(run_all_tests())
+    success = asyncio.run(run_all_tests())  # type: ignore[no-untyped-call]
     sys.exit(0 if success else 1)
