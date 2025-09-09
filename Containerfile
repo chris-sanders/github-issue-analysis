@@ -27,10 +27,7 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
 
 # Copy dependency files and source code
 COPY pyproject.toml uv.lock ./
-COPY github_issue_analysis ./github_issue_analysis
-
-# Create symlink for package structure (gh_analysis -> github_issue_analysis)
-RUN ln -s github_issue_analysis gh_analysis
+COPY gh_analysis ./gh_analysis
 
 # Install dependencies
 RUN uv sync --frozen --no-dev
