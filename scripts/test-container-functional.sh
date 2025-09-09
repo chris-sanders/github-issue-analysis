@@ -19,10 +19,14 @@ fi
 
 echo "Using container runtime: $CONTAINER_CMD"
 
-# Build the container
+# Build the container if not already built (CI may pre-build)
 echo ""
-echo "🔨 Building container..."
-$CONTAINER_CMD build -t gh-analysis:test .
+if [ -z "$SKIP_BUILD" ]; then
+    echo "🔨 Building container..."
+    $CONTAINER_CMD build -t gh-analysis:test .
+else
+    echo "📦 Using pre-built container image: gh-analysis:test"
+fi
 
 # Set up minimal test environment (no real tokens needed for functional tests)
 export GITHUB_TOKEN="mock-token"

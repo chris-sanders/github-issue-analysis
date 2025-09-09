@@ -4,8 +4,8 @@ on:
   pull_request:
     paths:
       - 'Containerfile'
-      - 'github_issue_analysis/runners/adapters/mcp_adapter.py'
-      - 'github_issue_analysis/cli/process.py'
+      - 'gh_analysis/runners/adapters/mcp_adapter.py'
+      - 'gh_analysis/cli/process.py'
       - 'pyproject.toml'
       - 'uv.lock'
       - 'tests/test_mcp_functional.py'
@@ -15,8 +15,8 @@ on:
     branches: [ main ]
     paths:
       - 'Containerfile'
-      - 'github_issue_analysis/runners/adapters/mcp_adapter.py'
-      - 'github_issue_analysis/cli/process.py'
+      - 'gh_analysis/runners/adapters/mcp_adapter.py'
+      - 'gh_analysis/cli/process.py'
       - 'pyproject.toml'  
       - 'uv.lock'
       - 'tests/test_mcp_functional.py'
@@ -52,4 +52,4 @@ jobs:
         # Run the complete functional test suite that focuses on end-to-end behavior
         # Tests MCP server connectivity, CLI validation, data structure handling,
         # and tool communication without requiring real bundle URLs or specific implementation details
-        ./scripts/test-container-functional.sh
+        SKIP_BUILD=1 ./scripts/test-container-functional.sh
