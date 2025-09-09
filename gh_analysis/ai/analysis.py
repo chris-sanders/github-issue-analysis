@@ -118,12 +118,12 @@ def format_troubleshooting_prompt(
     issue = issue_data["issue"]
 
     # Build context using exp03's simple format
-    context = f"Title: {issue.title}\nBody: {issue.body}\n"
+    context = f"Title: {issue.get('title', 'No Title')}\nBody: {issue.get('body', 'No Body')}\n"
 
-    if issue.comments:
+    if issue.get('comments'):
         context += "\nComments:\n"
-        for comment in issue.comments:
-            context += f"- {comment.body}\n"
+        for comment in issue.get('comments', []):
+            context += f"- {comment.get('body', '')}\n"
 
     # Add image context if needed (keep minimal)
     if image_count > 0:
@@ -146,12 +146,12 @@ def format_issue_prompt(issue_data: dict[str, Any], image_count: int = 0) -> str
 
     # Include all comments with full content
     comment_text = ""
-    if issue.comments:
-        all_comments = issue.comments
+    if issue.get('comments'):
+        all_comments = issue.get('comments', [])
         comment_entries = []
         for comment in all_comments:
-            user = comment.user.login
-            body = comment.body.replace("\n", " ").strip()
+            user = comment.get('user', {}).get('login', 'Unknown')
+            body = comment.get('body', '').replace("\n", " ").strip()
             comment_entries.append(f"{user}: {body}")
         comment_text = " | ".join(comment_entries)
 

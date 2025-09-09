@@ -14,6 +14,8 @@ or file permissions, focusing on actual functional behavior.
 import asyncio
 import sys
 
+import pytest
+
 # Add the project root to the path so we can import modules
 sys.path.insert(0, "/app")
 
@@ -23,6 +25,7 @@ from gh_analysis.runners.adapters.mcp_adapter import (
 from mcp import ClientSession
 
 
+@pytest.mark.asyncio
 async def test_mcp_server_connectivity():
     """Test that we can connect to and communicate with the MCP server."""
     print("=== Testing MCP Server Connectivity ===")
@@ -59,6 +62,7 @@ async def test_mcp_server_connectivity():
         return False
 
 
+@pytest.mark.asyncio  
 async def test_mcp_error_handling():
     """Test that MCP server handles invalid requests gracefully."""
     print("\n=== Testing MCP Error Handling ===")
@@ -94,6 +98,7 @@ async def test_mcp_error_handling():
         return False
 
 
+@pytest.mark.asyncio
 async def test_mcp_tool_communication():
     """Test that MCP server can handle tool communication with mock data."""
     print("\n=== Testing MCP Tool Communication ===")
@@ -135,6 +140,7 @@ async def test_mcp_tool_communication():
         return False
 
 
+@pytest.mark.asyncio
 async def test_troubleshoot_runner_integration():
     """Test that the troubleshoot runner can initialize with MCP tools."""
     print("\n=== Testing Troubleshoot Runner Integration ===")
@@ -171,6 +177,7 @@ async def test_troubleshoot_runner_integration():
         return False
 
 
+@pytest.mark.asyncio
 async def test_cli_process_command():
     """Test that the CLI process command can be invoked (without actually running)."""
     print("\n=== Testing CLI Process Command ===")

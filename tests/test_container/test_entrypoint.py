@@ -156,8 +156,8 @@ class TestEntrypointScript:
         with open(entrypoint_script, "r") as f:
             content = f.read()
 
-        assert 'export PATH="/app/.venv/bin:$PATH"' in content, (
-            "Script should set PATH to include virtual environment"
+        assert 'export PATH="/app/.venv/bin:/usr/local/bin:$PATH"' in content, (
+            "Script should set PATH to include virtual environment and local bins"
         )
 
     def test_script_uses_set_e(self, entrypoint_script):

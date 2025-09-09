@@ -17,6 +17,8 @@ import tempfile
 import tarfile
 import sys
 from pathlib import Path
+
+import pytest
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
@@ -76,6 +78,7 @@ Sep 05 14:30:20 node1 kubelet[1234]: E0905 14:30:20.654321 1234 pod_workers.go:9
     return bundle_path
 
 
+@pytest.mark.asyncio
 async def test_system_dependencies():
     """Test that required system binaries are available and working."""
     print("=== Testing System Dependencies ===")
@@ -110,6 +113,7 @@ async def test_system_dependencies():
     return True
 
 
+@pytest.mark.asyncio
 async def test_sbctl_serve_functionality():
     """Test that sbctl serve command works (not the wrong Python package)."""
     print("\n=== Testing sbctl serve Command ===")
@@ -149,6 +153,7 @@ async def test_sbctl_serve_functionality():
         return False
 
 
+@pytest.mark.asyncio
 async def test_mcp_server_initialization():
     """Test that MCP server can start without errors."""
     print("\n=== Testing MCP Server Initialization ===")
@@ -192,6 +197,7 @@ async def test_mcp_server_initialization():
         return False
 
 
+@pytest.mark.asyncio
 async def test_mcp_bundle_processing():
     """Test MCP server with a mock bundle to verify file access."""
     print("\n=== Testing MCP Bundle Processing ===")
@@ -303,6 +309,7 @@ async def test_mcp_bundle_processing():
             pass
 
 
+@pytest.mark.asyncio
 async def test_file_permissions():
     """Test that the container has proper file permissions for non-root user."""
     print("\n=== Testing File Permissions ===")

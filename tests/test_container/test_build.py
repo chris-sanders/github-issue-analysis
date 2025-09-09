@@ -58,7 +58,7 @@ class TestContainerBuild:
             content = f.read()
 
         # Check that script sets PATH to include venv
-        assert '"/app/.venv/bin:$PATH"' in content, (
+        assert '"/app/.venv/bin:/usr/local/bin:$PATH"' in content, (
             "Script should activate virtual environment"
         )
 
