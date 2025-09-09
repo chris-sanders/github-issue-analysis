@@ -25,13 +25,15 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
     rm kubectl
 
-# Copy dependency files first
+# Copy dependency files and create package structure
 COPY pyproject.toml uv.lock ./
+# Create empty package directory for uv sync to work
+RUN mkdir -p gh_analysis
 
-# Install dependencies before copying source code
+# Install dependencies
 RUN uv sync --frozen --no-dev
 
-# Now copy source code
+# Now copy actual source code
 COPY gh_analysis ./gh_analysis
 
 # Stage 2: Runtime
