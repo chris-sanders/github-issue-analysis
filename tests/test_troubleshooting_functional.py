@@ -331,7 +331,7 @@ class TestEndToEnd:
                         repo="testrepo",
                         issue_number=123,
                         url=None,
-                        agent_name="o3_medium",
+                        agent_name="gpt5_mini_medium",
                         include_images=False,
                         limit_comments=None,
                         dry_run=False,
