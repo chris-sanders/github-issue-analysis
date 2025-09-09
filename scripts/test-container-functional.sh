@@ -57,7 +57,7 @@ echo "Test 3: Testing CLI help and validation work..."
 $CONTAINER_CMD run --rm \
   --entrypoint=/bin/sh \
   gh-analysis:test \
-  -c "gh-analysis process troubleshoot --help" > /dev/null 2>&1
+  -c "cd /app && uv run gh-analysis process troubleshoot --help" > /dev/null 2>&1
   
 if [ $? -eq 0 ]; then
     echo "✓ CLI help command works"
