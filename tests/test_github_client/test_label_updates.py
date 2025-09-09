@@ -12,9 +12,7 @@ from gh_analysis.github_client.client import GitHubClient
 @pytest.fixture
 def mock_github() -> Generator[MagicMock]:
     """Mock GitHub API client."""
-    with patch(
-        "gh_analysis.github_client.client.Github"
-    ) as mock_github_class:
+    with patch("gh_analysis.github_client.client.Github") as mock_github_class:
         mock_github = MagicMock()
         mock_github_class.return_value = mock_github
 

@@ -295,9 +295,7 @@ class TestEndToEnd:
                 "OPENAI_API_KEY": "test_openai_key",
             }
             with patch.dict(os.environ, env_patches):
-                with patch(
-                    "gh_analysis.runners.get_runner"
-                ) as mock_get_runner:
+                with patch("gh_analysis.runners.get_runner") as mock_get_runner:
                     from gh_analysis.ai.models import ResolvedAnalysis
 
                     mock_result = ResolvedAnalysis(

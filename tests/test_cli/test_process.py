@@ -196,9 +196,7 @@ class TestConcurrentProcessing:
             )()
             return mock_result
 
-        with patch(
-            "gh_analysis.cli.process.RecommendationManager"
-        ) as mock_mgr:
+        with patch("gh_analysis.cli.process.RecommendationManager") as mock_mgr:
             mock_mgr.return_value.should_reprocess_issue.return_value = True
 
             with patch("gh_analysis.runners.get_runner") as mock_get_runner:

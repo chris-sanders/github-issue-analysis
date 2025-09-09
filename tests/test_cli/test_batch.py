@@ -72,9 +72,7 @@ class TestBatchSubmitCommand:
 
     def test_submit_with_new_options_dry_run(self, runner: CliRunner) -> None:
         """Test batch submit with new AI configuration options in dry run mode."""
-        with patch(
-            "gh_analysis.cli.batch.BatchManager"
-        ) as mock_manager_class:
+        with patch("gh_analysis.cli.batch.BatchManager") as mock_manager_class:
             # Mock the BatchManager instance and its methods
             mock_manager = MagicMock()
             mock_manager_class.return_value = mock_manager
@@ -125,9 +123,7 @@ class TestBatchSubmitCommand:
 
     def test_submit_with_thinking_budget(self, runner: CliRunner) -> None:
         """Test batch submit with thinking budget parameter."""
-        with patch(
-            "gh_analysis.cli.batch.BatchManager"
-        ) as mock_manager_class:
+        with patch("gh_analysis.cli.batch.BatchManager") as mock_manager_class:
             mock_manager = MagicMock()
             mock_manager_class.return_value = mock_manager
             mock_manager.find_issues.return_value = [
@@ -161,9 +157,7 @@ class TestBatchSubmitCommand:
         self, runner: CliRunner, sample_batch_job: BatchJob
     ) -> None:
         """Test that batch job is created with new configuration format."""
-        with patch(
-            "gh_analysis.cli.batch.BatchManager"
-        ) as mock_manager_class:
+        with patch("gh_analysis.cli.batch.BatchManager") as mock_manager_class:
             mock_manager = MagicMock()
             mock_manager_class.return_value = mock_manager
             mock_manager.find_issues.return_value = [
@@ -215,9 +209,7 @@ class TestBatchSubmitCommand:
 
     def test_submit_max_items_filtering(self, runner: CliRunner) -> None:
         """Test that max_items parameter correctly limits the issues."""
-        with patch(
-            "gh_analysis.cli.batch.BatchManager"
-        ) as mock_manager_class:
+        with patch("gh_analysis.cli.batch.BatchManager") as mock_manager_class:
             mock_manager = MagicMock()
             mock_manager_class.return_value = mock_manager
             # Return more issues than max_items limit
@@ -273,9 +265,7 @@ class TestBatchCliBackwardCompatibility:
 
     def test_old_style_parameters_still_work(self, runner: CliRunner) -> None:
         """Test that existing parameters without rich help panels still function."""
-        with patch(
-            "gh_analysis.cli.batch.BatchManager"
-        ) as mock_manager_class:
+        with patch("gh_analysis.cli.batch.BatchManager") as mock_manager_class:
             mock_manager = MagicMock()
             mock_manager_class.return_value = mock_manager
             mock_manager.find_issues.return_value = [
@@ -308,9 +298,7 @@ class TestBatchCliBackwardCompatibility:
         """Test that status command functionality is unchanged."""
         job_id = str(uuid.uuid4())
 
-        with patch(
-            "gh_analysis.cli.batch.BatchManager"
-        ) as mock_manager_class:
+        with patch("gh_analysis.cli.batch.BatchManager") as mock_manager_class:
             mock_manager = AsyncMock()
             mock_manager_class.return_value = mock_manager
 
@@ -338,9 +326,7 @@ class TestBatchCliBackwardCompatibility:
 
     def test_list_command_unchanged(self, runner: CliRunner) -> None:
         """Test that list command functionality is unchanged."""
-        with patch(
-            "gh_analysis.cli.batch.BatchManager"
-        ) as mock_manager_class:
+        with patch("gh_analysis.cli.batch.BatchManager") as mock_manager_class:
             mock_manager = AsyncMock()
             mock_manager_class.return_value = mock_manager
             mock_manager.list_jobs.return_value = []
@@ -373,9 +359,7 @@ class TestBatchErrorHandling:
 
     def test_batch_manager_exception_handling(self, runner: CliRunner) -> None:
         """Test error handling when batch manager throws exceptions."""
-        with patch(
-            "gh_analysis.cli.batch.BatchManager"
-        ) as mock_manager_class:
+        with patch("gh_analysis.cli.batch.BatchManager") as mock_manager_class:
             mock_manager = MagicMock()
             mock_manager_class.return_value = mock_manager
             mock_manager.find_issues.side_effect = Exception(
