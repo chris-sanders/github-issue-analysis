@@ -334,6 +334,7 @@ class TestEndToEnd:
                         limit_comments=None,
                         dry_run=False,
                         interactive=False,
+                        slack_notifications=False,
                     )
 
             # Validate the prompt content

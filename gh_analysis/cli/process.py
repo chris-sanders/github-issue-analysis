@@ -504,6 +504,12 @@ def troubleshoot(
         help="Enter interactive mode after analysis for follow-up questions",
         rich_help_panel="Processing Options",
     ),
+    slack_notifications: bool = typer.Option(
+        False,
+        "--slack-notifications",
+        help="Send Slack notifications when analysis completes",
+        rich_help_panel="Notifications",
+    ),
 ) -> None:
     """Analyze GitHub issues using advanced troubleshooting agents with MCP tools.
 
@@ -569,6 +575,7 @@ def troubleshoot(
                 limit_comments,
                 dry_run,
                 interactive,
+                slack_notifications,
             )
         )
     except ValueError as e:
@@ -586,6 +593,7 @@ async def _run_troubleshoot(
     limit_comments: int | None,
     dry_run: bool,
     interactive: bool,
+    slack_notifications: bool,
 ) -> None:
     """Run troubleshooting analysis."""
     import re
@@ -652,6 +660,27 @@ async def _run_troubleshoot(
             f"gpt5_mini_high_mt, gpt5_medium_mt, gpt5_high_mt, gemini_25_pro_mt[/red]"
         )
         return
+
+    # Validate Slack configuration if notifications are enabled
+    if slack_notifications:
+        from ..slack.config import SlackConfig
+
+        slack_config = SlackConfig()
+        if not slack_config.is_configured():
+            console.print(
+                "[red]❌ SLACK_BOT_TOKEN and SLACK_USER_TOKEN environment variables are required "
+                "for Slack notifications[/red]"
+            )
+            console.print(
+                "[yellow]SLACK_BOT_TOKEN: For posting messages (bot token with chat:write scope)[/yellow]"
+            )
+            console.print(
+                "[yellow]SLACK_USER_TOKEN: For searching messages (user token with search:read scope)[/yellow]"
+            )
+            console.print(
+                "[yellow]To disable notifications, remove --slack-notifications flag[/yellow]"
+            )
+            return
 
     # Validate that specific issue is provided (currently only supports single issue)
     if not issue_number:
@@ -882,6 +911,48 @@ async def _run_troubleshoot(
         console.print(f"\n[green]✓ Results saved to {result_file.name}[/green]")
     except Exception as e:
         console.print(f"\n[red]❌ Failed to save results: {e}[/red]")
+
+    # Send Slack notification if enabled
+    if slack_notifications:
+        try:
+            from ..slack.client import SlackClient
+            from ..slack.config import SlackConfig
+
+            slack_config = SlackConfig()
+            slack_client = SlackClient(slack_config)
+
+            # Build the issue URL
+            if url:
+                issue_url = url
+            else:
+                issue_url = f"https://github.com/{org}/{repo}/issues/{issue_number}"
+
+            # Get issue title from the issue data
+            issue_title = issue_data["issue"].get("title", f"Issue #{issue_number}")
+
+            console.print("[blue]📤 Sending Slack notification...[/blue]")
+
+            success = slack_client.notify_analysis_complete(
+                issue_url=issue_url,
+                issue_title=issue_title,
+                analysis_results=result.model_dump(),
+                agent_name=agent_name,
+            )
+
+            if success:
+                console.print(
+                    f"[green]✓ Slack notification sent to {slack_config.channel}[/green]"
+                )
+            else:
+                console.print(
+                    "[yellow]⚠️ Failed to send Slack notification (check logs)[/yellow]"
+                )
+
+        except Exception as e:
+            console.print(f"[yellow]⚠️ Slack notification failed: {e}[/yellow]")
+            console.print(
+                "[dim]Analysis completed successfully, but notification failed[/dim]"
+            )
 
     # Start interactive session if requested
     if interactive:
