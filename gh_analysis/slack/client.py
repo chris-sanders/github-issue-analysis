@@ -129,13 +129,12 @@ class SlackClient:
         analysis_results: Dict[str, Any],
         agent_name: str,
     ) -> bool:
-        """
-        Send notification about completed analysis.
+        """Send notification with topic-based splitting to avoid truncation.
 
-        This method handles the full workflow:
-        1. Search for existing issue thread
-        2. If found: Reply to the existing thread with analysis results
-        3. If not found: Post new comprehensive message with issue info and results
+        This method handles the full workflow with content preservation:
+        1. Generate topic-based blocks using new formatting methods
+        2. Decide between single message vs multi-message based on total block count
+        3. Handle both new messages and thread replies with intelligent splitting
 
         Args:
             issue_url: The GitHub issue URL
@@ -154,16 +153,71 @@ class SlackClient:
             # Step 1: Search for existing thread
             thread_ts = self.search_for_issue(issue_url)
 
-            if thread_ts:
-                # Step 2a: Reply to existing thread with analysis results
-                return self.post_to_thread(
-                    thread_ts, analysis_results, issue_url, agent_name
+            # Step 2: Generate all topic blocks
+
+            all_topics = [
+                self._format_status_topic(analysis_results, agent_name),
+                self._format_evidence_topic(analysis_results),
+                self._format_root_cause_topic(analysis_results),
+                self._format_solution_topic(analysis_results),
+                self._format_next_steps_topic(analysis_results),
+                self._format_footer_topic(),
+            ]
+
+            # Filter out empty topics
+            non_empty_topics = [topic for topic in all_topics if topic]
+            total_blocks = sum(len(topic) for topic in non_empty_topics)
+
+            logger.info(
+                f"Generated {len(non_empty_topics)} topics with {total_blocks} total blocks"
+            )
+
+            # Step 3: Decide posting strategy - use multi-message if content topics were split
+            # Skip status topic (index 0) since it naturally has 2 blocks
+            content_topics = non_empty_topics[1:] if non_empty_topics else []
+            has_split_content = any(len(topic) > 1 for topic in content_topics)
+
+            if (
+                has_split_content or total_blocks > 15
+            ):  # Use multi-message for split content
+                # Send each topic as separate message in thread
+                logger.info(
+                    f"Using multi-message posting due to split topics or {total_blocks} blocks"
                 )
+                if thread_ts:
+                    # Post topics as replies to existing thread
+                    return self._post_topic_replies_to_thread(
+                        non_empty_topics, thread_ts
+                    )
+                else:
+                    # Post topics as new thread
+                    return self._post_topic_sequence(
+                        non_empty_topics, issue_url, issue_title
+                    )
             else:
-                # Step 2b: Post new comprehensive message
-                return self.post_new_message(
-                    issue_url, issue_title, analysis_results, agent_name
-                )
+                # Send as single message for simple content
+                logger.info("Using single message posting for simple content")
+                all_blocks = [block for topic in non_empty_topics for block in topic]
+
+                if thread_ts:
+                    # Reply to existing thread with blocks directly
+                    try:
+                        response = self.bot_client.chat_postMessage(
+                            channel=self.config.channel,
+                            thread_ts=thread_ts,
+                            blocks=all_blocks,
+                            text="Analysis results available",
+                        )
+                        return bool(response["ok"])
+                    except Exception as e:
+                        logger.error(f"Error posting to thread: {e}")
+                        return False
+                else:
+                    # New message with issue header
+                    blocks_with_header = self._add_issue_header(
+                        all_blocks, issue_url, issue_title
+                    )
+                    return self._post_single_message(blocks_with_header, issue_title)
 
         except Exception as e:
             logger.error(f"Failed to send Slack notification: {e}")
@@ -363,3 +417,357 @@ class SlackClient:
         blocks.append(footer_block)
 
         return blocks
+
+    def _create_section_block(self, title: str, content: str) -> Dict[str, Any]:
+        """Helper to create section block with consistent formatting.
+
+        Args:
+            title: Block title
+            content: Block content
+
+        Returns:
+            Formatted section block
+        """
+        return {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*{title}:*\n{content}",
+            },
+        }
+
+    def _format_status_topic(
+        self, results: Dict[str, Any], agent_name: str
+    ) -> List[Dict[str, Any]]:
+        """Format status and agent info (always single block).
+
+        Args:
+            results: Analysis results
+            agent_name: Name of the AI agent used
+
+        Returns:
+            List of status blocks
+        """
+        status = results.get("status", "unknown")
+        status_emoji = (
+            "✅" if status == "resolved" else "📋" if status == "needs_data" else "❓"
+        )
+
+        return [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"{status_emoji} *Analysis Complete* - Agent: `{agent_name}`",
+                },
+            },
+            {
+                "type": "section",
+                "fields": [
+                    {
+                        "type": "mrkdwn",
+                        "text": f"*Status:* {status.replace('_', ' ').title()}",
+                    }
+                ],
+            },
+        ]
+
+    def _format_evidence_topic(self, results: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Format evidence points (may split if very long).
+
+        Args:
+            results: Analysis results
+
+        Returns:
+            List of evidence blocks
+        """
+        evidence = results.get("evidence", [])
+        if not evidence:
+            return []
+
+        # Limit to 5 points initially
+        limited_evidence = evidence[:5]
+        evidence_text = "\n".join([f"• {point}" for point in limited_evidence])
+
+        if len(evidence) > 5:
+            evidence_text += f"\n• ... and {len(evidence) - 5} more points"
+
+        # Check if text fits in single block
+        if len(evidence_text) <= 2900:
+            return [self._create_section_block("Key Evidence", evidence_text)]
+
+        # Split evidence into multiple blocks if too long
+        from .text_utils import split_text_at_boundaries, create_continuation_header
+
+        parts = split_text_at_boundaries(evidence_text, 2900)
+        blocks = []
+        for i, part in enumerate(parts):
+            title = create_continuation_header("Key Evidence", i > 0)
+            blocks.append(self._create_section_block(title, part))
+        return blocks
+
+    def _format_root_cause_topic(self, results: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Format root cause analysis (splits if >2900 chars).
+
+        Args:
+            results: Analysis results
+
+        Returns:
+            List of root cause blocks
+        """
+        root_cause = results.get("root_cause")
+        status = results.get("status", "unknown")
+
+        if not root_cause or status != "resolved":
+            return []
+
+        # Account for formatting overhead ("*Root Cause:*\n" is ~15 chars)
+        formatted_length = len(root_cause) + 20  # Buffer for formatting
+        if formatted_length <= 2900:
+            return [self._create_section_block("Root Cause", root_cause)]
+
+        # Split into multiple blocks with adjusted max length
+        from .text_utils import split_text_at_boundaries, create_continuation_header
+
+        # Leave room for title formatting in each part
+        max_content_length = 2900 - 30  # Buffer for "*Root Cause (continued):*\n"
+        parts = split_text_at_boundaries(root_cause, max_content_length)
+        blocks = []
+        for i, part in enumerate(parts):
+            title = create_continuation_header("Root Cause", i > 0)
+            blocks.append(self._create_section_block(title, part))
+        return blocks
+
+    def _format_solution_topic(self, results: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Format recommended solution (splits if >2900 chars).
+
+        Args:
+            results: Analysis results
+
+        Returns:
+            List of solution blocks
+        """
+        solution = results.get("recommended_solution")
+        status = results.get("status", "unknown")
+
+        if not solution or status != "resolved":
+            return []
+
+        # Account for formatting overhead ("*Recommended Solution:*\n" is ~25 chars)
+        formatted_length = len(solution) + 30  # Buffer for formatting
+        if formatted_length <= 2900:
+            return [self._create_section_block("Recommended Solution", solution)]
+
+        # Split into multiple blocks with adjusted max length
+        from .text_utils import split_text_at_boundaries, create_continuation_header
+
+        # Leave room for title formatting in each part
+        max_content_length = (
+            2900 - 40
+        )  # Buffer for "*Recommended Solution (continued):*\n"
+        parts = split_text_at_boundaries(solution, max_content_length)
+        blocks = []
+        for i, part in enumerate(parts):
+            title = create_continuation_header("Recommended Solution", i > 0)
+            blocks.append(self._create_section_block(title, part))
+        return blocks
+
+    def _format_next_steps_topic(self, results: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Format next steps (splits if many steps).
+
+        Args:
+            results: Analysis results
+
+        Returns:
+            List of next steps blocks
+        """
+        next_steps = results.get("next_steps", [])
+        status = results.get("status", "unknown")
+
+        if not next_steps or status != "needs_data":
+            return []
+
+        # Limit to 3 steps initially
+        limited_steps = next_steps[:3]
+        steps_text = "\n".join([f"• {step}" for step in limited_steps])
+
+        if len(next_steps) > 3:
+            steps_text += f"\n• ... and {len(next_steps) - 3} more steps"
+
+        if len(steps_text) <= 2900:
+            return [self._create_section_block("Next Steps", steps_text)]
+
+        # Split steps if too long
+        from .text_utils import split_text_at_boundaries, create_continuation_header
+
+        parts = split_text_at_boundaries(steps_text, 2900)
+        blocks = []
+        for i, part in enumerate(parts):
+            title = create_continuation_header("Next Steps", i > 0)
+            blocks.append(self._create_section_block(title, part))
+        return blocks
+
+    def _format_footer_topic(self) -> List[Dict[str, Any]]:
+        """Format footer with timestamp (always single block).
+
+        Returns:
+            List containing footer block
+        """
+        from datetime import datetime
+
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
+
+        return [
+            {
+                "type": "context",
+                "elements": [
+                    {"type": "mrkdwn", "text": f"Analysis completed at {timestamp}"}
+                ],
+            }
+        ]
+
+    def _add_issue_header(
+        self, blocks: List[Dict[str, Any]], issue_url: str, issue_title: str
+    ) -> List[Dict[str, Any]]:
+        """Add issue header to first message.
+
+        Args:
+            blocks: Existing blocks to add header to
+            issue_url: GitHub issue URL
+            issue_title: Issue title
+
+        Returns:
+            Blocks with issue header prepended
+        """
+        header_block = {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*GitHub Issue Analysis Complete*\n<{issue_url}|{issue_title}>",
+            },
+        }
+        return [header_block] + blocks
+
+    def _post_single_message(
+        self, blocks: List[Dict[str, Any]], issue_title: str
+    ) -> bool:
+        """Post all content as single message (backward compatibility).
+
+        Args:
+            blocks: Slack Block Kit blocks to post
+            issue_title: Issue title for fallback text
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            response = self.bot_client.chat_postMessage(
+                channel=self.config.channel,
+                blocks=blocks,
+                text=f"GitHub Issue Analysis: {issue_title}",
+            )
+            return bool(response["ok"])
+        except Exception as e:
+            logger.error(f"Error posting single message: {e}")
+            return False
+
+    def _post_topic_sequence(
+        self, topics: List[List[Dict[str, Any]]], issue_url: str, issue_title: str
+    ) -> bool:
+        """Post topics as separate messages in thread.
+
+        Args:
+            topics: List of topic blocks, each containing multiple blocks
+            issue_url: GitHub issue URL
+            issue_title: Issue title
+
+        Returns:
+            True if all messages posted successfully, False otherwise
+        """
+        thread_ts = None
+        success_count = 0
+        total_topics = len(topics)
+
+        logger.info(f"Posting {total_topics} topic messages for analysis")
+
+        for i, topic_blocks in enumerate(topics):
+            try:
+                if i == 0:
+                    # First message includes issue header
+                    blocks_with_header = self._add_issue_header(
+                        topic_blocks, issue_url, issue_title
+                    )
+                    response = self.bot_client.chat_postMessage(
+                        channel=self.config.channel,
+                        blocks=blocks_with_header,
+                        text=f"GitHub Issue Analysis: {issue_title}",
+                    )
+                    thread_ts = response["ts"]
+                else:
+                    # Subsequent messages as thread replies
+                    response = self.bot_client.chat_postMessage(
+                        channel=self.config.channel,
+                        thread_ts=thread_ts,
+                        blocks=topic_blocks,
+                        text="Analysis continuation",
+                    )
+
+                if response["ok"]:
+                    success_count += 1
+                    logger.info(f"Posted topic {i + 1}/{total_topics} successfully")
+                else:
+                    logger.error(
+                        f"Failed to post topic {i + 1}/{total_topics}: {response}"
+                    )
+
+            except Exception as e:
+                logger.error(f"Error posting topic {i + 1}/{total_topics}: {e}")
+
+        success = success_count == total_topics
+        if success:
+            logger.info(f"All {total_topics} topic messages posted successfully")
+        else:
+            logger.warning(
+                f"Only {success_count}/{total_topics} topic messages posted successfully"
+            )
+
+        return success
+
+    def _post_topic_replies_to_thread(
+        self, topics: List[List[Dict[str, Any]]], thread_ts: str
+    ) -> bool:
+        """Post topic messages as replies to existing thread.
+
+        Args:
+            topics: List of topic blocks, each containing multiple blocks
+            thread_ts: Thread timestamp to reply to
+
+        Returns:
+            True if all messages posted successfully, False otherwise
+        """
+        success_count = 0
+        total_topics = len(topics)
+
+        for i, topic_blocks in enumerate(topics):
+            try:
+                response = self.bot_client.chat_postMessage(
+                    channel=self.config.channel,
+                    thread_ts=thread_ts,
+                    blocks=topic_blocks,
+                    text="Analysis results",
+                )
+
+                if response["ok"]:
+                    success_count += 1
+                    logger.info(
+                        f"Posted topic reply {i + 1}/{total_topics} successfully"
+                    )
+                else:
+                    logger.error(
+                        f"Failed to post topic reply {i + 1}/{total_topics}: {response}"
+                    )
+
+            except Exception as e:
+                logger.error(f"Error posting topic reply {i + 1}/{total_topics}: {e}")
+
+        return success_count == total_topics
