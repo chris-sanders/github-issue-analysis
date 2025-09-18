@@ -181,7 +181,9 @@ class TestMessageStrategy:
     @patch("gh_analysis.slack.client.SlackClient.bot_client")
     @patch("gh_analysis.slack.client.SlackClient.search_for_issue")
     @patch("gh_analysis.slack.config.SlackConfig.is_configured", return_value=True)
-    def test_single_message_for_small_content(self, mock_configured, mock_search, mock_bot_client):
+    def test_single_message_for_small_content(
+        self, mock_configured, mock_search, mock_bot_client
+    ):
         """Test single message strategy for small content."""
 
         mock_search.return_value = None  # No existing thread
@@ -204,7 +206,9 @@ class TestMessageStrategy:
     @patch("gh_analysis.slack.client.SlackClient.bot_client")
     @patch("gh_analysis.slack.client.SlackClient.search_for_issue")
     @patch("gh_analysis.slack.config.SlackConfig.is_configured", return_value=True)
-    def test_multi_message_for_large_content(self, mock_configured, mock_search, mock_bot_client):
+    def test_multi_message_for_large_content(
+        self, mock_configured, mock_search, mock_bot_client
+    ):
         """Test multi-message strategy for large content."""
 
         mock_search.return_value = None  # No existing thread
@@ -237,7 +241,9 @@ class TestMessageStrategy:
     @patch("gh_analysis.slack.client.SlackClient.bot_client")
     @patch("gh_analysis.slack.client.SlackClient.search_for_issue")
     @patch("gh_analysis.slack.config.SlackConfig.is_configured", return_value=True)
-    def test_thread_reply_for_existing_issue(self, mock_configured, mock_search, mock_bot_client):
+    def test_thread_reply_for_existing_issue(
+        self, mock_configured, mock_search, mock_bot_client
+    ):
         """Test replying to existing thread."""
 
         mock_search.return_value = "existing_thread_123"  # Existing thread
@@ -262,7 +268,9 @@ class TestMessageStrategy:
     @patch("gh_analysis.slack.client.SlackClient.bot_client")
     @patch("gh_analysis.slack.client.SlackClient.search_for_issue")
     @patch("gh_analysis.slack.config.SlackConfig.is_configured", return_value=True)
-    def test_partial_posting_failure_handling(self, mock_configured, mock_search, mock_bot_client):
+    def test_partial_posting_failure_handling(
+        self, mock_configured, mock_search, mock_bot_client
+    ):
         """Test handling of partial posting failures."""
 
         mock_search.return_value = None
@@ -272,6 +280,7 @@ class TestMessageStrategy:
             {"ok": True, "ts": "123.456"},  # First message succeeds
             {"ok": False, "error": "rate_limited"},  # Second message fails
             {"ok": True, "ts": "123.789"},  # Third message succeeds
+            {"ok": True, "ts": "123.999"},  # Fourth message succeeds
         ]
         mock_bot_client.chat_postMessage.side_effect = mock_responses
 
@@ -286,7 +295,7 @@ class TestMessageStrategy:
         )
 
         assert not success  # Should fail due to partial failure
-        assert mock_bot_client.chat_postMessage.call_count == 3
+        assert mock_bot_client.chat_postMessage.call_count == 4
 
 
 class TestBackwardCompatibility:
@@ -315,13 +324,17 @@ class TestBackwardCompatibility:
 
         sig = inspect.signature(method)
         expected_params = ["issue_url", "issue_title", "analysis_results", "agent_name"]
-        actual_params = list(sig.parameters.keys())[1:]  # Skip 'self'
+        actual_params = list(
+            sig.parameters.keys()
+        )  # Don't skip 'self' for bound method
         assert actual_params == expected_params
 
     @patch("gh_analysis.slack.client.SlackClient.bot_client")
     @patch("gh_analysis.slack.client.SlackClient.search_for_issue")
     @patch("gh_analysis.slack.config.SlackConfig.is_configured", return_value=True)
-    def test_normal_content_uses_single_message(self, mock_configured, mock_search, mock_bot_client):
+    def test_normal_content_uses_single_message(
+        self, mock_configured, mock_search, mock_bot_client
+    ):
         """Test that normal-sized content still uses single message (backward compatibility)."""
 
         mock_search.return_value = None

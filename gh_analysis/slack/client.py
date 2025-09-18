@@ -172,9 +172,31 @@ class SlackClient:
                 f"Generated {len(non_empty_topics)} topics with {total_blocks} total blocks"
             )
 
-            # Step 3: Decide posting strategy
-            if total_blocks <= 45:  # Leave margin for Slack's 50 block limit
-                # Send as single message (preserves backward compatibility)
+            # Step 3: Decide posting strategy - use multi-message if content topics were split
+            # Skip status topic (index 0) since it naturally has 2 blocks
+            content_topics = non_empty_topics[1:] if non_empty_topics else []
+            has_split_content = any(len(topic) > 1 for topic in content_topics)
+
+            if (
+                has_split_content or total_blocks > 15
+            ):  # Use multi-message for split content
+                # Send each topic as separate message in thread
+                logger.info(
+                    f"Using multi-message posting due to split topics or {total_blocks} blocks"
+                )
+                if thread_ts:
+                    # Post topics as replies to existing thread
+                    return self._post_topic_replies_to_thread(
+                        non_empty_topics, thread_ts
+                    )
+                else:
+                    # Post topics as new thread
+                    return self._post_topic_sequence(
+                        non_empty_topics, issue_url, issue_title
+                    )
+            else:
+                # Send as single message for simple content
+                logger.info("Using single message posting for simple content")
                 all_blocks = [block for topic in non_empty_topics for block in topic]
 
                 if thread_ts:
@@ -196,18 +218,6 @@ class SlackClient:
                         all_blocks, issue_url, issue_title
                     )
                     return self._post_single_message(blocks_with_header, issue_title)
-            else:
-                # Send each topic as separate message in thread
-                if thread_ts:
-                    # Post topics as replies to existing thread
-                    return self._post_topic_replies_to_thread(
-                        non_empty_topics, thread_ts
-                    )
-                else:
-                    # Post topics as new thread
-                    return self._post_topic_sequence(
-                        non_empty_topics, issue_url, issue_title
-                    )
 
         except Exception as e:
             logger.error(f"Failed to send Slack notification: {e}")
