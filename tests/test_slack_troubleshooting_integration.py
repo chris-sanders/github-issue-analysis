@@ -2,6 +2,7 @@
 
 from unittest.mock import patch
 
+from gh_analysis.ai.models import ResolvedAnalysis, NeedsDataAnalysis
 from gh_analysis.slack.client import SlackClient
 from gh_analysis.slack.config import SlackConfig
 
@@ -19,18 +20,20 @@ class TestTroubleshootingSlackIntegration:
         mock_search.return_value = None
         mock_bot_client.chat_postMessage.return_value = {"ok": True, "ts": "123"}
 
-        # Use actual ResolvedAnalysis field names
-        resolved_results = {
-            "status": "resolved",
-            "root_cause": "The service fails to start because the database connection string is malformed",
-            "evidence": [
+        # Use ACTUAL ResolvedAnalysis dataclass
+        resolved_analysis = ResolvedAnalysis(
+            root_cause="The service fails to start because the database connection string is malformed",
+            evidence=[
                 "Error log shows: 'Invalid connection string format'",
                 "Service crashes immediately after attempting database connection",
                 "Connection string contains unescaped special characters",
             ],
-            "solution": "Escape special characters in the database password using URL encoding",
-            "validation": "The error message directly indicates connection string parsing failure",
-        }
+            solution="Escape special characters in the database password using URL encoding",
+            validation="The error message directly indicates connection string parsing failure",
+        )
+
+        # This is what the CLI actually does - passes model_dump() output
+        resolved_results = resolved_analysis.model_dump()
 
         client = SlackClient(SlackConfig())
         success = client.notify_analysis_complete(
@@ -68,22 +71,24 @@ class TestTroubleshootingSlackIntegration:
         mock_search.return_value = None
         mock_bot_client.chat_postMessage.return_value = {"ok": True, "ts": "123"}
 
-        # Use actual NeedsDataAnalysis field names
-        needs_data_results = {
-            "status": "needs_data",
-            "current_hypothesis": "Likely a memory leak but need heap dumps to confirm",
-            "missing_evidence": [
+        # Use ACTUAL NeedsDataAnalysis dataclass
+        needs_data_analysis = NeedsDataAnalysis(
+            current_hypothesis="Likely a memory leak but need heap dumps to confirm",
+            missing_evidence=[
                 "Heap dump from when memory usage is high",
                 "GC logs showing collection frequency",
                 "Thread dump to check for thread leaks",
             ],
-            "next_steps": [
+            next_steps=[
                 "Enable heap dump on OutOfMemoryError with -XX:+HeapDumpOnOutOfMemoryError",
                 "Enable GC logging with -Xlog:gc*",
                 "Take thread dump when memory is high using jstack",
             ],
-            "eliminated": ["Network issues - no connection errors in logs"],
-        }
+            eliminated=["Network issues - no connection errors in logs"],
+        )
+
+        # This is what the CLI actually does - passes model_dump() output
+        needs_data_results = needs_data_analysis.model_dump()
 
         client = SlackClient(SlackConfig())
         success = client.notify_analysis_complete(
@@ -123,13 +128,14 @@ class TestTroubleshootingSlackIntegration:
         mock_search.return_value = None
         mock_bot_client.chat_postMessage.return_value = {"ok": True, "ts": "123"}
 
-        results = {
-            "status": "resolved",
-            "root_cause": "Configuration file missing",
-            "evidence": ["Error: config.yaml not found"],
-            "solution": "Create config.yaml with required settings",
-            "validation": "Error directly indicates missing file",
-        }
+        # Use ACTUAL ResolvedAnalysis dataclass
+        resolved = ResolvedAnalysis(
+            root_cause="Configuration file missing",
+            evidence=["Error: config.yaml not found"],
+            solution="Create config.yaml with required settings",
+            validation="Error directly indicates missing file",
+        )
+        results = resolved.model_dump()
 
         client = SlackClient(SlackConfig())
         success = client.notify_analysis_complete(
@@ -199,13 +205,14 @@ class TestTroubleshootingSlackIntegration:
             + "B" * 3000
         )  # Make it very long
 
-        results = {
-            "status": "resolved",
-            "root_cause": long_root_cause,
-            "evidence": [f"Evidence point {i}" for i in range(20)],
-            "solution": long_solution,
-            "validation": "Multiple validation points confirm this analysis",
-        }
+        # Use ACTUAL ResolvedAnalysis dataclass
+        resolved = ResolvedAnalysis(
+            root_cause=long_root_cause,
+            evidence=[f"Evidence point {i}" for i in range(20)],
+            solution=long_solution,
+            validation="Multiple validation points confirm this analysis",
+        )
+        results = resolved.model_dump()
 
         client = SlackClient(SlackConfig())
         success = client.notify_analysis_complete(
@@ -246,38 +253,38 @@ class TestTroubleshootingSlackIntegration:
 
 
 class TestFieldCompatibility:
-    """Test field name compatibility between different analysis types."""
+    """Test that Slack handles exact troubleshooting datatypes."""
 
-    def test_all_analysis_types_field_mapping(self):
-        """Verify field mapping handles all analysis types correctly."""
+    def test_troubleshooting_datatypes_handled(self):
+        """Verify Slack handles the exact datatypes from troubleshooting agents."""
         client = SlackClient(SlackConfig())
 
-        # Test cases for different analysis types
-        test_cases = [
-            # Troubleshooting uses 'solution'
-            {
-                "name": "troubleshooting_resolved",
-                "data": {"status": "resolved", "solution": "Fix from troubleshooting"},
-                "expected_field": "solution",
-            },
-            # Product labeling uses 'recommended_solution'
-            {
-                "name": "product_labeling",
-                "data": {
-                    "status": "resolved",
-                    "recommended_solution": "Fix from labeling",
-                },
-                "expected_field": "recommended_solution",
-            },
-        ]
+        # Test ACTUAL ResolvedAnalysis dataclass
+        resolved = ResolvedAnalysis(
+            root_cause="Database connection timeout",
+            evidence=["Timeout in logs", "Connection pool exhausted"],
+            solution="Increase connection timeout to 30s",
+            validation="Logs confirm timeout at connection phase",
+        )
+        resolved_analysis = resolved.model_dump()
 
-        for test_case in test_cases:
-            blocks = client._format_solution_topic(test_case["data"])
-            if test_case["data"]["status"] == "resolved":
-                assert len(blocks) > 0, f"No blocks for {test_case['name']}"
-                assert "Fix from" in blocks[0]["text"]["text"], (
-                    f"Solution not found for {test_case['name']}"
-                )
+        # Test ACTUAL NeedsDataAnalysis dataclass
+        needs_data = NeedsDataAnalysis(
+            current_hypothesis="Memory leak suspected",
+            missing_evidence=["Heap dump", "GC logs"],
+            next_steps=["Enable heap dumps", "Monitor memory"],
+            eliminated=["Network issues - no errors"],
+        )
+        needs_data_analysis = needs_data.model_dump()
+
+        # Test that ResolvedAnalysis solution field works
+        blocks = client._format_solution_topic(resolved_analysis)
+        assert len(blocks) > 0, "ResolvedAnalysis solution not formatted"
+        assert "Increase connection timeout" in blocks[0]["text"]["text"]
+
+        # Test that NeedsDataAnalysis has no solution
+        blocks = client._format_solution_topic(needs_data_analysis)
+        assert blocks == [], "NeedsDataAnalysis should have no solution"
 
     def test_missing_field_graceful_handling(self):
         """Test that missing fields are handled gracefully."""

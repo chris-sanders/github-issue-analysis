@@ -143,7 +143,7 @@ class TestTopicFormatting:
 
     def test_solution_topic_formatting(self):
         """Test solution topic formatting."""
-        results = {"recommended_solution": "Simple solution", "status": "resolved"}
+        results = {"solution": "Simple solution", "status": "resolved"}
         blocks = self.client._format_solution_topic(results)
 
         assert len(blocks) == 1
@@ -193,7 +193,7 @@ class TestMessageStrategy:
         results = {
             "status": "resolved",
             "root_cause": "Simple cause",
-            "recommended_solution": "Simple solution",
+            "solution": "Simple solution",  # Troubleshooting uses 'solution'
         }
 
         success = self.client.notify_analysis_complete(
@@ -218,7 +218,7 @@ class TestMessageStrategy:
         results = {
             "status": "resolved",
             "root_cause": "A" * 5000,  # Very long content
-            "recommended_solution": "B" * 5000,  # Very long content
+            "solution": "B" * 5000,  # Very long content (troubleshooting uses 'solution')
             "evidence": [f"Evidence {i}" for i in range(20)],  # Many evidence points
         }
 
@@ -252,7 +252,7 @@ class TestMessageStrategy:
         results = {
             "status": "resolved",
             "root_cause": "Simple cause",
-            "recommended_solution": "Simple solution",
+            "solution": "Simple solution",  # Troubleshooting uses 'solution'
         }
 
         success = self.client.notify_analysis_complete(
@@ -419,21 +419,13 @@ class TestBackwardCompatibility:
         )
         assert root_cause_index == 1, "Root Cause should be second topic (after status)"
 
-    def test_solution_field_mapping_backward_compatibility(self):
-        """Test that both 'solution' and 'recommended_solution' fields work."""
+    def test_solution_field_for_troubleshooting(self):
+        """Test that troubleshooting 'solution' field works correctly."""
         client = SlackClient(SlackConfig())
 
-        # Test with 'solution' field (new troubleshooting format)
-        results_new = {"status": "resolved", "solution": "Fix using new format"}
-        blocks = client._format_solution_topic(results_new)
+        # Test with 'solution' field (the ONLY field troubleshooting uses)
+        results = {"status": "resolved", "solution": "Fix the issue by doing X"}
+        blocks = client._format_solution_topic(results)
         assert len(blocks) == 1
-        assert "Fix using new format" in blocks[0]["text"]["text"]
-
-        # Test with 'recommended_solution' field (old format)
-        results_old = {
-            "status": "resolved",
-            "recommended_solution": "Fix using old format",
-        }
-        blocks = client._format_solution_topic(results_old)
-        assert len(blocks) == 1
-        assert "Fix using old format" in blocks[0]["text"]["text"]
+        assert "Fix the issue by doing X" in blocks[0]["text"]["text"]
+        assert "*Recommended Solution:*" in blocks[0]["text"]["text"]

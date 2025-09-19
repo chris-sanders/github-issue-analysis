@@ -402,8 +402,7 @@ class SlackClient:
             )
 
         # Solution (if high confidence)
-        # Handle both field names for backward compatibility
-        solution = results.get("recommended_solution") or results.get("solution")
+        solution = results.get("solution")
         if solution and status == "resolved":
             blocks.append(
                 {
@@ -573,8 +572,7 @@ class SlackClient:
         Returns:
             List of solution blocks
         """
-        # Handle both field names for backward compatibility
-        solution = results.get("recommended_solution") or results.get("solution")
+        solution = results.get("solution")
         status = results.get("status", "unknown")
 
         if not solution or status != "resolved":
