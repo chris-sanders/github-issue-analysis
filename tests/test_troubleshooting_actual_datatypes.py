@@ -1,5 +1,6 @@
 """Test that Slack handles the EXACT datatypes returned by troubleshooting agents."""
 
+from typing import Any, Dict, List
 from unittest.mock import patch
 
 from gh_analysis.ai.models import ResolvedAnalysis, NeedsDataAnalysis
@@ -55,7 +56,9 @@ class TestActualTroubleshootingDatatypes:
         assert "database connection pool is exhausted" in all_text, "root_cause missing"
         assert "Connection pool metrics show 100%" in all_text, "evidence missing"
         assert "Implement connection timeout" in all_text, "solution missing"
-        assert "evidence directly shows connection exhaustion" in all_text, "validation missing"
+        assert "evidence directly shows connection exhaustion" in all_text, (
+            "validation missing"
+        )
 
         # Verify field is labeled as "Recommended Solution" in UI
         assert "*Recommended Solution:*" in all_text, "Solution not properly labeled"
@@ -115,7 +118,9 @@ class TestActualTroubleshootingDatatypes:
         assert "Database connection leak" in all_text, "eliminated missing"
 
         # Verify NO solution is shown (NeedsDataAnalysis has no solution field)
-        assert "*Recommended Solution:*" not in all_text, "Solution shown for needs_data"
+        assert "*Recommended Solution:*" not in all_text, (
+            "Solution shown for needs_data"
+        )
 
     def test_dataclass_field_names(self):
         """Verify the exact field names in the dataclasses."""
@@ -128,8 +133,12 @@ class TestActualTroubleshootingDatatypes:
         )
 
         resolved_dict = resolved.model_dump()
-        assert "solution" in resolved_dict, "ResolvedAnalysis should have 'solution' field"
-        assert "recommended_solution" not in resolved_dict, "ResolvedAnalysis should NOT have 'recommended_solution'"
+        assert "solution" in resolved_dict, (
+            "ResolvedAnalysis should have 'solution' field"
+        )
+        assert "recommended_solution" not in resolved_dict, (
+            "ResolvedAnalysis should NOT have 'recommended_solution'"
+        )
 
         # NeedsDataAnalysis fields
         needs_data = NeedsDataAnalysis(
@@ -140,10 +149,14 @@ class TestActualTroubleshootingDatatypes:
         )
 
         needs_data_dict = needs_data.model_dump()
-        assert "solution" not in needs_data_dict, "NeedsDataAnalysis should NOT have 'solution'"
-        assert "recommended_solution" not in needs_data_dict, "NeedsDataAnalysis should NOT have 'recommended_solution'"
+        assert "solution" not in needs_data_dict, (
+            "NeedsDataAnalysis should NOT have 'solution'"
+        )
+        assert "recommended_solution" not in needs_data_dict, (
+            "NeedsDataAnalysis should NOT have 'recommended_solution'"
+        )
 
-    def _extract_all_text(self, blocks):
+    def _extract_all_text(self, blocks: List[Dict[str, Any]]) -> str:
         """Helper to extract all text from Slack blocks."""
         all_text = ""
         for block in blocks:

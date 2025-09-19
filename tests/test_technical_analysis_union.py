@@ -1,7 +1,7 @@
 """Test that Slack handles the TechnicalAnalysis union type correctly."""
 
-from typing import Union
-from unittest.mock import patch, Mock
+from typing import Any, Dict, List
+from unittest.mock import patch
 
 from gh_analysis.ai.models import ResolvedAnalysis, NeedsDataAnalysis, TechnicalAnalysis
 from gh_analysis.slack.client import SlackClient
@@ -137,7 +137,7 @@ class TestTechnicalAnalysisUnion:
         assert "current_hypothesis" not in resolved_dict
         assert "current_hypothesis" in needs_data_dict
 
-    def _extract_all_text(self, blocks):
+    def _extract_all_text(self, blocks: List[Dict[str, Any]]) -> str:
         """Helper to extract all text from Slack blocks."""
         all_text = ""
         for block in blocks:

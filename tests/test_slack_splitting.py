@@ -218,7 +218,8 @@ class TestMessageStrategy:
         results = {
             "status": "resolved",
             "root_cause": "A" * 5000,  # Very long content
-            "solution": "B" * 5000,  # Very long content (troubleshooting uses 'solution')
+            "solution": "B"
+            * 5000,  # Very long content (troubleshooting uses 'solution')
             "evidence": [f"Evidence {i}" for i in range(20)],  # Many evidence points
         }
 

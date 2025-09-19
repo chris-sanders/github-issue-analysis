@@ -1,5 +1,6 @@
 """Tests for the dynamic troubleshooting formatter."""
 
+from typing import Any
 from gh_analysis.slack.troubleshooting_formatter import TroubleshootingFormatter
 
 
@@ -87,7 +88,7 @@ class TestTroubleshootingFormatter:
         """Test that long text fields are split into multiple blocks."""
         long_text = "A" * 3500  # Exceeds 2900 char limit
 
-        results = {
+        results: dict[str, Any] = {
             "status": "resolved",
             "root_cause": long_text,
             "evidence": [],
@@ -111,7 +112,7 @@ class TestTroubleshootingFormatter:
 
     def test_empty_fields_not_included(self):
         """Test that empty fields are not included in output."""
-        results = {
+        results: dict[str, Any] = {
             "status": "resolved",
             "root_cause": "Simple cause",
             "evidence": [],  # Empty list
