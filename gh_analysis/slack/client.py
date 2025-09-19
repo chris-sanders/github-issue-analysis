@@ -157,8 +157,10 @@ class SlackClient:
 
             all_topics = [
                 self._format_status_topic(analysis_results, agent_name),
-                self._format_evidence_topic(analysis_results),
-                self._format_root_cause_topic(analysis_results),
+                self._format_root_cause_topic(
+                    analysis_results
+                ),  # Moved before evidence
+                self._format_evidence_topic(analysis_results),  # Moved after root cause
                 self._format_solution_topic(analysis_results),
                 self._format_next_steps_topic(analysis_results),
                 self._format_footer_topic(),
@@ -377,7 +379,8 @@ class SlackClient:
             )
 
         # Solution (if high confidence)
-        solution = results.get("recommended_solution")
+        # Handle both field names for backward compatibility
+        solution = results.get("recommended_solution") or results.get("solution")
         if solution and status == "resolved":
             blocks.append(
                 {
@@ -547,7 +550,8 @@ class SlackClient:
         Returns:
             List of solution blocks
         """
-        solution = results.get("recommended_solution")
+        # Handle both field names for backward compatibility
+        solution = results.get("recommended_solution") or results.get("solution")
         status = results.get("status", "unknown")
 
         if not solution or status != "resolved":

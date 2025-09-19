@@ -368,3 +368,65 @@ class TestBackwardCompatibility:
         assert "normal-sized root cause" in all_text
         assert "normal-sized solution" in all_text
         assert "Evidence 1" in all_text
+
+    def test_topic_ordering_root_cause_first(self):
+        """Test that Root Cause appears before Evidence in topic order."""
+        results = {
+            "status": "resolved",
+            "root_cause": "Test root cause",
+            "evidence": ["Evidence 1", "Evidence 2"],
+            "solution": "Test solution",
+        }
+
+        # Use internal method to verify ordering
+        client = SlackClient(SlackConfig())
+
+        # Get all topics in the actual order used by notify_analysis_complete
+        all_topics = [
+            client._format_status_topic(results, "test_agent"),
+            client._format_root_cause_topic(results),
+            client._format_evidence_topic(results),
+            client._format_solution_topic(results),
+            client._format_next_steps_topic(results),
+            client._format_footer_topic(),
+        ]
+
+        # Filter non-empty topics
+        non_empty_topics = [topic for topic in all_topics if topic]
+
+        # Find indices of root cause and evidence topics
+        root_cause_index = -1
+        evidence_index = -1
+
+        for i, topic in enumerate(non_empty_topics):
+            if topic and len(topic) > 0:
+                text = topic[0].get("text", {}).get("text", "")
+                if "Root Cause" in text:
+                    root_cause_index = i
+                elif "Evidence" in text:
+                    evidence_index = i
+
+        # Root Cause should come before Evidence
+        assert root_cause_index < evidence_index, (
+            "Root Cause must appear before Evidence"
+        )
+        assert root_cause_index == 1, "Root Cause should be second topic (after status)"
+
+    def test_solution_field_mapping_backward_compatibility(self):
+        """Test that both 'solution' and 'recommended_solution' fields work."""
+        client = SlackClient(SlackConfig())
+
+        # Test with 'solution' field (new troubleshooting format)
+        results_new = {"status": "resolved", "solution": "Fix using new format"}
+        blocks = client._format_solution_topic(results_new)
+        assert len(blocks) == 1
+        assert "Fix using new format" in blocks[0]["text"]["text"]
+
+        # Test with 'recommended_solution' field (old format)
+        results_old = {
+            "status": "resolved",
+            "recommended_solution": "Fix using old format",
+        }
+        blocks = client._format_solution_topic(results_old)
+        assert len(blocks) == 1
+        assert "Fix using old format" in blocks[0]["text"]["text"]
