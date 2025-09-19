@@ -179,25 +179,19 @@ Only use the standard co-author format when explicitly requested by the user.
 
 ## GitHub CLI Usage
 
-**IMPORTANT Token Configuration:**
-- For **testing the program** (collecting issues): Use `GITHUB_TOKEN` (required for accessing test repositories)
-- For **GitHub CLI operations** (creating PRs, viewing repos): Use `GITHUB_PERSONAL_ACCESS_TOKEN`
-
 **GitHub CLI Commands:**
 ```bash
-# Create pull requests (use GITHUB_PERSONAL_ACCESS_TOKEN)
-GITHUB_TOKEN=$GITHUB_PERSONAL_ACCESS_TOKEN gh pr create --title "Title" --body "Body"
+# Create pull requests
+gh pr create --title "Title" --body "Body"
 
-# View repository information (use GITHUB_PERSONAL_ACCESS_TOKEN) 
-GITHUB_TOKEN=$GITHUB_PERSONAL_ACCESS_TOKEN gh repo view
+# View repository information
+gh repo view
 
-# Testing the CLI tool (use GITHUB_TOKEN for test repo access)
+# Testing the CLI tool
 uv run gh-analysis collect --org [USER-ORG] --repo [USER-REPO] --issue-number [USER-ISSUE]
 ```
 
-**Why Two Tokens:**
-- `GITHUB_TOKEN`: Has access to test repositories but limited GitHub API permissions
-- `GITHUB_PERSONAL_ACCESS_TOKEN`: Has full GitHub API permissions for repository operations
+The `GITHUB_TOKEN` environment variable is used for all GitHub operations.
 
 ## Repository Reference Policy
 

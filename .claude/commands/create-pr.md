@@ -35,7 +35,7 @@ Think very carefully about creating this pull request. I need you to:
 
 6. **Push and create PR**:
    - Push the branch: `git push -u origin feature/[task-name]`
-   - Create PR with: `GITHUB_TOKEN=$GITHUB_PERSONAL_ACCESS_TOKEN gh pr create --title "[Title]" --body "[Body]"`
+   - Create PR with: `gh pr create --title "[Title]" --body "[Body]"`
 
 7. **PR content should include**:
    - **Summary**: Concise bullets of real functionality added
