@@ -154,17 +154,40 @@ class SlackClient:
             thread_ts = self.search_for_issue(issue_url)
 
             # Step 2: Generate all topic blocks
+            from .troubleshooting_formatter import TroubleshootingFormatter
 
-            all_topics = [
-                self._format_status_topic(analysis_results, agent_name),
-                self._format_root_cause_topic(
-                    analysis_results
-                ),  # Moved before evidence
-                self._format_evidence_topic(analysis_results),  # Moved after root cause
-                self._format_solution_topic(analysis_results),
-                self._format_next_steps_topic(analysis_results),
-                self._format_footer_topic(),
-            ]
+            formatter = TroubleshootingFormatter()
+
+            # Check if we should use dynamic formatting for troubleshooting results
+            if formatter.should_use_dynamic_formatting(analysis_results):
+                # Use dynamic formatting for troubleshooting
+                all_topics = []
+
+                # Add status topic first
+                all_topics.append(
+                    self._format_status_topic(analysis_results, agent_name)
+                )
+
+                # Add dynamically formatted troubleshooting fields
+                dynamic_topics = formatter.format_analysis_topics(analysis_results)
+                all_topics.extend(dynamic_topics)
+
+                # Add footer last
+                all_topics.append(self._format_footer_topic())
+            else:
+                # Fall back to legacy formatting for non-troubleshooting results
+                all_topics = [
+                    self._format_status_topic(analysis_results, agent_name),
+                    self._format_root_cause_topic(
+                        analysis_results
+                    ),  # Moved before evidence
+                    self._format_evidence_topic(
+                        analysis_results
+                    ),  # Moved after root cause
+                    self._format_solution_topic(analysis_results),
+                    self._format_next_steps_topic(analysis_results),
+                    self._format_footer_topic(),
+                ]
 
             # Filter out empty topics
             non_empty_topics = [topic for topic in all_topics if topic]

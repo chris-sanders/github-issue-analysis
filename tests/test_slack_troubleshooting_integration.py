@@ -1,7 +1,6 @@
 """Integration tests for Slack notifications with troubleshooting analysis results."""
 
-from unittest.mock import Mock, patch
-import pytest
+from unittest.mock import patch
 
 from gh_analysis.slack.client import SlackClient
 from gh_analysis.slack.config import SlackConfig
@@ -50,9 +49,14 @@ class TestTroubleshootingSlackIntegration:
         all_text = self._extract_all_text(blocks)
 
         # Verify critical content is displayed
-        assert "database connection string is malformed" in all_text, "Root cause not found"
+        assert "database connection string is malformed" in all_text, (
+            "Root cause not found"
+        )
         assert "Invalid connection string format" in all_text, "Evidence not found"
         assert "Escape special characters" in all_text, "Solution not found"
+        assert "directly indicates connection string parsing failure" in all_text, (
+            "Validation not found"
+        )
 
     @patch("gh_analysis.slack.client.SlackClient.bot_client")
     @patch("gh_analysis.slack.client.SlackClient.search_for_issue")
@@ -96,11 +100,18 @@ class TestTroubleshootingSlackIntegration:
 
         all_text = self._extract_all_text(blocks)
 
-        # Verify next steps are displayed (not solution)
+        # Verify all needs_data fields are displayed
+        assert "Likely a memory leak" in all_text, "Current hypothesis not found"
+        assert "Heap dump from when memory usage is high" in all_text, (
+            "Missing evidence not found"
+        )
         assert "Enable heap dump" in all_text, "Next steps not found"
         assert "HeapDumpOnOutOfMemoryError" in all_text, "Next steps details not found"
+        assert "Network issues" in all_text, "Eliminated items not found"
         # Solution should NOT appear for needs_data
-        assert "Recommended Solution" not in all_text, "Solution shown for needs_data status"
+        assert "Recommended Solution" not in all_text, (
+            "Solution shown for needs_data status"
+        )
 
     @patch("gh_analysis.slack.client.SlackClient.bot_client")
     @patch("gh_analysis.slack.client.SlackClient.search_for_issue")
@@ -176,11 +187,17 @@ class TestTroubleshootingSlackIntegration:
         mock_bot_client.chat_postMessage.return_value = {"ok": True, "ts": "123"}
 
         # Create very long content that should trigger splitting
-        long_root_cause = """The issue is caused by a complex interaction between multiple system components.
-        """ + "A" * 3000  # Make it very long
+        long_root_cause = (
+            """The issue is caused by a complex interaction between multiple system components.
+        """
+            + "A" * 3000
+        )  # Make it very long
 
-        long_solution = """To resolve this issue, follow these detailed steps:
-        """ + "B" * 3000  # Make it very long
+        long_solution = (
+            """To resolve this issue, follow these detailed steps:
+        """
+            + "B" * 3000
+        )  # Make it very long
 
         results = {
             "status": "resolved",
@@ -211,7 +228,9 @@ class TestTroubleshootingSlackIntegration:
         assert "thread_ts" not in first_call, "First message should create thread"
 
         for call in calls[1:]:
-            assert "thread_ts" in call[1], "Subsequent messages should be thread replies"
+            assert "thread_ts" in call[1], (
+                "Subsequent messages should be thread replies"
+            )
 
     def _extract_all_text(self, blocks):
         """Helper to extract all text from Slack blocks."""
@@ -244,7 +263,10 @@ class TestFieldCompatibility:
             # Product labeling uses 'recommended_solution'
             {
                 "name": "product_labeling",
-                "data": {"status": "resolved", "recommended_solution": "Fix from labeling"},
+                "data": {
+                    "status": "resolved",
+                    "recommended_solution": "Fix from labeling",
+                },
                 "expected_field": "recommended_solution",
             },
         ]
