@@ -2,7 +2,9 @@
 
 import asyncio
 import json
+import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Optional
 
 import typer
@@ -49,7 +51,7 @@ async def fetch_and_format_issue(org: str, repo: str, issue_number: int) -> dict
         github_client.get_issue_comments, org, repo, issue_number
     )
 
-    # Format as expected by runners
+    # Format as expected by MultiSummaryRunner (matches context-experiments format)
     formatted = {
         "number": issue.get("number"),
         "title": issue.get("title"),
@@ -72,34 +74,41 @@ async def fetch_and_format_issue(org: str, repo: str, issue_number: int) -> dict
     return formatted
 
 
-async def generate_summary(issue_data: dict, model: str) -> dict:
-    """Generate summary using AI model."""
-    console.print(f"🤖 Generating summary using model: {model}")
+async def generate_summary(issue_data: dict) -> dict:
+    """Generate summary using MultiSummaryRunner from context-experiments."""
+    console.print(f"🤖 Generating summary using MultiSummaryRunner...")
 
-    # Use BaseSummaryRunner with specified model
-    from ..runners.base_summary import BaseSummaryRunner
-    runner = BaseSummaryRunner(model_name=model)
+    # Import MultiSummaryRunner from context-experiments
+    # Add context-experiments to path if not already there
+    context_exp_path = Path("/Users/chris/src/context-experiments/exp/05_memory")
+    if str(context_exp_path) not in sys.path:
+        sys.path.insert(0, str(context_exp_path))
 
-    # Generate summary
+    try:
+        from runners.multi_summary import MultiSummaryRunner
+    except ImportError as e:
+        raise ImportError(
+            f"Failed to import MultiSummaryRunner from context-experiments: {e}\n"
+            f"Make sure {context_exp_path} exists and contains the runners module."
+        )
+
+    # Create runner and generate summary
+    runner = MultiSummaryRunner()
     summary_result = await runner.analyze(issue_data)
 
-    # Ensure proper structure
-    if isinstance(summary_result, str):
-        # Try to parse if it's JSON string
-        try:
-            summary_result = json.loads(summary_result)
-        except:
-            # Create basic structure
-            summary_result = {
-                "product": ["unknown"],
-                "symptoms": [summary_result[:100]],
-                "evidence": [],
-                "cause": "Auto-generated",
-                "fix": [],
-                "confidence": 0.5
-            }
+    # Check for error output
+    if isinstance(summary_result, str) and summary_result.startswith("❌"):
+        raise RuntimeError(f"Summary generation failed: {summary_result}")
 
-    return summary_result
+    # Convert Pydantic model to dict if needed
+    if hasattr(summary_result, 'model_dump'):
+        summary_dict = summary_result.model_dump()
+    elif hasattr(summary_result, 'dict'):
+        summary_dict = summary_result.dict()
+    else:
+        summary_dict = summary_result
+
+    return summary_dict
 
 
 def save_to_snowflake(
@@ -116,7 +125,7 @@ def save_to_snowflake(
     # Initialize Snowflake client for EXP05 schema
     sf_client = SnowflakeDevClient(schema="EXP05")
 
-    # Create table DDL
+    # Create table DDL (matches context-experiments schema)
     table_ddl = """
     CREATE TABLE IF NOT EXISTS SUMMARIES (
         ORG_NAME VARCHAR(255) NOT NULL,
@@ -173,19 +182,13 @@ def store(
         "-u",
         help="GitHub issue URL to process",
     ),
-    model: str = typer.Option(
-        "gpt-4-turbo",
-        "--model",
-        "-m",
-        help="OpenAI model to use for summary generation (e.g., gpt-4-turbo, gpt-4o, gpt-4o-mini)",
-    ),
     dry_run: bool = typer.Option(
         False,
         "--dry-run",
         help="Generate summary but don't save to Snowflake",
     ),
 ) -> None:
-    """Generate and store a case summary in Snowflake."""
+    """Generate and store a case summary in Snowflake using MultiSummaryRunner."""
 
     try:
         # Parse URL
@@ -205,7 +208,7 @@ def store(
             issue_data = await fetch_and_format_issue(org, repo, issue_number)
 
             # Generate summary
-            summary = await generate_summary(issue_data, model)
+            summary = await generate_summary(issue_data)
 
             if dry_run:
                 console.print("\n[yellow]🔍 DRY RUN - Summary Generated:[/yellow]")
@@ -218,8 +221,8 @@ def store(
                     repo=repo,
                     issue_number=issue_number,
                     summary=summary,
-                    runner_name="gh-analysis-cli",
-                    model_name=model
+                    runner_name="MultiSummaryRunner",
+                    model_name="multi-agent"
                 )
 
                 console.print(f"\n✅ Successfully processed {org}/{repo}#{issue_number}")
