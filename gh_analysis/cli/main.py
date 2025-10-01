@@ -3,7 +3,7 @@
 import typer
 from rich.console import Console
 
-from . import batch, process, recommendations
+from . import batch, process, recommendations, store_summary
 from .collect import collect, status
 from .export import export
 from .update import update_labels
@@ -35,6 +35,7 @@ app.command(
 app.add_typer(process.app, name="process")
 app.add_typer(batch.app, name="batch")
 app.add_typer(recommendations.app, name="recommendations")
+app.add_typer(store_summary.app, name="store-summary")
 
 
 @app.command(context_settings={"help_option_names": ["-h", "--help"]})
