@@ -243,11 +243,11 @@ class BaseAgentRunner(ABC):
 
         # Import new Phoenix integration utilities
         try:
-            from utils.mcp_instrumentation import (
+            from .mcp_instrumentation import (
                 instrument_mcp_agent,
                 get_mcp_tool_metrics,
             )
-            from utils.context_tracking import (
+            from .context_tracking import (
                 add_message_history_to_span,
             )
 
@@ -313,7 +313,7 @@ class BaseAgentRunner(ABC):
             )  # First 1000 chars
 
             # Import context tracking utilities
-            from utils.context_tracking import (
+            from .context_tracking import (
                 add_context_attributes,
                 track_context_growth,
                 get_model_max_tokens,
