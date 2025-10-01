@@ -142,9 +142,7 @@ def generate_embeddings(sf_client: SnowflakeDevClient, records: list) -> None:
 
     except Exception as e:
         console.print(f"[yellow]⚠️  Failed to generate embeddings: {e}[/yellow]")
-        console.print(
-            "[yellow]Summary is saved but without vector embeddings[/yellow]"
-        )
+        console.print("[yellow]Summary is saved but without vector embeddings[/yellow]")
 
 
 def save_to_snowflake(
