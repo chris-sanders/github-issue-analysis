@@ -72,21 +72,13 @@ async def fetch_and_format_issue(org: str, repo: str, issue_number: int) -> dict
     return formatted
 
 
-async def generate_summary(issue_data: dict, agent: str) -> dict:
-    """Generate summary using AI agent."""
-    console.print(f"🤖 Generating summary using agent: {agent}")
+async def generate_summary(issue_data: dict, model: str) -> dict:
+    """Generate summary using AI model."""
+    console.print(f"🤖 Generating summary using model: {model}")
 
-    # Import runner based on agent selection
-    if agent == "claude-sonnet":
-        from ..runners.claude_summary import ClaudeSummaryRunner
-        runner = ClaudeSummaryRunner()
-    elif agent == "gpt4":
-        from ..runners.openai_summary import OpenAISummaryRunner
-        runner = OpenAISummaryRunner()
-    else:
-        # Default to a basic runner that uses OpenAI
-        from ..runners.base_summary import BaseSummaryRunner
-        runner = BaseSummaryRunner(model_name=agent)
+    # Use BaseSummaryRunner with specified model
+    from ..runners.base_summary import BaseSummaryRunner
+    runner = BaseSummaryRunner(model_name=model)
 
     # Generate summary
     summary_result = await runner.analyze(issue_data)
@@ -181,11 +173,11 @@ def store(
         "-u",
         help="GitHub issue URL to process",
     ),
-    agent: str = typer.Option(
-        "claude-sonnet",
-        "--agent",
-        "-a",
-        help="AI agent to use for summary generation",
+    model: str = typer.Option(
+        "gpt-4-turbo",
+        "--model",
+        "-m",
+        help="OpenAI model to use for summary generation (e.g., gpt-4-turbo, gpt-4o, gpt-4o-mini)",
     ),
     dry_run: bool = typer.Option(
         False,
@@ -213,7 +205,7 @@ def store(
             issue_data = await fetch_and_format_issue(org, repo, issue_number)
 
             # Generate summary
-            summary = await generate_summary(issue_data, agent)
+            summary = await generate_summary(issue_data, model)
 
             if dry_run:
                 console.print("\n[yellow]🔍 DRY RUN - Summary Generated:[/yellow]")
@@ -227,7 +219,7 @@ def store(
                     issue_number=issue_number,
                     summary=summary,
                     runner_name="gh-analysis-cli",
-                    model_name=agent
+                    model_name=model
                 )
 
                 console.print(f"\n✅ Successfully processed {org}/{repo}#{issue_number}")
