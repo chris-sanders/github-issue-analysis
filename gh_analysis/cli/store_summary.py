@@ -2,9 +2,7 @@
 
 import asyncio
 import json
-import sys
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Optional
 
 import typer
@@ -70,27 +68,11 @@ async def fetch_and_format_issue(org: str, repo: str, issue_number: int) -> dict
 
 
 async def generate_summary(issue_data: dict) -> dict:
-    """Generate summary using MultiSummaryRunner from context-experiments."""
+    """Generate summary using vendored MultiSummaryRunner."""
     console.print(f"🤖 Generating summary using MultiSummaryRunner...")
 
-    # Import MultiSummaryRunner from context-experiments
-    # Add context-experiments paths to sys.path if not already there
-    context_exp_base = Path("/Users/chris/src/context-experiments")
-    exp05_path = context_exp_base / "exp" / "05_memory"
-    src_path = context_exp_base / "src"
-
-    for path in [exp05_path, src_path]:
-        if str(path) not in sys.path:
-            sys.path.insert(0, str(path))
-
-    try:
-        from runners.multi_summary import MultiSummaryRunner
-    except ImportError as e:
-        raise ImportError(
-            f"Failed to import MultiSummaryRunner from context-experiments: {e}\n"
-            f"Make sure {exp05_path} exists and contains the runners module.\n"
-            f"Make sure {src_path} exists and contains the utils module."
-        )
+    # Import MultiSummaryRunner from vendored code
+    from ..runners.summary import MultiSummaryRunner
 
     # Create runner and generate summary
     runner = MultiSummaryRunner()
