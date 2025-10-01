@@ -1,13 +1,12 @@
 """History management utilities for agent conversations."""
 
-from collections.abc import Callable
-
+from typing import List, Callable
 from pydantic_ai.messages import ModelMessage
 
 
 def _preserve_tool_pairs(
-    messages: list[ModelMessage], target_keep_count: int
-) -> list[ModelMessage]:
+    messages: List[ModelMessage], target_keep_count: int
+) -> List[ModelMessage]:
     """Preserve tool call/tool return pairs when trimming message history.
 
     This ensures that ToolCallPart and ToolReturnPart blocks are kept together
@@ -20,8 +19,19 @@ def _preserve_tool_pairs(
     Returns:
         Trimmed messages list with tool pairs preserved
     """
+    import logging
+    import time
+
+    start_time = time.time()
+    logger = logging.getLogger(__name__)
+
     if len(messages) <= target_keep_count:
+        logger.debug(f"No trimming needed: {len(messages)} <= {target_keep_count}")
         return messages
+
+    logger.debug(
+        f"Trimming messages from {len(messages)} to target {target_keep_count}"
+    )
 
     # Helper function to check if a message contains tool returns
     def has_tool_returns(msg) -> bool:
@@ -65,7 +75,8 @@ def _preserve_tool_pairs(
                         keep_messages.insert(0, messages[j])  # tool call
                         i = j - 1  # Skip past the tool call we just processed
                     else:
-                        # Not enough space for the pair, stop here
+                        # Not enough space for the pair, skip both to avoid orphaned returns
+                        i = j - 1
                         break
                 else:
                     j -= 1
@@ -79,6 +90,11 @@ def _preserve_tool_pairs(
             keep_messages.insert(0, message)
             i -= 1
 
+    elapsed = time.time() - start_time
+    logger.debug(
+        f"Trimmed to {len(keep_messages)} messages in {elapsed:.3f}s "
+        f"(dropped {len(messages) - len(keep_messages)})"
+    )
     return keep_messages
 
 
@@ -86,8 +102,8 @@ def create_history_trimmer(
     max_tokens: int = 200_000,
     critical_ratio: float = 0.9,
     high_ratio: float = 0.8,
-    chars_per_token: float = 3.5,
-) -> Callable[[list[ModelMessage]], list[ModelMessage]]:
+    chars_per_token: float = 3.0,
+) -> Callable[[List[ModelMessage]], List[ModelMessage]]:
     """Create a history trimmer function with configurable parameters.
 
     This creates a function that progressively trims message history to stay
@@ -123,11 +139,22 @@ def create_history_trimmer(
     critical_threshold = int(max_tokens * critical_ratio)
     high_threshold = int(max_tokens * high_ratio)
 
-    def history_trimmer(messages: list[ModelMessage]) -> list[ModelMessage]:
+    def history_trimmer(messages: List[ModelMessage]) -> List[ModelMessage]:
         """Trim message history based on configured thresholds."""
+        import logging
+        import time
+
+        start_time = time.time()
+        logger = logging.getLogger(__name__)
+
         # Conservative token estimation
         total_chars = sum(len(str(msg)) for msg in messages)
         estimated_tokens = total_chars / chars_per_token
+
+        logger.debug(
+            f"history_trimmer called: {len(messages)} messages, "
+            f"{estimated_tokens:.0f} tokens ({(estimated_tokens / max_tokens) * 100:.1f}%)"
+        )
 
         # Track truncation for observability
         from opentelemetry import trace
@@ -199,6 +226,8 @@ def create_history_trimmer(
         if current_span:
             current_span.set_attribute("context.truncation_triggered", False)
 
+        elapsed = time.time() - start_time
+        logger.debug(f"history_trimmer completed in {elapsed:.3f}s")
         return messages
 
     return history_trimmer

@@ -1,17 +1,17 @@
 """Base class for agent runners with common execution logic."""
 
-import asyncio
 import logging
-from abc import ABC, abstractmethod
+import asyncio
 from pathlib import Path
-from typing import TypeVar
+from typing import TypeVar, Optional
+from abc import ABC, abstractmethod
 
-from pydantic import BaseModel
 from pydantic_ai import Agent
 from pydantic_ai.usage import UsageLimits
+from pydantic import BaseModel
 
 # Default timeout for agent execution (can be overridden)
-AGENT_EXECUTION_TIMEOUT = 1920  # 32 minutes (30 min LLM timeout + 2 min buffer)
+AGENT_EXECUTION_TIMEOUT = 3600  # 1 hour
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -38,7 +38,7 @@ class BaseAgentRunner(ABC):
         # Apply patches based on the model type being used
         self._apply_model_specific_patches()
 
-    def get_last_span_id(self) -> str | None:
+    def get_last_span_id(self) -> Optional[str]:
         """Get the span ID from the last execution (Phoenix backend only)."""
         return self._last_span_id
 
@@ -101,62 +101,17 @@ class BaseAgentRunner(ABC):
 
                 while retry_count <= max_retries:
                     try:
-                        # Wrap agent.run() with custom span naming for better Phoenix tracing
+                        # Wrap agent.run() with custom span naming for Phoenix tracing
                         result_data = await self._run_agent_with_custom_span(
                             user_message, UsageLimits(request_limit=150)
                         )
 
-                        # Handle Phoenix backend returning (result, span_id) tuple
-                        import os
-
-                        backend = os.getenv("TRACING_BACKEND", "file").lower()
-                        if backend == "phoenix" and isinstance(result_data, tuple):
-                            result, self._last_span_id = result_data
-                        else:
-                            result = result_data
-                            self._last_span_id = None
+                        # Phoenix always returns (result, span_id) tuple
+                        result, self._last_span_id = result_data
 
                         logger.info("Run completed successfully")
                         break
                     except Exception as e:
-                        # Log detailed exception information including TaskGroup errors
-                        logger.error(f"Exception caught: {type(e).__name__}: {str(e)}")
-
-                        # Check for TaskGroup errors and try to extract the underlying exception
-                        if "TaskGroup" in str(e):
-                            logger.error(
-                                "TaskGroup error detected - attempting to extract underlying exceptions"
-                            )
-                            # Try to get the underlying exception from TaskGroup
-                            if hasattr(e, "__cause__") and e.__cause__:
-                                logger.error(
-                                    f"Underlying cause: {type(e.__cause__).__name__}: {e.__cause__}"
-                                )
-                            if hasattr(e, "__context__") and e.__context__:
-                                logger.error(
-                                    f"Exception context: {type(e.__context__).__name__}: {e.__context__}"
-                                )
-                            if hasattr(e, "exceptions"):
-                                logger.error(
-                                    f"TaskGroup exceptions: {[str(ex) for ex in e.exceptions]}"
-                                )
-                            # For TaskGroup, also try to access the task exceptions
-                            try:
-                                import asyncio
-
-                                if isinstance(e, asyncio.exceptions.ExceptionGroup):
-                                    logger.error(
-                                        f"ExceptionGroup with {len(e.exceptions)} exceptions:"
-                                    )
-                                    for i, ex in enumerate(e.exceptions):
-                                        logger.error(
-                                            f"  Exception {i}: {type(ex).__name__}: {ex}"
-                                        )
-                            except Exception as extract_error:
-                                logger.error(
-                                    f"Failed to extract TaskGroup exceptions: {extract_error}"
-                                )
-
                         if (
                             "MALFORMED_FUNCTION_CALL" in str(e)
                             and retry_count < max_retries
@@ -257,9 +212,9 @@ class BaseAgentRunner(ABC):
         Fixes inconsistency between Chat Completions and Responses API tool call handling
         by applying the same guard_tool_call_id logic to Responses API.
         """
+        from pydantic_ai.models.openai import OpenAIResponsesModel
         from pydantic_ai._utils import guard_tool_call_id as _guard_tool_call_id
         from pydantic_ai.messages import ToolCallPart
-        from pydantic_ai.models.openai import OpenAIResponsesModel
 
         original_process_response = OpenAIResponsesModel._process_response
 
@@ -277,36 +232,23 @@ class BaseAgentRunner(ABC):
         OpenAIResponsesModel._process_response = patched_process_response
 
     async def _run_agent_with_custom_span(self, user_message: str, usage_limits):
-        """Run agent with custom span naming for Phoenix and run naming for MLflow."""
-        import os
-
-        backend = os.getenv("TRACING_BACKEND", "file").lower()
-
-        if backend == "mlflow":
-            return await self._run_agent_with_mlflow_naming(user_message, usage_limits)
-        elif backend == "phoenix":
-            # Phoenix returns (result, span_id)
-            return await self._run_agent_with_phoenix_span(user_message, usage_limits)
-        else:
-            # File backend uses Phoenix span method but we only need the result
-            result_and_span = await self._run_agent_with_phoenix_span(
-                user_message, usage_limits
-            )
-            return result_and_span[0]  # Return just the result for file backend
+        """Run agent with Phoenix tracing."""
+        # Always use Phoenix span method - Phoenix integration is now the standard
+        return await self._run_agent_with_phoenix_span(user_message, usage_limits)
 
     async def _run_agent_with_phoenix_span(self, user_message: str, usage_limits):
         """Run agent with enhanced OpenTelemetry span for Phoenix tracing."""
-        from openinference.semconv.trace import SpanAttributes
         from opentelemetry import trace
+        from openinference.semconv.trace import SpanAttributes
 
         # Import new Phoenix integration utilities
         try:
+            from .mcp_instrumentation import (
+                instrument_mcp_agent,
+                get_mcp_tool_metrics,
+            )
             from .context_tracking import (
                 add_message_history_to_span,
-            )
-            from .mcp_instrumentation import (
-                get_mcp_tool_metrics,
-                instrument_mcp_agent,
             )
 
             phoenix_integration_available = True
@@ -357,7 +299,7 @@ class BaseAgentRunner(ABC):
             # Add MCP tool information to span
             if phoenix_integration_available and "mcp_metrics" in locals():
                 for key, value in mcp_metrics.items():
-                    if isinstance(value, int | float | str | bool):
+                    if isinstance(value, (int, float, str, bool)):
                         span.set_attribute(f"mcp.{key}", value)
                     elif isinstance(value, list) and len(value) <= 10:
                         # Add list items for small lists
@@ -373,8 +315,8 @@ class BaseAgentRunner(ABC):
             # Import context tracking utilities
             from .context_tracking import (
                 add_context_attributes,
-                get_model_max_tokens,
                 track_context_growth,
+                get_model_max_tokens,
             )
 
             try:
@@ -512,7 +454,7 @@ class BaseAgentRunner(ABC):
                     # Log structured output fields
                     try:
                         for key, value in result.output.__dict__.items():
-                            if isinstance(value, int | float):
+                            if isinstance(value, (int, float)):
                                 span.set_attribute(f"output.{key}", value)
                             elif isinstance(value, str) and len(value) < 100:
                                 span.set_attribute(f"output.{key}", value)
@@ -544,147 +486,3 @@ class BaseAgentRunner(ABC):
 
             # Return both result and span ID for Phoenix SpanEvaluations
             return (result, span_id_hex)
-
-    async def _run_agent_with_mlflow_naming(self, user_message: str, usage_limits):
-        """Run agent with child run for metrics while master collects traces."""
-        import os
-        import time
-
-        import mlflow
-        from mlflow import MlflowClient
-
-        # Create a clean run name
-        run_name = self.name.replace(" ", "_").replace("(", "").replace(")", "").lower()
-
-        start_time = time.time()
-
-        # Get the master run ID that was created in setup_tracing
-        master_run_id = os.environ.get("MLFLOW_MASTER_RUN_ID")
-
-        if not master_run_id:
-            # Fallback: No master means we're not in MLflow mode properly
-            print(f"⚠️ No master run found for {self.name}")
-            # Just run without MLflow tracking
-            result = await asyncio.wait_for(
-                self.agent.run(user_message, usage_limits=usage_limits),
-                timeout=AGENT_EXECUTION_TIMEOUT,  # 32 minutes
-            )
-            return result
-
-        # Create a child run using MlflowClient (doesn't change active run)
-        client = MlflowClient()
-        active_run = mlflow.active_run()
-
-        child_run = client.create_run(
-            experiment_id=active_run.info.experiment_id,
-            run_name=run_name,
-            tags={
-                "mlflow.parentRunId": master_run_id,
-                "agent.name": self.name,
-                "agent.family": self.name.split()[0].lower(),
-                "message.length": str(len(user_message)),
-            },
-        )
-
-        child_run_id = child_run.info.run_id
-
-        try:
-            import mlflow
-            from mlflow import MlflowClient
-
-            # No need to track traces - custom naming handles identification
-
-            # Create wrapper with custom trace name
-            @mlflow.trace(name=self.name)
-            async def run_agent_with_custom_trace_name():
-                return await asyncio.wait_for(
-                    self.agent.run(user_message, usage_limits=usage_limits),
-                    timeout=AGENT_EXECUTION_TIMEOUT,  # 32 minutes
-                )
-
-            # Run the agent with custom trace name
-            result = await run_agent_with_custom_trace_name()
-
-            # Trace naming is handled by the @mlflow.trace decorator
-            print(f"✅ Completed {self.name} with custom trace name")
-
-            execution_time = time.time() - start_time
-            mlflow.set_tag(
-                f"agent.{self.name}.execution_time", f"{execution_time:.2f}s"
-            )
-
-            # Log metrics to the CHILD run for this specific agent
-            client.log_metric(child_run_id, "execution_time_seconds", execution_time)
-            client.set_tag(child_run_id, "status", "success")
-
-            # Log result metadata to child run
-            if hasattr(result, "output"):
-                client.set_tag(
-                    child_run_id, "result.type", type(result.output).__name__
-                )
-
-                # Log token usage if available
-                if hasattr(result, "usage"):
-                    usage = result.usage()  # Call the method to get usage stats
-                    if usage and hasattr(usage, "total_tokens"):
-                        client.log_metric(
-                            child_run_id, "tokens.total", usage.total_tokens
-                        )
-
-                    # PydanticAI uses different field names than OpenAI
-                    if usage and hasattr(usage, "request_tokens"):
-                        client.log_metric(
-                            child_run_id, "tokens.input", usage.request_tokens
-                        )
-                    elif usage and hasattr(usage, "input_tokens"):
-                        client.log_metric(
-                            child_run_id, "tokens.input", usage.input_tokens
-                        )
-
-                    if usage and hasattr(usage, "response_tokens"):
-                        client.log_metric(
-                            child_run_id, "tokens.output", usage.response_tokens
-                        )
-                    elif usage and hasattr(usage, "output_tokens"):
-                        client.log_metric(
-                            child_run_id, "tokens.output", usage.output_tokens
-                        )
-
-                # Log output metrics
-                if isinstance(result.output, str):
-                    client.log_metric(child_run_id, "output.length", len(result.output))
-                    client.log_metric(
-                        child_run_id, "output.word_count", len(result.output.split())
-                    )
-                elif hasattr(result.output, "__dict__"):
-                    # Log structured output fields
-                    try:
-                        for key, value in result.output.__dict__.items():
-                            if isinstance(value, int | float):
-                                client.log_metric(child_run_id, f"output.{key}", value)
-                            elif isinstance(value, str) and len(value) < 100:
-                                client.set_tag(child_run_id, f"output.{key}", value)
-                    except Exception:
-                        pass
-
-            # Mark child run as finished
-            client.set_terminated(child_run_id, status="FINISHED")
-
-        except Exception as e:
-            execution_time = time.time() - start_time
-
-            # Log error info to master run for this agent
-            mlflow.set_tag(
-                f"agent.{self.name}.execution_time", f"{execution_time:.2f}s"
-            )
-            mlflow.set_tag(f"agent.{self.name}.error", str(e)[:100])
-
-            # Log error to child run
-            client.log_metric(child_run_id, "execution_time_seconds", execution_time)
-            client.set_tag(child_run_id, "status", "failed")
-            client.set_tag(child_run_id, "error.type", type(e).__name__)
-            client.set_tag(child_run_id, "error.message", str(e)[:200])
-            client.set_terminated(child_run_id, status="FAILED")
-            raise
-
-        return result

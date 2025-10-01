@@ -474,7 +474,7 @@ def troubleshoot(
         "--agent",
         "-a",
         help="Troubleshoot agent to use (gpt5_mini_medium, gpt5_mini_high, "
-        "gpt5_medium, gpt5_high, claude_sonnet_mt, "
+        "gpt5_medium, gpt5_high, claude_sonnet_mt, claude_sonnet_4_5_mt, "
         "gpt5_mini_medium_mt, gpt5_mini_high_mt, gpt5_medium_mt, gpt5_high_mt, "
         "gemini_25_pro_mt)",
         rich_help_panel="AI Configuration",
@@ -518,10 +518,11 @@ def troubleshoot(
     Currently supports single-issue analysis for in-depth investigation.
 
     Agents available:
-    - gpt5_mini_medium_mt: GPT-5 Mini (medium reasoning) with memory+tools (default, 
+    - gpt5_mini_medium_mt: GPT-5 Mini (medium reasoning) with memory+tools (default,
       balanced speed and enhanced analysis with historical case retrieval)
     - gpt5_mini_high_mt: GPT-5 Mini (high reasoning) with memory+tools (slower but more thorough)
     - claude_sonnet_mt: Claude Sonnet 4 with memory+tools (alternative enhanced option)
+    - claude_sonnet_4_5_mt: Claude Sonnet 4.5 with memory+tools (latest model with extended thinking)
     - gpt5_mini_medium: GPT-5 Mini with medium reasoning (basic, no memory)
     - gpt5_mini_high: GPT-5 Mini with high reasoning (basic, no memory)
     - gpt5_medium: GPT-5 with medium reasoning (basic, no memory)
@@ -656,7 +657,7 @@ async def _run_troubleshoot(
         console.print(
             f"[red]❌ Unknown agent: {agent_name}. Available: "
             f"gpt5_mini_medium, gpt5_mini_high, gpt5_medium, gpt5_high, "
-            f"claude_sonnet_mt, gpt5_mini_medium_mt, "
+            f"claude_sonnet_mt, claude_sonnet_4_5_mt, gpt5_mini_medium_mt, "
             f"gpt5_mini_high_mt, gpt5_medium_mt, gpt5_high_mt, gemini_25_pro_mt[/red]"
         )
         return
