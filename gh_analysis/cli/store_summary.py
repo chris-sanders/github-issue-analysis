@@ -96,6 +96,57 @@ async def generate_summary(issue_data: dict) -> dict:
     return summary_dict
 
 
+def generate_embeddings(sf_client: SnowflakeDevClient, records: list) -> None:
+    """Generate vector embeddings for saved summaries using Snowflake Cortex.
+
+    Args:
+        sf_client: SnowflakeDevClient instance
+        records: List of summary records that were saved
+    """
+    try:
+        # Generate embeddings for each record using Snowflake Cortex
+        embedding_sql = """
+        UPDATE DEV_CRE.EXP05.SUMMARIES
+        SET
+            PRODUCT_EMBEDDING = SNOWFLAKE.CORTEX.EMBED_TEXT_768(
+                'snowflake-arctic-embed-m',
+                ARRAY_TO_STRING(PRODUCT, ' ')
+            ),
+            SYMPTOMS_EMBEDDING = SNOWFLAKE.CORTEX.EMBED_TEXT_768(
+                'snowflake-arctic-embed-m',
+                ARRAY_TO_STRING(SYMPTOMS, ' ')
+            ),
+            EVIDENCE_EMBEDDING = SNOWFLAKE.CORTEX.EMBED_TEXT_768(
+                'snowflake-arctic-embed-m',
+                ARRAY_TO_STRING(EVIDENCE, ' ')
+            ),
+            CAUSE_EMBEDDING = SNOWFLAKE.CORTEX.EMBED_TEXT_768(
+                'snowflake-arctic-embed-m',
+                COALESCE(CAUSE, '')
+            ),
+            FIX_EMBEDDING = SNOWFLAKE.CORTEX.EMBED_TEXT_768(
+                'snowflake-arctic-embed-m',
+                ARRAY_TO_STRING(FIX, ' ')
+            )
+        WHERE (ORG_NAME, REPO_NAME, ISSUE_NUMBER) IN ({placeholders})
+        """.format(
+            placeholders=",".join(
+                f"('{r['ORG_NAME']}', '{r['REPO_NAME']}', {r['ISSUE_NUMBER']})"
+                for r in records
+            )
+        )
+
+        # Execute the embedding generation
+        rows_updated = sf_client.execute_non_query(embedding_sql)
+        console.print(f"✅ Generated embeddings for {rows_updated} summaries")
+
+    except Exception as e:
+        console.print(f"[yellow]⚠️  Failed to generate embeddings: {e}[/yellow]")
+        console.print(
+            "[yellow]Summary is saved but without vector embeddings[/yellow]"
+        )
+
+
 def save_to_snowflake(
     org: str,
     repo: str,
@@ -110,7 +161,7 @@ def save_to_snowflake(
     # Initialize Snowflake client for EXP05 schema
     sf_client = SnowflakeDevClient(schema="EXP05")
 
-    # Create table DDL (matches context-experiments schema)
+    # Create table DDL (matches context-experiments schema with vector embeddings)
     table_ddl = """
     CREATE TABLE IF NOT EXISTS SUMMARIES (
         ORG_NAME VARCHAR(255) NOT NULL,
@@ -125,6 +176,11 @@ def save_to_snowflake(
         CONFIDENCE FLOAT,
         RUNNER_NAME VARCHAR(255),
         MODEL_NAME VARCHAR(255),
+        PRODUCT_EMBEDDING VECTOR(FLOAT, 768),
+        SYMPTOMS_EMBEDDING VECTOR(FLOAT, 768),
+        EVIDENCE_EMBEDDING VECTOR(FLOAT, 768),
+        CAUSE_EMBEDDING VECTOR(FLOAT, 768),
+        FIX_EMBEDDING VECTOR(FLOAT, 768),
         CREATED_AT TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
         PRIMARY KEY (ORG_NAME, REPO_NAME, ISSUE_NUMBER)
     )
@@ -155,6 +211,10 @@ def save_to_snowflake(
     )
 
     console.print(f"✅ Summary saved to Snowflake ({rows_affected} rows affected)")
+
+    # Generate vector embeddings using Snowflake Cortex
+    console.print("🧠 Generating vector embeddings...")
+    generate_embeddings(sf_client, [record])
 
 
 @app.command()
