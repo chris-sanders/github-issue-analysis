@@ -22,8 +22,8 @@ console = Console()
 def parse_github_url(url: str) -> tuple[str, str, int]:
     """Parse GitHub issue URL into org, repo, and issue number."""
     # Format: https://github.com/org/repo/issues/123
-    parts = url.rstrip('/').split('/')
-    if len(parts) < 7 or parts[-2] != 'issues':
+    parts = url.rstrip("/").split("/")
+    if len(parts) < 7 or parts[-2] != "issues":
         raise ValueError(f"Invalid GitHub issue URL: {url}")
 
     org = parts[-4]
@@ -51,17 +51,21 @@ async def fetch_and_format_issue(org: str, repo: str, issue_number: int) -> dict
         "body": github_issue.body or "",
         "labels": [{"name": label.name} for label in github_issue.labels],
         "state": github_issue.state,
-        "created_at": github_issue.created_at.isoformat() if github_issue.created_at else None,
+        "created_at": github_issue.created_at.isoformat()
+        if github_issue.created_at
+        else None,
         "closed_at": None,  # GitHubIssue doesn't track closed_at, only updated_at
         "html_url": f"https://github.com/{org}/{repo}/issues/{issue_number}",
         "comments": [
             {
                 "user": {"login": comment.user.login},
                 "body": comment.body,
-                "created_at": comment.created_at.isoformat() if comment.created_at else None
+                "created_at": comment.created_at.isoformat()
+                if comment.created_at
+                else None,
             }
             for comment in github_issue.comments
-        ]
+        ],
     }
 
     return formatted
@@ -83,9 +87,9 @@ async def generate_summary(issue_data: dict) -> dict:
         raise RuntimeError(f"Summary generation failed: {summary_result}")
 
     # Convert Pydantic model to dict if needed
-    if hasattr(summary_result, 'model_dump'):
+    if hasattr(summary_result, "model_dump"):
         summary_dict = summary_result.model_dump()
-    elif hasattr(summary_result, 'dict'):
+    elif hasattr(summary_result, "dict"):
         summary_dict = summary_result.dict()
     else:
         summary_dict = summary_result
@@ -99,7 +103,7 @@ def save_to_snowflake(
     issue_number: int,
     summary: dict,
     runner_name: str,
-    model_name: str
+    model_name: str,
 ) -> None:
     """Save summary to Snowflake DEV_CRE.EXP05.SUMMARIES table."""
     console.print("❄️ Connecting to Snowflake...")
@@ -143,14 +147,12 @@ def save_to_snowflake(
         "FIX": summary.get("fix", []),
         "CONFIDENCE": float(summary.get("confidence", 0.5)),
         "RUNNER_NAME": runner_name,
-        "MODEL_NAME": model_name
+        "MODEL_NAME": model_name,
     }
 
     # Use upsert to handle re-runs
     rows_affected = sf_client.upsert_data(
-        "DEV_CRE.EXP05.SUMMARIES",
-        [record],
-        ["ORG_NAME", "REPO_NAME", "ISSUE_NUMBER"]
+        "DEV_CRE.EXP05.SUMMARIES", [record], ["ORG_NAME", "REPO_NAME", "ISSUE_NUMBER"]
     )
 
     console.print(f"✅ Summary saved to Snowflake ({rows_affected} rows affected)")
@@ -195,7 +197,9 @@ def store(
             if dry_run:
                 console.print("\n[yellow]🔍 DRY RUN - Summary Generated:[/yellow]")
                 console.print(json.dumps(summary, indent=2))
-                console.print("\n[yellow]Would save to DEV_CRE.EXP05.SUMMARIES[/yellow]")
+                console.print(
+                    "\n[yellow]Would save to DEV_CRE.EXP05.SUMMARIES[/yellow]"
+                )
             else:
                 # Save to Snowflake
                 save_to_snowflake(
@@ -204,10 +208,12 @@ def store(
                     issue_number=issue_number,
                     summary=summary,
                     runner_name="MultiSummaryRunner",
-                    model_name="multi-agent"
+                    model_name="multi-agent",
                 )
 
-                console.print(f"\n✅ Successfully processed {org}/{repo}#{issue_number}")
+                console.print(
+                    f"\n✅ Successfully processed {org}/{repo}#{issue_number}"
+                )
 
         # Run the async function
         asyncio.run(process())

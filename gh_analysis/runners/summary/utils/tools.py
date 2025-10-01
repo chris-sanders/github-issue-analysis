@@ -144,6 +144,7 @@ def _format_evidence_search_results(
 
 # Helm Debugging Tools
 
+
 def list_tar_contents(tar_path: str) -> str:
     """List the contents of a tar archive without extracting it.
 
@@ -173,7 +174,7 @@ def list_tar_contents(tar_path: str) -> str:
             return f"Error: {tar_path} is not a file"
 
         # Open and list contents
-        with tarfile.open(tar_path, 'r:*') as tar:
+        with tarfile.open(tar_path, "r:*") as tar:
             members = tar.getmembers()
 
             if not members:
@@ -245,7 +246,7 @@ def extract_file(tar_path: str, file_path: str, dest_dir: Optional[str] = None) 
             dest_path = Path(tempfile.mkdtemp())
 
         # Extract the specific file
-        with tarfile.open(tar_path, 'r:*') as tar:
+        with tarfile.open(tar_path, "r:*") as tar:
             try:
                 # Find the member
                 member = tar.getmember(file_path)
@@ -299,7 +300,7 @@ def extract_all_files(tar_path: str, dest_dir: Optional[str] = None) -> str:
             dest_path = Path(tempfile.mkdtemp())
 
         # Extract all files
-        with tarfile.open(tar_path, 'r:*') as tar:
+        with tarfile.open(tar_path, "r:*") as tar:
             # Get total file count for progress context
             members = tar.getmembers()
             file_count = len([m for m in members if m.isfile()])
@@ -343,7 +344,7 @@ def read_yaml_file(file_path: str) -> str:
             return f"Error: {file_path} is not a file"
 
         # Read and parse YAML
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
         # Try to parse as YAML for validation
@@ -357,17 +358,21 @@ def read_yaml_file(file_path: str) -> str:
             # Add some helpful metadata if it's a known type
             if isinstance(parsed_data, dict):
                 # Detect file type and highlight key information
-                if 'apiVersion' in parsed_data and 'kind' in parsed_data:
-                    lines.append(f"📋 Kubernetes Resource: {parsed_data.get('kind', 'Unknown')}")
-                    lines.append(f"🔖 API Version: {parsed_data.get('apiVersion', 'Unknown')}")
+                if "apiVersion" in parsed_data and "kind" in parsed_data:
+                    lines.append(
+                        f"📋 Kubernetes Resource: {parsed_data.get('kind', 'Unknown')}"
+                    )
+                    lines.append(
+                        f"🔖 API Version: {parsed_data.get('apiVersion', 'Unknown')}"
+                    )
 
-                elif 'name' in parsed_data and 'version' in parsed_data:
+                elif "name" in parsed_data and "version" in parsed_data:
                     lines.append(f"📦 Chart: {parsed_data.get('name', 'Unknown')}")
                     lines.append(f"🏷️  Version: {parsed_data.get('version', 'Unknown')}")
 
-                if 'metadata' in parsed_data:
-                    metadata = parsed_data['metadata']
-                    if isinstance(metadata, dict) and 'name' in metadata:
+                if "metadata" in parsed_data:
+                    metadata = parsed_data["metadata"]
+                    if isinstance(metadata, dict) and "name" in metadata:
                         lines.append(f"📛 Name: {metadata['name']}")
 
             lines.append("\n📄 Content:")
@@ -409,17 +414,17 @@ def run_helm_command(command: str, chart_path: str = "") -> str:
     """
     try:
         # Whitelist of allowed commands for security
-        allowed_commands = ['show', 'template', 'lint', 'version']
+        allowed_commands = ["show", "template", "lint", "version"]
 
         command_parts = command.strip().split()
         if not command_parts or command_parts[0] not in allowed_commands:
             return f"Error: Command '{command}' not allowed. Allowed: {', '.join(allowed_commands)}"
 
         # Build full command
-        cmd_args = ['helm'] + command_parts
+        cmd_args = ["helm"] + command_parts
 
         # Add chart path if provided and needed
-        if chart_path and command_parts[0] != 'version':
+        if chart_path and command_parts[0] != "version":
             chart_path = Path(chart_path)
             if not chart_path.exists():
                 return f"Error: Chart path not found: {chart_path}"
@@ -431,7 +436,7 @@ def run_helm_command(command: str, chart_path: str = "") -> str:
             capture_output=True,
             text=True,
             timeout=30,  # 30 second timeout
-            cwd=os.getcwd()
+            cwd=os.getcwd(),
         )
 
         # Format output
@@ -492,14 +497,14 @@ def read_file(file_path: str, max_lines: int = 100) -> str:
 
         # Try to read as text
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 lines = []
                 for i, line in enumerate(f):
                     if i >= max_lines:
                         break
                     lines.append(line.rstrip())
 
-            content = '\n'.join(lines)
+            content = "\n".join(lines)
             total_lines = i + 1
 
             # Format output with file metadata
@@ -511,7 +516,11 @@ def read_file(file_path: str, max_lines: int = 100) -> str:
                 file_type = _get_file_type_description(file_ext)
                 output_lines.append(f"📝 Type: {file_type}")
 
-            size_str = f"{file_size} bytes" if file_size < 1024 else f"{file_size/1024:.1f} KB"
+            size_str = (
+                f"{file_size} bytes"
+                if file_size < 1024
+                else f"{file_size / 1024:.1f} KB"
+            )
             output_lines.append(f"📏 Size: {size_str}")
 
             if total_lines > max_lines:
@@ -524,15 +533,17 @@ def read_file(file_path: str, max_lines: int = 100) -> str:
 
             # Add truncation notice if file was truncated
             if total_lines >= max_lines:
-                output_lines.append(f"\n⚠️  File truncated at {max_lines} lines. Use larger max_lines to see more.")
+                output_lines.append(
+                    f"\n⚠️  File truncated at {max_lines} lines. Use larger max_lines to see more."
+                )
 
-            return '\n'.join(output_lines)
+            return "\n".join(output_lines)
 
         except UnicodeDecodeError:
             # Try with different encodings
-            for encoding in ['latin-1', 'cp1252', 'ascii']:
+            for encoding in ["latin-1", "cp1252", "ascii"]:
                 try:
-                    with open(file_path, 'r', encoding=encoding) as f:
+                    with open(file_path, "r", encoding=encoding) as f:
                         content = f.read()[:10000]  # Limit to 10KB for binary-ish files
                     return f"📄 File: {file_path.name} (encoding: {encoding})\n{'=' * 50}\n{content}"
                 except UnicodeDecodeError:
@@ -550,32 +561,40 @@ def read_file(file_path: str, max_lines: int = 100) -> str:
 def _get_file_type_description(file_ext: str) -> str:
     """Get a human-readable description of file type based on extension."""
     type_map = {
-        '.yaml': 'YAML configuration',
-        '.yml': 'YAML configuration',
-        '.json': 'JSON data',
-        '.tpl': 'Helm template',
-        '.txt': 'Text file',
-        '.md': 'Markdown documentation',
-        '.sh': 'Shell script',
-        '.py': 'Python script',
-        '.js': 'JavaScript',
-        '.conf': 'Configuration file',
-        '.ini': 'INI configuration',
-        '.properties': 'Properties file',
-        '.log': 'Log file',
-        '.toml': 'TOML configuration',
-        '.xml': 'XML document',
-        '.html': 'HTML document',
-        '.css': 'CSS stylesheet',
-        '.sql': 'SQL script',
-        '.go': 'Go source code',
-        '.java': 'Java source code',
-        '.dockerfile': 'Docker configuration',
+        ".yaml": "YAML configuration",
+        ".yml": "YAML configuration",
+        ".json": "JSON data",
+        ".tpl": "Helm template",
+        ".txt": "Text file",
+        ".md": "Markdown documentation",
+        ".sh": "Shell script",
+        ".py": "Python script",
+        ".js": "JavaScript",
+        ".conf": "Configuration file",
+        ".ini": "INI configuration",
+        ".properties": "Properties file",
+        ".log": "Log file",
+        ".toml": "TOML configuration",
+        ".xml": "XML document",
+        ".html": "HTML document",
+        ".css": "CSS stylesheet",
+        ".sql": "SQL script",
+        ".go": "Go source code",
+        ".java": "Java source code",
+        ".dockerfile": "Docker configuration",
     }
-    return type_map.get(file_ext, f'{file_ext[1:].upper()} file' if file_ext else 'Text file')
+    return type_map.get(
+        file_ext, f"{file_ext[1:].upper()} file" if file_ext else "Text file"
+    )
 
 
-def grep_file(file_path: str, pattern: str, context_lines: int = 2, max_matches: int = 20, use_regex: bool = False) -> str:
+def grep_file(
+    file_path: str,
+    pattern: str,
+    context_lines: int = 2,
+    max_matches: int = 20,
+    use_regex: bool = False,
+) -> str:
     """Search for a pattern within a text file and return matching lines with context.
 
     Use this tool to search for specific strings, error messages, configuration values,
@@ -615,13 +634,13 @@ def grep_file(file_path: str, pattern: str, context_lines: int = 2, max_matches:
 
         # Read file and search for pattern
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
         except UnicodeDecodeError:
             # Try alternative encodings
-            for encoding in ['latin-1', 'cp1252']:
+            for encoding in ["latin-1", "cp1252"]:
                 try:
-                    with open(file_path, 'r', encoding=encoding) as f:
+                    with open(file_path, "r", encoding=encoding) as f:
                         lines = f.readlines()
                     break
                 except UnicodeDecodeError:
@@ -645,20 +664,24 @@ def grep_file(file_path: str, pattern: str, context_lines: int = 2, max_matches:
             # Check if line matches
             if use_regex:
                 if regex_pattern.search(line):
-                    matches.append({
-                        'line_num': line_num,
-                        'line': line.rstrip(),
-                        'context_start': max(1, line_num - context_lines),
-                        'context_end': min(len(lines), line_num + context_lines)
-                    })
+                    matches.append(
+                        {
+                            "line_num": line_num,
+                            "line": line.rstrip(),
+                            "context_start": max(1, line_num - context_lines),
+                            "context_end": min(len(lines), line_num + context_lines),
+                        }
+                    )
             else:
                 if pattern_lower in line.lower():
-                    matches.append({
-                        'line_num': line_num,
-                        'line': line.rstrip(),
-                        'context_start': max(1, line_num - context_lines),
-                        'context_end': min(len(lines), line_num + context_lines)
-                    })
+                    matches.append(
+                        {
+                            "line_num": line_num,
+                            "line": line.rstrip(),
+                            "context_start": max(1, line_num - context_lines),
+                            "context_end": min(len(lines), line_num + context_lines),
+                        }
+                    )
 
             # Stop if we hit max matches
             if len(matches) >= max_matches:
@@ -670,7 +693,9 @@ def grep_file(file_path: str, pattern: str, context_lines: int = 2, max_matches:
         # Format results
         result_lines = [f"🔍 Search results for '{pattern}' in {file_path.name}"]
         result_lines.append("=" * 60)
-        result_lines.append(f"📊 Found {len(matches)} match{'es' if len(matches) > 1 else ''}")
+        result_lines.append(
+            f"📊 Found {len(matches)} match{'es' if len(matches) > 1 else ''}"
+        )
 
         if len(matches) >= max_matches:
             result_lines.append(f"⚠️  Showing first {max_matches} matches")
@@ -683,20 +708,26 @@ def grep_file(file_path: str, pattern: str, context_lines: int = 2, max_matches:
             result_lines.append("-" * 40)
 
             # Show context lines
-            for context_line_num in range(match['context_start'], match['context_end'] + 1):
+            for context_line_num in range(
+                match["context_start"], match["context_end"] + 1
+            ):
                 if 1 <= context_line_num <= len(lines):
                     line_content = lines[context_line_num - 1].rstrip()
 
-                    if context_line_num == match['line_num']:
+                    if context_line_num == match["line_num"]:
                         # Highlight the matching line
-                        result_lines.append(f">>> {context_line_num:4d}: {line_content}")
+                        result_lines.append(
+                            f">>> {context_line_num:4d}: {line_content}"
+                        )
                     else:
                         # Regular context line
-                        result_lines.append(f"    {context_line_num:4d}: {line_content}")
+                        result_lines.append(
+                            f"    {context_line_num:4d}: {line_content}"
+                        )
 
             result_lines.append("")
 
-        return '\n'.join(result_lines)
+        return "\n".join(result_lines)
 
     except PermissionError:
         return f"❌ Permission denied reading file: {file_path}"
@@ -704,9 +735,15 @@ def grep_file(file_path: str, pattern: str, context_lines: int = 2, max_matches:
         return f"Error searching file: {str(e)}"
 
 
-def grep_directory(directory_path: str, pattern: str, file_pattern: str = "*",
-                  max_files: int = 20, context_lines: int = 1, use_regex: bool = False,
-                  recursive: bool = True) -> str:
+def grep_directory(
+    directory_path: str,
+    pattern: str,
+    file_pattern: str = "*",
+    max_files: int = 20,
+    context_lines: int = 1,
+    use_regex: bool = False,
+    recursive: bool = True,
+) -> str:
     """Search for a pattern across multiple files in a directory.
 
     Use this tool to search for patterns across multiple files, such as finding
@@ -761,7 +798,9 @@ def grep_directory(directory_path: str, pattern: str, file_pattern: str = "*",
             # Filter to only text files and limit count
             text_files = []
             for f in files:
-                if f.is_file() and f.stat().st_size < 10 * 1024 * 1024:  # Skip files > 10MB
+                if (
+                    f.is_file() and f.stat().st_size < 10 * 1024 * 1024
+                ):  # Skip files > 10MB
                     text_files.append(f)
                     if len(text_files) >= max_files:
                         break
@@ -787,7 +826,7 @@ def grep_directory(directory_path: str, pattern: str, file_pattern: str = "*",
 
         for file_path in text_files:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     lines = f.readlines()
 
                 file_matches = []
@@ -802,18 +841,22 @@ def grep_directory(directory_path: str, pattern: str, file_pattern: str = "*",
                             match_found = True
 
                     if match_found:
-                        file_matches.append({
-                            'line_num': line_num,
-                            'line': line.rstrip(),
-                            'context_start': max(1, line_num - context_lines),
-                            'context_end': min(len(lines), line_num + context_lines)
-                        })
+                        file_matches.append(
+                            {
+                                "line_num": line_num,
+                                "line": line.rstrip(),
+                                "context_start": max(1, line_num - context_lines),
+                                "context_end": min(
+                                    len(lines), line_num + context_lines
+                                ),
+                            }
+                        )
 
                 if file_matches:
                     all_matches[file_path.name] = {
-                        'path': file_path,
-                        'matches': file_matches,
-                        'lines': lines
+                        "path": file_path,
+                        "matches": file_matches,
+                        "lines": lines,
                     }
 
             except (UnicodeDecodeError, PermissionError):
@@ -825,33 +868,43 @@ def grep_directory(directory_path: str, pattern: str, file_pattern: str = "*",
         # Format results
         result_lines = [f"🔍 Directory search results for '{pattern}'"]
         result_lines.append("=" * 60)
-        result_lines.append(f"📊 Found matches in {len(all_matches)} of {len(text_files)} files")
+        result_lines.append(
+            f"📊 Found matches in {len(all_matches)} of {len(text_files)} files"
+        )
         result_lines.append("")
 
         for filename, file_data in all_matches.items():
-            matches = file_data['matches']
-            lines = file_data['lines']
+            matches = file_data["matches"]
+            lines = file_data["lines"]
 
-            result_lines.append(f"📄 {filename} ({len(matches)} match{'es' if len(matches) > 1 else ''})")
+            result_lines.append(
+                f"📄 {filename} ({len(matches)} match{'es' if len(matches) > 1 else ''})"
+            )
             result_lines.append("-" * 40)
 
             for match in matches[:5]:  # Limit to 5 matches per file
                 # Show minimal context for directory searches
-                for context_line_num in range(match['context_start'], match['context_end'] + 1):
+                for context_line_num in range(
+                    match["context_start"], match["context_end"] + 1
+                ):
                     if 1 <= context_line_num <= len(lines):
                         line_content = lines[context_line_num - 1].rstrip()
 
-                        if context_line_num == match['line_num']:
-                            result_lines.append(f">>> {context_line_num:4d}: {line_content}")
+                        if context_line_num == match["line_num"]:
+                            result_lines.append(
+                                f">>> {context_line_num:4d}: {line_content}"
+                            )
                         else:
-                            result_lines.append(f"    {context_line_num:4d}: {line_content}")
+                            result_lines.append(
+                                f"    {context_line_num:4d}: {line_content}"
+                            )
 
             if len(matches) > 5:
                 result_lines.append(f"    ... and {len(matches) - 5} more matches")
 
             result_lines.append("")
 
-        return '\n'.join(result_lines)
+        return "\n".join(result_lines)
 
     except Exception as e:
         return f"Error searching directory: {str(e)}"
@@ -896,7 +949,9 @@ def list_directory(directory_path: str, max_depth: int = 2) -> str:
 
             items = []
             try:
-                items = sorted(path.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower()))
+                items = sorted(
+                    path.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower())
+                )
             except PermissionError:
                 lines.append(f"{prefix}❌ Permission denied")
                 return
@@ -913,7 +968,11 @@ def list_directory(directory_path: str, max_depth: int = 2) -> str:
                     # Show file size for regular files
                     try:
                         size = item.stat().st_size
-                        size_str = f" ({size} bytes)" if size < 1024 else f" ({size/1024:.1f} KB)"
+                        size_str = (
+                            f" ({size} bytes)"
+                            if size < 1024
+                            else f" ({size / 1024:.1f} KB)"
+                        )
                     except:
                         size_str = ""
                     lines.append(f"{prefix}{current_prefix}📄 {item.name}{size_str}")
