@@ -41,33 +41,28 @@ async def fetch_and_format_issue(org: str, repo: str, issue_number: int) -> dict
 
     github_client = GitHubClient()
 
-    # Fetch issue details
-    issue = await asyncio.to_thread(
-        github_client.get_issue_details, org, repo, issue_number
-    )
-
-    # Fetch comments
-    comments = await asyncio.to_thread(
-        github_client.get_issue_comments, org, repo, issue_number
+    # Fetch issue with all details (includes comments)
+    github_issue = await asyncio.to_thread(
+        github_client.get_issue, org, repo, issue_number
     )
 
     # Format as expected by MultiSummaryRunner (matches context-experiments format)
     formatted = {
-        "number": issue.get("number"),
-        "title": issue.get("title"),
-        "body": issue.get("body") or "",
-        "labels": [{"name": label["name"]} for label in issue.get("labels", [])],
-        "state": issue.get("state"),
-        "created_at": issue.get("created_at"),
-        "closed_at": issue.get("closed_at"),
-        "html_url": issue.get("html_url"),
+        "number": github_issue.number,
+        "title": github_issue.title,
+        "body": github_issue.body or "",
+        "labels": [{"name": label.name} for label in github_issue.labels],
+        "state": github_issue.state,
+        "created_at": github_issue.created_at.isoformat() if github_issue.created_at else None,
+        "closed_at": None,  # GitHubIssue doesn't track closed_at, only updated_at
+        "html_url": f"https://github.com/{org}/{repo}/issues/{issue_number}",
         "comments": [
             {
-                "user": {"login": comment.get("user", {}).get("login")},
-                "body": comment.get("body"),
-                "created_at": comment.get("created_at")
+                "user": {"login": comment.user.login},
+                "body": comment.body,
+                "created_at": comment.created_at.isoformat() if comment.created_at else None
             }
-            for comment in comments
+            for comment in github_issue.comments
         ]
     }
 
@@ -79,17 +74,22 @@ async def generate_summary(issue_data: dict) -> dict:
     console.print(f"🤖 Generating summary using MultiSummaryRunner...")
 
     # Import MultiSummaryRunner from context-experiments
-    # Add context-experiments to path if not already there
-    context_exp_path = Path("/Users/chris/src/context-experiments/exp/05_memory")
-    if str(context_exp_path) not in sys.path:
-        sys.path.insert(0, str(context_exp_path))
+    # Add context-experiments paths to sys.path if not already there
+    context_exp_base = Path("/Users/chris/src/context-experiments")
+    exp05_path = context_exp_base / "exp" / "05_memory"
+    src_path = context_exp_base / "src"
+
+    for path in [exp05_path, src_path]:
+        if str(path) not in sys.path:
+            sys.path.insert(0, str(path))
 
     try:
         from runners.multi_summary import MultiSummaryRunner
     except ImportError as e:
         raise ImportError(
             f"Failed to import MultiSummaryRunner from context-experiments: {e}\n"
-            f"Make sure {context_exp_path} exists and contains the runners module."
+            f"Make sure {exp05_path} exists and contains the runners module.\n"
+            f"Make sure {src_path} exists and contains the utils module."
         )
 
     # Create runner and generate summary
