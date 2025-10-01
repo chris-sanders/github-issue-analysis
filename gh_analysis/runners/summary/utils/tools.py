@@ -973,7 +973,7 @@ def list_directory(directory_path: str, max_depth: int = 2) -> str:
                             if size < 1024
                             else f" ({size / 1024:.1f} KB)"
                         )
-                    except:
+                    except Exception:
                         size_str = ""
                     lines.append(f"{prefix}{current_prefix}📄 {item.name}{size_str}")
 

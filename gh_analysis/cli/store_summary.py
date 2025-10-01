@@ -3,7 +3,6 @@
 import asyncio
 import json
 from datetime import datetime
-from typing import Any, Optional
 
 import typer
 from rich.console import Console
@@ -73,7 +72,7 @@ async def fetch_and_format_issue(org: str, repo: str, issue_number: int) -> dict
 
 async def generate_summary(issue_data: dict) -> dict:
     """Generate summary using vendored MultiSummaryRunner."""
-    console.print(f"🤖 Generating summary using MultiSummaryRunner...")
+    console.print("🤖 Generating summary using MultiSummaryRunner...")
 
     # Import MultiSummaryRunner from vendored code
     from ..runners.summary import MultiSummaryRunner
