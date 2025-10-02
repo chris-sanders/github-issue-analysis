@@ -470,7 +470,7 @@ def troubleshoot(
         rich_help_panel="Target Selection",
     ),
     agent: str = typer.Option(
-        "gpt5_mini_medium_mt",
+        "claude_sonnet_4_5_mt",
         "--agent",
         "-a",
         help="Troubleshoot agent to use (gpt5_mini_medium, gpt5_mini_high, "
@@ -518,11 +518,12 @@ def troubleshoot(
     Currently supports single-issue analysis for in-depth investigation.
 
     Agents available:
-    - gpt5_mini_medium_mt: GPT-5 Mini (medium reasoning) with memory+tools (default,
-      balanced speed and enhanced analysis with historical case retrieval)
+    - claude_sonnet_4_5_mt: Claude Sonnet 4.5 with memory+tools (default, latest model
+      with extended thinking for comprehensive troubleshooting analysis)
+    - gpt5_mini_medium_mt: GPT-5 Mini (medium reasoning) with memory+tools (balanced
+      speed and enhanced analysis with historical case retrieval)
     - gpt5_mini_high_mt: GPT-5 Mini (high reasoning) with memory+tools (slower but more thorough)
     - claude_sonnet_mt: Claude Sonnet 4 with memory+tools (alternative enhanced option)
-    - claude_sonnet_4_5_mt: Claude Sonnet 4.5 with memory+tools (latest model with extended thinking)
     - gpt5_mini_medium: GPT-5 Mini with medium reasoning (basic, no memory)
     - gpt5_mini_high: GPT-5 Mini with high reasoning (basic, no memory)
     - gpt5_medium: GPT-5 with medium reasoning (basic, no memory)
