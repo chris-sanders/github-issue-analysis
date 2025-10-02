@@ -1,17 +1,16 @@
 """Context tracking utilities for Phoenix tracing using OpenInference conventions."""
 
-from typing import Any
-
-from openinference.semconv.trace import MessageAttributes, SpanAttributes
 from opentelemetry import trace
+from typing import Optional, List, Dict, Any
+from openinference.semconv.trace import SpanAttributes, MessageAttributes
 
 
 def add_context_attributes(
-    span: trace.Span | None = None,
+    span: Optional[trace.Span] = None,
     prefix: str = "context",
-    message_count: int | None = None,
-    total_chars: int | None = None,
-    estimated_tokens: int | None = None,
+    message_count: Optional[int] = None,
+    total_chars: Optional[int] = None,
+    estimated_tokens: Optional[int] = None,
     max_tokens: int = 200_000,
 ) -> None:
     """Add context tracking attributes to a span using OpenInference conventions.
@@ -62,7 +61,7 @@ def add_context_attributes(
 def track_context_growth(
     before_chars: int,
     after_chars: int,
-    span: trace.Span | None = None,
+    span: Optional[trace.Span] = None,
     prefix: str = "context",
 ) -> None:
     """Track context growth between before and after states.
@@ -113,7 +112,7 @@ def get_model_max_tokens(model_name: str) -> int:
 
 
 def add_message_history_to_span(
-    span: trace.Span, messages: list[dict[str, Any]], max_messages: int = 10
+    span: trace.Span, messages: List[Dict[str, Any]], max_messages: int = 10
 ) -> None:
     """Add message history to span using OpenInference semantic conventions.
 
@@ -156,7 +155,7 @@ def add_message_history_to_span(
         logging.getLogger(__name__).warning(f"Failed to add message history: {e}")
 
 
-def track_tool_usage(span: trace.Span, tool_calls: list[dict[str, Any]]) -> None:
+def track_tool_usage(span: trace.Span, tool_calls: List[Dict[str, Any]]) -> None:
     """Track tool usage in a span using OpenInference conventions.
 
     Args:
@@ -193,8 +192,8 @@ def track_tool_usage(span: trace.Span, tool_calls: list[dict[str, Any]]) -> None
 
 
 def create_context_summary_span(
-    name: str, agent_name: str, context_data: dict[str, Any]
-) -> trace.Span | None:
+    name: str, agent_name: str, context_data: Dict[str, Any]
+) -> Optional[trace.Span]:
     """Create a dedicated context summary span for better Phoenix visibility.
 
     Args:
@@ -216,7 +215,7 @@ def create_context_summary_span(
 
         # Add context data
         for key, value in context_data.items():
-            if isinstance(value, int | float | str | bool):
+            if isinstance(value, (int, float, str, bool)):
                 span.set_attribute(f"context.{key}", value)
             elif isinstance(value, list):
                 span.set_attribute(f"context.{key}.count", len(value))
