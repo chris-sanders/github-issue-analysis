@@ -7,9 +7,9 @@ from datetime import datetime
 import typer
 from rich.console import Console
 
+from temporal_framework.snowflake import SnowflakeDevClient
+
 from ..github_client import GitHubClient
-from ..runners.utils import checks
-from ..runners.utils.snowflake_dev_client import SnowflakeDevClient
 
 app = typer.Typer(
     help="Store case summaries in Snowflake",
@@ -238,11 +238,21 @@ def store(
 
         # Run async operations
         async def process():
-            # Check environment
+            # Check Snowflake environment
             if not dry_run:
-                check_functions = [checks.snowflake]
-                if not await checks.run_checks(check_functions):
-                    console.print("[red]❌ Snowflake environment check failed[/red]")
+                import os
+
+                if not all(
+                    [
+                        os.getenv("SNOWFLAKE_ACCOUNT"),
+                        os.getenv("SNOWFLAKE_USER"),
+                        os.getenv("SNOWFLAKE_PRIVATE_KEY_PATH"),
+                    ]
+                ):
+                    console.print(
+                        "[red]❌ Missing Snowflake environment variables. "
+                        "Set SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PRIVATE_KEY_PATH[/red]"
+                    )
                     raise typer.Exit(1)
 
             # Fetch issue
