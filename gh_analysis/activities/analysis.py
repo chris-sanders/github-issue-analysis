@@ -38,7 +38,9 @@ async def run_agent_analysis(issue_data: dict[str, Any], agent_name: str) -> dic
         result = await agent.run(issue_data)
 
         activity.logger.info(f"Analysis complete: {agent_name}")
-        return {"output": result.output.model_dump()}
+
+        # Return the model dict directly (workflow will pass it through)
+        return result.output.model_dump()
 
     except Exception as e:
         activity.logger.error(f"Analysis failed: {e}")

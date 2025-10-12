@@ -717,11 +717,17 @@ async def _run_troubleshoot(
                     workflow_id=f"troubleshoot-{org}-{repo}-{issue_number}",
                 )
 
-        # Extract result from workflow output
-        from gh_analysis.ai.models import TechnicalAnalysis
+        # Extract result from workflow output (already a dict)
+        from gh_analysis.ai.models import (
+            TechnicalAnalysisNeedsData,
+            TechnicalAnalysisResolved,
+        )
 
-        # result_dict["output"] is already a dict from the workflow
-        result = TechnicalAnalysis.model_validate(result_dict.get("output", result_dict))
+        # result_dict is the model dict from the activity
+        if result_dict.get("status") == "resolved":
+            result = TechnicalAnalysisResolved.model_validate(result_dict)
+        else:
+            result = TechnicalAnalysisNeedsData.model_validate(result_dict)
 
         end_time = datetime.utcnow()
         processing_time = (end_time - start_time).total_seconds()
