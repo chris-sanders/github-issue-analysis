@@ -9,12 +9,14 @@ from datetime import timedelta
 
 from pydantic_ai import Agent
 from pydantic_ai.durable_exec.temporal import TemporalAgent
+from pydantic_ai.models.anthropic import AnthropicModel
 from pydantic_ai.models.openai import OpenAIResponsesModel
 from temporal_framework import create_mcp_toolset
 from temporal_framework.history import create_history_trimmer
+from temporal_framework.tools import search_evidence
 
 from gh_analysis.ai.models import TechnicalAnalysis
-from gh_analysis.ai.prompts import TROUBLESHOOTING_PROMPT
+from gh_analysis.ai.prompts import TROUBLESHOOTING_PROMPT, TOOL_INSTRUCTIONS
 
 # Create MCP toolset using framework
 mcp_tools = create_mcp_toolset(
@@ -25,9 +27,13 @@ mcp_tools = create_mcp_toolset(
     toolset_id="troubleshoot-mcp",
 )
 
-# Create history trimmer for different context windows
+# Create history trimmers for different context windows
 history_400k = create_history_trimmer(max_tokens=400_000, critical_ratio=0.9, high_ratio=0.8)
+history_300k = create_history_trimmer(max_tokens=300_000, critical_ratio=0.9, high_ratio=0.8)
 history_200k = create_history_trimmer(max_tokens=200_000, critical_ratio=0.9, high_ratio=0.8)
+
+# Combined instructions for agents with search_evidence tool
+combined_instructions = TROUBLESHOOTING_PROMPT + "\n\n" + TOOL_INSTRUCTIONS
 
 
 # GPT-5 Mini Medium
@@ -106,12 +112,54 @@ gpt5_high = TemporalAgent(
     model_activity_config={"start_to_close_timeout": timedelta(minutes=2)},
 )
 
+# Claude Sonnet 4
+claude_sonnet_4 = TemporalAgent(
+    Agent(
+        name="claude_sonnet_4",
+        model=AnthropicModel("claude-sonnet-4"),
+        output_type=TechnicalAnalysis,
+        instructions=combined_instructions,
+        toolsets=[mcp_tools],
+        tools=[search_evidence],
+        history_processors=[history_300k],
+        retries=2,
+        model_settings={
+            "timeout": 1200.0,
+            "parallel_tool_calls": True,
+        },
+    ),
+    model_activity_config={"start_to_close_timeout": timedelta(minutes=2)},
+)
+
+# Claude Sonnet 4.5
+claude_sonnet_4_5 = TemporalAgent(
+    Agent(
+        name="claude_sonnet_4_5",
+        model=AnthropicModel("claude-sonnet-4-5-20250929"),
+        output_type=TechnicalAnalysis,
+        instructions=combined_instructions,
+        toolsets=[mcp_tools],
+        tools=[search_evidence],
+        history_processors=[history_200k],
+        retries=10,
+        model_settings={
+            "timeout": 60.0,
+            "max_thinking_tokens": 20000,
+            "max_tokens": 8192,
+            "parallel_tool_calls": False,
+        },
+    ),
+    model_activity_config={"start_to_close_timeout": timedelta(minutes=2)},
+)
+
 # Agent registry
 AVAILABLE_AGENTS = {
     "gpt5_mini_medium": gpt5_mini_medium,
     "gpt5_mini_high": gpt5_mini_high,
     "gpt5_medium": gpt5_medium,
     "gpt5_high": gpt5_high,
+    "claude_sonnet_4": claude_sonnet_4,
+    "claude_sonnet_4_5": claude_sonnet_4_5,
 }
 
 

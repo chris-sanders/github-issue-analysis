@@ -623,21 +623,21 @@ async def _run_troubleshoot(
         console.print("[yellow]This token is needed for MCP tool access[/yellow]")
         return
 
+    # Validate agent exists and check API keys
+    from ..agents import AVAILABLE_AGENTS
+
+    if agent_name not in AVAILABLE_AGENTS:
+        available = ", ".join(AVAILABLE_AGENTS.keys())
+        console.print(f"[red]❌ Unknown agent: {agent_name}[/red]")
+        console.print(f"[yellow]Available agents: {available}[/yellow]")
+        return
+
     # Validate agent-specific API keys
-    if agent_name in [
-        "gpt5_mini_medium",
-        "gpt5_mini_high",
-        "gpt5_medium",
-        "gpt5_high",
-        "gpt5_mini_medium_mt",
-        "gpt5_mini_high_mt",
-        "gpt5_medium_mt",
-        "gpt5_high_mt",
-    ]:
+    if agent_name.startswith("gpt5_"):
         if not os.environ.get("OPENAI_API_KEY"):
             console.print(
                 "[red]❌ OPENAI_API_KEY environment variable is required "
-                "for GPT-5 and O3 agents[/red]"
+                "for GPT-5 agents[/red]"
             )
             return
     elif agent_name.startswith("claude_"):
@@ -647,21 +647,6 @@ async def _run_troubleshoot(
                 "for Claude agents[/red]"
             )
             return
-    elif agent_name.startswith("gemini_"):
-        if not os.environ.get("GOOGLE_API_KEY"):
-            console.print(
-                "[red]❌ GOOGLE_API_KEY environment variable is required "
-                "for Gemini agents[/red]"
-            )
-            return
-    else:
-        console.print(
-            f"[red]❌ Unknown agent: {agent_name}. Available: "
-            f"gpt5_mini_medium, gpt5_mini_high, gpt5_medium, gpt5_high, "
-            f"claude_sonnet_mt, claude_sonnet_4_5_mt, gpt5_mini_medium_mt, "
-            f"gpt5_mini_high_mt, gpt5_medium_mt, gpt5_high_mt, gemini_25_pro_mt[/red]"
-        )
-        return
 
     # Validate Slack configuration if notifications are enabled
     if slack_notifications:
@@ -699,147 +684,55 @@ async def _run_troubleshoot(
         console.print("[red]❌ --repo is required when specifying --issue-number[/red]")
         return
 
-    # Use runner instead of create_troubleshooting_agent
-    from ..runners import get_runner
-
-    try:
-        runner = get_runner(agent_name)
-        console.print(f"[blue]✓ Created {agent_name} troubleshoot runner[/blue]")
-    except ValueError as e:
-        console.print(f"[red]❌ {e}[/red]")
-        return
-    except Exception as e:
-        console.print(f"[red]❌ Failed to create runner: {e}[/red]")
-        return
-
-    # Find and load issue file (with auto-collection)
-    base_data_dir = Path(os.environ.get("GITHUB_ANALYSIS_DATA_DIR", "data"))
-    data_dir = base_data_dir / "issues"
-    expected_filename = f"{org}_{repo}_issue_{issue_number}.json"
-    issue_file = data_dir / expected_filename
-
-    # Auto-collect if issue not found
-    if not issue_file.exists() or not data_dir.exists():
-        console.print(
-            f"[yellow]Issue not cached, collecting {org}/{repo}#{issue_number}..."
-            "[/yellow]"
-        )
-
-        # Import collection functionality
-        from ..github_client.client import GitHubClient
-        from ..github_client.search import GitHubSearcher
-        from ..storage.manager import StorageManager
-
-        try:
-            github_client = GitHubClient()
-            searcher = GitHubSearcher(github_client)
-            storage = StorageManager()
-
-            console.print("[blue]🔍 Collecting issue...[/blue]")
-            issue = searcher.get_single_issue(org, repo, issue_number)
-            issues = [issue]
-
-            storage.save_issues(org, repo, issues)
-            console.print("[green]✅ Issue collected and saved[/green]")
-
-        except Exception as e:
-            console.print(f"[red]❌ Failed to collect issue: {e}[/red]")
-            console.print(
-                f"[yellow]Try running: github-analysis collect --org {org} "
-                f"--repo {repo} --issue-number {issue_number}[/yellow]"
-            )
-            return
-
-    # Load issue data
-    try:
-        with open(issue_file) as f:
-            issue_data = json.load(f)
-        console.print(f"[blue]✓ Loaded issue data from {expected_filename}[/blue]")
-    except Exception as e:
-        console.print(f"[red]❌ Failed to load issue data: {e}[/red]")
-        return
+    console.print(f"[blue]✓ Using {agent_name} agent with Temporal orchestration[/blue]")
 
     if dry_run:
         console.print(
-            f"[yellow]Would analyze issue #{issue_number} with "
-            f"{agent_name} agent[/yellow]"
+            f"[yellow]Would analyze {org}/{repo}#{issue_number} with "
+            f"{agent_name} agent via Temporal[/yellow]"
         )
-        console.print(
-            f"[yellow]Image processing: "
-            f"{'enabled' if include_images else 'disabled'}[/yellow]"
-        )
+        console.print("[yellow]Temporal orchestration: workflow + activities[/yellow]")
         return
 
-    # Check for images if enabled
-    if include_images:
-        attachment_count = len(
-            [
-                att
-                for att in issue_data["issue"].get("attachments", [])
-                if att.get("downloaded")
-                and att.get("content_type", "").startswith("image/")
-            ]
-        )
-        if attachment_count > 0:
-            console.print(f"[blue]Found {attachment_count} image(s) to analyze[/blue]")
-
-    # Limit comments if specified (for processing only, not downloading)
-    processed_issue_data = issue_data
-    if limit_comments is not None:
-        processed_issue_data = issue_data.copy()
-        # Extract issue from StoredIssue dictionary format
-        issue_model = issue_data["issue"]
-        original_comments = issue_model.get("comments", [])
-        if len(original_comments) > limit_comments:
-            # Create a new dictionary with limited comments
-            limited_issue = issue_model.copy()
-            limited_issue["comments"] = original_comments[:limit_comments]
-            processed_issue_data["issue"] = limited_issue
-            console.print(
-                f"[yellow]Limiting analysis to first {limit_comments} comment(s) "
-                f"out of {len(original_comments)} total[/yellow]"
-            )
-        else:
-            console.print(
-                f"[blue]Processing all {len(original_comments)} comment(s)[/blue]"
-            )
-
-    # Run analysis
-    console.print(f"[blue]🔍 Running {agent_name} analysis...[/blue]")
+    # Run analysis via Temporal
+    console.print(f"[blue]🔍 Starting Temporal workflow for {agent_name}...[/blue]")
     start_time = datetime.utcnow()
 
     try:
-        # Analyze using runner
+        # Execute via TemporalManager (manages server + worker lifecycle)
+        from ..temporal import TemporalManager
+        from ..workflows import TroubleshootWorkflow
+
         with console.status(
-            "[dim]🤔 Analyzing issue with troubleshooting runner...[/dim]",
+            "[dim]🚀 Starting Temporal infrastructure...[/dim]",
             spinner="dots",
         ):
-            result: Any = await runner.analyze(processed_issue_data)
+            async with TemporalManager() as tm:
+                console.print("[green]✓ Temporal server and worker ready[/green]")
 
-        # For interactive mode compatibility, create a simple agent_result-like object
-        if interactive:
-            # Create a minimal result object for interactive mode compatibility
-            class SimpleAgentResult:
-                def __init__(self, output: Any) -> None:
-                    self.output = output
+                console.print("[blue]📋 Executing troubleshoot workflow...[/blue]")
+                result_dict = await tm.execute_workflow(
+                    TroubleshootWorkflow,
+                    args=(org, repo, issue_number, agent_name),
+                    workflow_id=f"troubleshoot-{org}-{repo}-{issue_number}",
+                )
 
-                def new_messages(self) -> list[Any]:
-                    """Return empty message history for interactive mode compatibility."""
-                    return []
+        # Extract result from workflow output
+        from gh_analysis.ai.models import TechnicalAnalysis
 
-            agent_result = SimpleAgentResult(result)
-        else:
-            agent_result = None
+        result = TechnicalAnalysis.model_validate(result_dict["output"])
 
         end_time = datetime.utcnow()
         processing_time = (end_time - start_time).total_seconds()
 
-        # Processing time calculated but not stored in discriminated union
-
         console.print(f"[green]✓ Analysis completed in {processing_time:.1f}s[/green]")
+        console.print("[dim]View workflow in Temporal UI: http://localhost:8233[/dim]")
 
     except Exception as e:
         console.print(f"[red]❌ Analysis failed: {e}[/red]")
+        import traceback
+
+        console.print(f"[red]{traceback.format_exc()}[/red]")
         return
 
     # Display results based on discriminated union status
@@ -882,6 +775,7 @@ async def _run_troubleshoot(
                 console.print(f"{i}. {eliminated}")
 
     # Save results
+    base_data_dir = Path(os.environ.get("GITHUB_ANALYSIS_DATA_DIR", "data"))
     results_dir = base_data_dir / "results" / "troubleshoot"
     results_dir.mkdir(parents=True, exist_ok=True)
 
@@ -892,16 +786,16 @@ async def _run_troubleshoot(
 
     result_data = {
         "issue_reference": {
-            "file_path": str(issue_file),
             "org": org,
             "repo": repo,
             "issue_number": issue_number,
+            "url": f"https://github.com/{org}/{repo}/issues/{issue_number}",
         },
         "processor": {
             "name": "troubleshoot",
-            "version": "1.0.0",
+            "version": "2.0.0",  # Temporal version
             "agent": agent_name,
-            "include_images": include_images,
+            "temporal": True,
             "timestamp": datetime.utcnow().isoformat() + "Z",
         },
         "analysis": result.model_dump(),
@@ -929,8 +823,8 @@ async def _run_troubleshoot(
             else:
                 issue_url = f"https://github.com/{org}/{repo}/issues/{issue_number}"
 
-            # Get issue title from the issue data
-            issue_title = issue_data["issue"].get("title", f"Issue #{issue_number}")
+            # Get issue title (workflow fetches directly, so we may not have it cached)
+            issue_title = f"Issue #{issue_number}"
 
             console.print("[blue]📤 Sending Slack notification...[/blue]")
 
