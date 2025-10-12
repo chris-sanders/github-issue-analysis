@@ -1,9 +1,15 @@
 """Troubleshooting workflow using Temporal orchestration."""
 
 import logging
+from datetime import timedelta
 from typing import Any
 
 from temporalio import workflow
+
+# Import activities at module level (required for Temporal sandbox)
+with workflow.unsafe.imports_passed_through():
+    from gh_analysis.activities.analysis import run_agent_analysis
+    from gh_analysis.activities.github import fetch_github_issue
 
 logger = logging.getLogger(__name__)
 
@@ -32,21 +38,17 @@ class TroubleshootWorkflow:
         )
 
         # Activity 1: Fetch GitHub issue
-        from gh_analysis.activities.github import fetch_github_issue
-
         issue_data = await workflow.execute_activity(
             fetch_github_issue,
             args=(org, repo, issue_number),
-            start_to_close_timeout=workflow.timedelta(minutes=5),
+            start_to_close_timeout=timedelta(minutes=5),
         )
 
         # Activity 2: Run agent analysis (TemporalAgent - tool calls become activities)
-        from gh_analysis.activities.analysis import run_agent_analysis
-
         result = await workflow.execute_activity(
             run_agent_analysis,
             args=(issue_data, agent_name),
-            start_to_close_timeout=workflow.timedelta(minutes=30),
+            start_to_close_timeout=timedelta(minutes=30),
         )
 
         workflow.logger.info("Troubleshoot workflow completed")

@@ -120,15 +120,30 @@ class TemporalManager:
 
     async def _wait_for_server_ready(self, timeout: float = 30.0):
         """Poll Temporal server until ready."""
+        import socket
+
         start = time.time()
-        async with httpx.AsyncClient() as client:
-            while time.time() - start < timeout:
-                try:
-                    response = await client.get(f"http://{self.temporal_host}/")
-                    if response.status_code in (200, 404):  # Server is responding
-                        return
-                except (httpx.ConnectError, httpx.ReadTimeout):
-                    await asyncio.sleep(0.5)
+
+        # Give server a moment to start
+        await asyncio.sleep(2.0)
+
+        # Poll port until it's open
+        while time.time() - start < timeout:
+            try:
+                # Try to connect to port 7233
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(1.0)
+                result = sock.connect_ex(("localhost", 7233))
+                sock.close()
+
+                if result == 0:  # Port is open
+                    # Give it another second for HTTP to be ready
+                    await asyncio.sleep(1.0)
+                    return
+            except Exception:
+                pass
+
+            await asyncio.sleep(0.5)
 
         raise TimeoutError(f"Temporal server not ready after {timeout}s")
 
