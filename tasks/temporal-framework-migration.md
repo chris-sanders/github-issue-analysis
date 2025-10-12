@@ -7,13 +7,38 @@
 **Estimated Effort:** 4-5 days total
 **Actual Effort So Far:** 1 day (Phase 1)
 
-## Current State (2025-10-12)
+## Current State (2025-10-12 - In Progress)
 
 ### ✅ Phase 1 Complete: Basic Framework Integration
 - Added framework submodule
 - Migrated MCP integration to use `create_mcp_toolset()`
 - Documentation updated
 - Tests passing (465 tests pass)
+
+### ⚙️ Phase 2 In Progress: Full Temporal Migration
+
+#### ✅ Completed:
+1. **Framework utilities added** (on framework feature/add-shared-utilities branch):
+   - `temporal_framework/history/` - History trimming with tool pairs
+   - `temporal_framework/snowflake/` - Database integration (base, client, retrieval)
+   - `temporal_framework/memory/` - Memory retrieval and formatting
+   - `temporal_framework/tools/` - search_evidence tool
+   - All utilities tested and working
+
+2. **Temporal infrastructure created**:
+   - `gh_analysis/temporal/manager.py` - TemporalManager (CLI lifecycle management)
+   - `gh_analysis/workflows/troubleshoot.py` - TroubleshootWorkflow
+   - `gh_analysis/activities/github.py` - fetch_github_issue activity
+   - `gh_analysis/activities/analysis.py` - run_agent_analysis activity
+   - `gh_analysis/agents/troubleshoot.py` - TemporalAgent definitions (4 agents)
+   - `gh_analysis/workers/main_worker.py` - Worker factory
+
+#### ⬜ Remaining:
+1. **Update CLI command** to use TemporalManager instead of Runner pattern
+2. **Test end-to-end** with real issue through Temporal
+3. **Remove vendored code** (entire runners/ directory)
+4. **Update tests** to work with Temporal pattern
+5. **Merge framework feature branch** and update submodule pointer
 
 ### ❌ Phase 2 Needed: Full Migration
 **IMPORTANT DISCOVERY**: After reviewing exp05-temporal, realized the migration is incomplete:
