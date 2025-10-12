@@ -34,8 +34,24 @@ async def run_agent_analysis(issue_data: dict[str, Any], agent_name: str) -> dic
     agent = get_agent(agent_name)
 
     try:
-        # Run agent (tool calls become Temporal activities automatically)
-        result = await agent.run(issue_data)
+        # Format issue data properly for agent (needs actual issue content, not schema)
+        # The issue_data is a GitHubIssue model dict with: number, title, body, comments, etc.
+        formatted_context = f"""**GitHub Issue Analysis**
+
+**Issue**: #{issue_data['number']}
+**Title**: {issue_data.get('title', 'N/A')}
+**State**: {issue_data.get('state', 'N/A')}
+
+**Description**:
+{issue_data.get('body', 'No description provided')}
+
+**Comments** ({len(issue_data.get('comments', []))} total):
+"""
+        for i, comment in enumerate(issue_data.get('comments', [])[:10], 1):
+            formatted_context += f"\n--- Comment {i} ---\n{comment.get('body', '')}\n"
+
+        # Run agent with formatted context
+        result = await agent.run(formatted_context)
 
         activity.logger.info(f"Analysis complete: {agent_name}")
 

@@ -107,11 +107,11 @@ class TemporalManager:
         """Start Temporal dev server as subprocess."""
         logger.info("Starting Temporal dev server...")
 
-        # Start server in background
+        # Start server in background with output suppressed
         self.server_process = subprocess.Popen(
             ["temporal", "server", "start-dev", "--ip", "0.0.0.0", "--port", "7233"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
 
         # Wait for server to be ready

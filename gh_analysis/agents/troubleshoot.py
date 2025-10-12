@@ -18,12 +18,13 @@ from temporal_framework.tools import search_evidence
 from gh_analysis.ai.models import TechnicalAnalysis
 from gh_analysis.ai.prompts import TROUBLESHOOTING_PROMPT, TOOL_INSTRUCTIONS
 
-# Create MCP toolset using framework
+# Create MCP toolset using framework (suppress verbose logging)
 mcp_tools = create_mcp_toolset(
     server_command="troubleshoot-mcp-server",
     token_env="SBCTL_TOKEN",
     env={"PYTHONWARNINGS": "ignore"},
     timeout=120.0,
+    verbose=False,  # Suppress MCP server logs
     toolset_id="troubleshoot-mcp",
 )
 
