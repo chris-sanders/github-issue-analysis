@@ -64,6 +64,14 @@ class TemporalManager:
 
     async def __aenter__(self) -> "TemporalManager":
         """Start Temporal server and worker."""
+        # Suppress noisy logging from MCP server and Temporal
+        import logging as log
+
+        log.getLogger("lifecycle").setLevel(log.ERROR)
+        log.getLogger("bundle").setLevel(log.ERROR)
+        log.getLogger("server").setLevel(log.ERROR)
+        log.getLogger("temporalio").setLevel(log.WARNING)
+
         logger.info("🚀 Starting CLI-managed Temporal infrastructure...")
 
         # Step 1: Start Temporal dev server
