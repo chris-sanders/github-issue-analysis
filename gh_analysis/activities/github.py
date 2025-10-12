@@ -16,7 +16,7 @@ async def fetch_github_issue(org: str, repo: str, issue_number: int) -> dict[str
 
     Args:
         org: GitHub organization
-        repo: GitHub repository  
+        repo: GitHub repository
         issue_number: Issue number
 
     Returns:
@@ -27,15 +27,21 @@ async def fetch_github_issue(org: str, repo: str, issue_number: int) -> dict[str
     """
     activity.logger.info(f"Fetching issue: {org}/{repo}#{issue_number}")
 
-    # Use existing GitHubClient
+    # Use existing GitHub search (synchronous)
+    from gh_analysis.github_client.search import GitHubSearcher
+
     client = GitHubClient()
+    searcher = GitHubSearcher(client)
 
     try:
-        # Fetch issue with comments
-        issue = await client.get_issue(org, repo, issue_number)
+        # Fetch issue with comments (synchronous call)
+        issue = searcher.get_single_issue(org, repo, issue_number)
 
-        activity.logger.info(f"Fetched issue with {len(issue.get('comments', []))} comments")
-        return issue
+        comments_count = len(issue.comments) if hasattr(issue, "comments") else 0
+        activity.logger.info(f"Fetched issue with {comments_count} comments")
+
+        # Convert to dict
+        return issue.model_dump()
 
     except Exception as e:
         activity.logger.error(f"Failed to fetch issue: {e}")
