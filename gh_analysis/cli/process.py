@@ -720,7 +720,8 @@ async def _run_troubleshoot(
         # Extract result from workflow output
         from gh_analysis.ai.models import TechnicalAnalysis
 
-        result = TechnicalAnalysis.model_validate(result_dict["output"])
+        # result_dict["output"] is already a dict from the workflow
+        result = TechnicalAnalysis.model_validate(result_dict.get("output", result_dict))
 
         end_time = datetime.utcnow()
         processing_time = (end_time - start_time).total_seconds()
