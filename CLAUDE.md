@@ -2,6 +2,72 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Temporal Framework Integration
+
+gh-analysis uses the Temporal PydanticAI Framework as a git submodule for shared infrastructure.
+
+### First-Time Setup
+```bash
+# Clone with submodules
+git clone --recurse-submodules <repo-url>
+
+# Or initialize after clone
+git submodule init
+git submodule update
+```
+
+### Framework Location
+- Submodule: `framework/` directory
+- Repository: `~/src/temporal`
+- Branch: `pydantic-temporal-framework`
+
+### Framework Provides
+- **MCP Integration**: `create_mcp_toolset()` - flexible MCP server creation with auto-discovery
+- **Agent Utilities**: Helper functions for creating Temporal-compatible agents
+- **Shared Infrastructure**: Common patterns for context-experiments and gh-analysis
+
+### Usage Pattern
+```python
+# Import directly from framework - NO ADAPTERS
+from temporal_framework import create_mcp_toolset
+
+# Create MCP toolset
+mcp_tools = create_mcp_toolset(
+    server_command="troubleshoot-mcp-server",
+    token_env="SBCTL_TOKEN",
+    env={"PYTHONWARNINGS": "ignore"},
+    timeout=120.0,
+    toolset_id="troubleshoot-mcp",
+)
+
+# Use with agent
+agent = Agent(
+    model="openai:gpt-5",
+    toolsets=[mcp_tools],
+    ...
+)
+```
+
+### Updating Framework
+```bash
+# Pull latest framework changes
+cd framework
+git pull origin pydantic-temporal-framework
+cd ..
+
+# Commit submodule update
+git add framework
+git commit -m "Update temporal framework"
+```
+
+### Important Principle
+**If the framework is hard to use, fix THE FRAMEWORK, not gh-analysis.**
+
+The framework is shared infrastructure. If we need new features:
+1. Add them to the framework repository (`~/src/temporal`)
+2. Update the submodule in gh-analysis
+3. Benefits all projects using the framework
+
 ## Required Commands
 
 **Setup:**

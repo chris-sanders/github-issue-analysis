@@ -1,5 +1,42 @@
 # Architecture Overview
 
+## Framework Integration
+
+gh-analysis uses the Temporal PydanticAI Framework (git submodule) for shared infrastructure.
+
+### Framework vs Application
+- **Framework** (`framework/`): Shared infrastructure, no private data
+  - MCP tool integration (`create_mcp_toolset`)
+  - Agent utilities for Temporal-compatible agents
+  - Common patterns shared with context-experiments
+- **Application** (`gh_analysis/`): gh-analysis-specific logic
+  - Agent prompts and response models
+  - CLI interface and commands
+  - Runner classes (GitHubIssueRunner, MemoryAwareGitHubRunner)
+  - Snowflake integration for memory-enhanced runners
+  - History trimming utilities
+  - Business logic and workflows
+
+### Direct Framework Usage
+gh-analysis imports framework utilities directly - no adapter layer needed:
+```python
+from temporal_framework import create_mcp_toolset
+```
+
+The framework is designed to be flexible and handle common use cases:
+- Automatically uses `uv run` if command not in PATH
+- Creates isolated temp directories for MCP servers
+- Manages environment variables
+- Provides consistent API across projects
+
+### Application-Specific Code
+gh-analysis maintains its own utilities for app-specific needs:
+- `GitHubIssueRunner` / `MemoryAwareGitHubRunner` - Runner base classes
+- `create_history_trimmer()` - Context window management (model-specific)
+- `search_evidence()` - Snowflake evidence search tool
+- `SnowflakeDevClient` - Database connectivity
+- Summary retrieval and case memory systems
+
 ## System Components
 
 ### Core Application

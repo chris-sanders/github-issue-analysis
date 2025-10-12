@@ -1,0 +1,4 @@
+[submodule "framework"]
+	path = framework
+	url = /Users/chris/src/temporal
+	branch = pydantic-temporal-framework
