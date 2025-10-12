@@ -31,28 +31,154 @@
    - gh-analysis still uses Runner pattern
    - Should convert to workflows/activities like exp05-temporal demo
 
-## Phase 2 Plan: Complete Migration
+## Phase 2 Plan: Complete Temporal Migration
 
-### Step 1: Add Shared Utilities to Framework
+**Goal**: CLI command runs case through Temporal framework with ZERO vendored code.
+
+### Critical Architecture Decision: CLI-Managed Temporal
+
+**Problem**: Can't ask users to run 3 commands (server, worker, CLI)
+**Solution**: CLI manages Temporal server and worker lifecycle
+
+```python
+# CLI execution pattern
+uv run gh-analysis process troubleshoot --org X --repo Y --issue-number Z
+    ↓
+1. CLI starts Temporal server (subprocess)
+2. CLI starts worker (background asyncio task in same process)
+3. CLI executes workflow via Temporal client
+4. CLI waits for result
+5. CLI shuts down worker
+6. CLI shuts down Temporal server
+```
+
+**Implementation**:
+```python
+# gh_analysis/temporal_manager.py
+class TemporalManager:
+    async def __aenter__(self):
+        # Start temporal server subprocess
+        self.server = subprocess.Popen(["temporal", "server", "start-dev", ...])
+        await self._wait_for_server_ready()  # Poll port 7233
+
+        # Connect client
+        self.client = await Client.connect("localhost:7233")
+
+        # Start worker in background task
+        self.worker = Worker(self.client, task_queue="gh-analysis", ...)
+        self.worker_task = asyncio.create_task(self.worker.run())
+        await self._wait_for_worker_ready()
+
+        return self
+
+    async def __aexit__(self, *args):
+        # Shutdown worker
+        self.worker_task.cancel()
+
+        # Shutdown server
+        self.server.terminate()
+        self.server.wait()
+
+# CLI usage
+async def troubleshoot_command(org, repo, issue_number):
+    async with TemporalManager() as temporal:
+        result = await temporal.client.execute_workflow(
+            TroubleshootWorkflow.run,
+            args=(org, repo, issue_number),
+            task_queue="gh-analysis",
+        )
+    return result
+```
+
+### Step 1: Move ALL Shared Utilities to Framework
+
+**No more vendored code anywhere!** Everything shared goes to framework:
 Work on framework feature branch: `feature/add-shared-utilities`
 
-Move these from both exp05 and gh-analysis into framework:
-- `memory/` - memory injection and retrieval
-  - `memory_runner.py` → adapt to work with TemporalAgent
-  - `memory_preprocessor.py` → context preparation
-- `history.py` - history trimming utilities
-- `snowflake/` - database integration
-  - `snowflake_base.py` - base client
-  - `snowflake_dev_client.py` - development client
-  - `summary_retrieval.py` - case retrieval
-- `tools.py` - shared tool functions (search_evidence, etc.)
+**Framework directory structure**:
+```
+framework/temporal_framework/
+├── mcp.py              ✅ Done (Phase 1)
+├── agents.py           ✅ Done (Phase 1)
+├── models.py           ✅ Done (Phase 1)
+├── history/            ⬜ Add in Phase 2
+│   ├── __init__.py
+│   └── trimming.py     # From gh_analysis/runners/utils/history.py
+├── memory/             ⬜ Add in Phase 2
+│   ├── __init__.py
+│   ├── runner.py       # From exp05/memory_runner.py
+│   ├── preprocessor.py # From exp05/memory_preprocessor.py
+│   └── retrieval.py    # From gh_analysis/runners/utils/summary_retrieval.py
+├── snowflake/          ⬜ Add in Phase 2
+│   ├── __init__.py
+│   ├── base.py         # From gh_analysis/runners/utils/snowflake_base.py
+│   └── client.py       # From gh_analysis/runners/utils/snowflake_dev_client.py
+├── tools/              ⬜ Add in Phase 2
+│   ├── __init__.py
+│   └── evidence.py     # From gh_analysis/runners/utils/tools.py (search_evidence)
+└── observability/      ⬜ Add later (exp05 is working on this)
+```
 
-**Key Decision**: Should these work with TemporalAgent or be Temporal activities?
-- Memory retrieval → Temporal activity (external operation)
-- History trimming → Utility function (in-process)
-- Snowflake queries → Temporal activity (external operation)
+**Migration order**:
+1. **history/** - No dependencies, simple utility functions
+2. **snowflake/** - Standalone database client
+3. **tools/** - Depends on snowflake for search_evidence
+4. **memory/** - Depends on snowflake and tools
 
-### Step 2: Convert gh-analysis to Temporal Pattern
+**Files to copy and consolidate**:
+```bash
+# Source files (compare and merge):
+# - /Users/chris/src/context-experiments/exp/05_memory/memory_runner.py
+# - /Users/chris/src/context-experiments/src/utils/history.py
+# - /Users/chris/src/context-experiments/src/utils/snowflake_*.py
+# - /Users/chris/src/github-issue-analysis/gh_analysis/runners/utils/history.py
+# - /Users/chris/src/github-issue-analysis/gh_analysis/runners/utils/memory_runner.py
+# - /Users/chris/src/github-issue-analysis/gh_analysis/runners/utils/snowflake_*.py
+# - /Users/chris/src/github-issue-analysis/gh_analysis/runners/utils/summary_retrieval.py
+# - /Users/chris/src/github-issue-analysis/gh_analysis/runners/utils/tools.py
+```
+
+**Key Decision**: Framework utilities should be agnostic:
+- Work with both regular Agent and TemporalAgent
+- No gh-analysis-specific assumptions
+- No context-experiments-specific assumptions
+- Generic enough for any project using the framework
+
+### Step 2: Implement CLI-Managed Temporal
+
+Create infrastructure for CLI to manage Temporal lifecycle:
+
+**Files to create**:
+- `gh_analysis/temporal/manager.py` - Manages server/worker lifecycle
+- `gh_analysis/temporal/config.py` - Temporal configuration
+- `gh_analysis/workers/main_worker.py` - Worker definition
+- `gh_analysis/workflows/troubleshoot.py` - Workflow definitions
+- `gh_analysis/activities/github.py` - GitHub operations
+- `gh_analysis/activities/memory.py` - Memory retrieval (uses framework)
+- `gh_analysis/activities/analysis.py` - Analysis operations
+
+**Key patterns**:
+```python
+# Temporal manager handles lifecycle
+class TemporalManager:
+    async def start_server(self):
+        """Start Temporal dev server as subprocess."""
+
+    async def start_worker(self):
+        """Start worker in background task (same process)."""
+
+    async def execute_workflow(self, workflow, args):
+        """Execute workflow and return result."""
+
+    async def shutdown(self):
+        """Clean shutdown of worker and server."""
+
+# CLI uses context manager
+async with TemporalManager() as tm:
+    result = await tm.execute_workflow(TroubleshootWorkflow, ...)
+```
+
+### Step 3: Convert gh-analysis to Temporal Pattern
 
 Replace Runner pattern with Temporal workflows:
 
@@ -101,9 +227,9 @@ async def retrieve_memory(issue_data: dict) -> str:
     pass
 ```
 
-### Step 3: Update CLI to Use Workflows
+### Step 4: Update CLI to Use Managed Temporal
 
-CLI commands should trigger Temporal workflows, not Runner classes:
+CLI commands use TemporalManager to execute workflows:
 
 ```python
 # cli/process.py
@@ -118,13 +244,59 @@ async def troubleshoot(issue_number: int, agent_name: str):
     )
 ```
 
-### Step 4: Remove Old Code
+### Step 5: Remove ALL Vendored Code
 
-Delete deprecated patterns:
-- `gh_analysis/runners/base/` - GitHubIssueRunner classes
-- `gh_analysis/runners/troubleshooting/` - old runner implementations
-- `gh_analysis/runners/utils/` - now in framework
-- Replace with Temporal workflows/activities
+**Goal: ZERO vendored code**. Everything uses framework.
+
+Delete these directories completely:
+- `gh_analysis/runners/utils/` - ALL utilities moved to framework
+- `gh_analysis/runners/summary/utils/` - ALL utilities moved to framework
+- `gh_analysis/runners/base/` - GitHubIssueRunner classes removed
+- `gh_analysis/runners/troubleshooting/` - Old runner implementations removed
+- `gh_analysis/runners/summary/` - Old runner implementations removed
+- `gh_analysis/runners/adapters/` - No longer needed
+
+**After deletion**, only these remain:
+- `gh_analysis/workflows/` - Temporal workflows (NEW)
+- `gh_analysis/activities/` - Temporal activities (NEW)
+- `gh_analysis/agents/` - TemporalAgent definitions (NEW)
+- `gh_analysis/workers/` - Worker process definition (NEW)
+- `gh_analysis/temporal/` - Temporal manager (NEW)
+- `gh_analysis/cli/` - Updated to use TemporalManager
+- `gh_analysis/ai/` - Prompts and models (application-specific)
+
+### Step 6: Acceptance Test
+
+**The test**: Can CLI process a case using ONLY framework utilities?
+
+```bash
+# Single command - CLI handles everything
+uv run gh-analysis process troubleshoot \
+  --org YOUR_ORG --repo YOUR_REPO --issue-number YOUR_ISSUE \
+  --agent gpt5_medium
+
+# What should happen:
+# 1. CLI starts Temporal server (subprocess)
+# 2. CLI starts worker (background task)
+# 3. CLI submits TroubleshootWorkflow
+# 4. Worker executes workflow:
+#    - Activity: fetch_github_issue
+#    - Activity: retrieve_memory (uses framework.memory)
+#    - TemporalAgent: gpt5_medium (uses framework.mcp)
+#    - Activity: save_results
+# 5. CLI receives result
+# 6. CLI shuts down worker
+# 7. CLI shuts down server
+# 8. CLI displays result
+
+# Verify:
+# - Check Temporal UI: http://localhost:8233
+# - See workflow execution
+# - See all activities
+# - See tool calls as activities
+# - No imports from gh_analysis.runners.utils
+# - All imports from framework or gh_analysis.workflows/activities
+```
 
 ## Overview
 
