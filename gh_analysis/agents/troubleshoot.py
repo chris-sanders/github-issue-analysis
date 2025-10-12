@@ -112,29 +112,10 @@ gpt5_high = TemporalAgent(
     model_activity_config={"start_to_close_timeout": timedelta(minutes=2)},
 )
 
-# Claude Sonnet 4
-claude_sonnet_4 = TemporalAgent(
+# Sonnet 4.5 (default Claude model)
+sonnet_4_5 = TemporalAgent(
     Agent(
-        name="claude_sonnet_4",
-        model=AnthropicModel("claude-sonnet-4"),
-        output_type=TechnicalAnalysis,
-        instructions=combined_instructions,
-        toolsets=[mcp_tools],
-        tools=[search_evidence],
-        history_processors=[history_300k],
-        retries=2,
-        model_settings={
-            "timeout": 1200.0,
-            "parallel_tool_calls": True,
-        },
-    ),
-    model_activity_config={"start_to_close_timeout": timedelta(minutes=2)},
-)
-
-# Claude Sonnet 4.5
-claude_sonnet_4_5 = TemporalAgent(
-    Agent(
-        name="claude_sonnet_4_5",
+        name="sonnet_4_5",
         model=AnthropicModel("claude-sonnet-4-5-20250929"),
         output_type=TechnicalAnalysis,
         instructions=combined_instructions,
@@ -158,8 +139,7 @@ AVAILABLE_AGENTS = {
     "gpt5_mini_high": gpt5_mini_high,
     "gpt5_medium": gpt5_medium,
     "gpt5_high": gpt5_high,
-    "claude_sonnet_4": claude_sonnet_4,
-    "claude_sonnet_4_5": claude_sonnet_4_5,
+    "sonnet_4_5": sonnet_4_5,  # Default Claude (Sonnet 4.5)
 }
 
 
