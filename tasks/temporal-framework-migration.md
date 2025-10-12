@@ -1,11 +1,130 @@
 # Task: Migrate to Temporal Framework via Submodule
 
 ## Status
-**Status:** Complete
+**Status:** In Progress - Phase 1 Complete, Phase 2 Needed
 **Assigned:** Claude Code
 **Priority:** High
-**Estimated Effort:** 2-3 days
-**Actual Effort:** 1 day
+**Estimated Effort:** 4-5 days total
+**Actual Effort So Far:** 1 day (Phase 1)
+
+## Current State (2025-10-12)
+
+### ✅ Phase 1 Complete: Basic Framework Integration
+- Added framework submodule
+- Migrated MCP integration to use `create_mcp_toolset()`
+- Documentation updated
+- Tests passing (465 tests pass)
+
+### ❌ Phase 2 Needed: Full Migration
+**IMPORTANT DISCOVERY**: After reviewing exp05-temporal, realized the migration is incomplete:
+
+1. **Framework is missing shared utilities**
+   - exp05 and gh-analysis BOTH have: memory_runner, history, snowflake_base, snowflake_dev_client, summary_retrieval
+   - These should be in framework, not duplicated
+
+2. **Runner pattern should be eliminated**
+   - Current: GitHubIssueRunner, MemoryAwareGitHubRunner classes
+   - Should be: Temporal workflows + activities + TemporalAgent
+   - exp05-temporal shows the pattern: direct TemporalAgent usage, no Runner classes
+
+3. **Temporal integration not implemented**
+   - gh-analysis still uses Runner pattern
+   - Should convert to workflows/activities like exp05-temporal demo
+
+## Phase 2 Plan: Complete Migration
+
+### Step 1: Add Shared Utilities to Framework
+Work on framework feature branch: `feature/add-shared-utilities`
+
+Move these from both exp05 and gh-analysis into framework:
+- `memory/` - memory injection and retrieval
+  - `memory_runner.py` → adapt to work with TemporalAgent
+  - `memory_preprocessor.py` → context preparation
+- `history.py` - history trimming utilities
+- `snowflake/` - database integration
+  - `snowflake_base.py` - base client
+  - `snowflake_dev_client.py` - development client
+  - `summary_retrieval.py` - case retrieval
+- `tools.py` - shared tool functions (search_evidence, etc.)
+
+**Key Decision**: Should these work with TemporalAgent or be Temporal activities?
+- Memory retrieval → Temporal activity (external operation)
+- History trimming → Utility function (in-process)
+- Snowflake queries → Temporal activity (external operation)
+
+### Step 2: Convert gh-analysis to Temporal Pattern
+
+Replace Runner pattern with Temporal workflows:
+
+**Before** (Runner pattern):
+```python
+class GPT5MediumRunner(GitHubIssueRunner):
+    def __init__(self):
+        agent = Agent(...)
+        super().__init__("gpt5-medium", agent)
+
+    async def analyze(self, issue_data):
+        return await self.agent.run(issue_data)
+```
+
+**After** (Temporal pattern):
+```python
+# agents/troubleshoot.py
+gpt5_medium_agent = TemporalAgent(
+    Agent(
+        name="gpt5-medium",
+        model=OpenAIResponsesModel("gpt-5"),
+        output_type=TechnicalAnalysis,
+        instructions=TROUBLESHOOTING_PROMPT,
+        toolsets=[mcp_tools],
+        model_settings={"openai_reasoning_effort": "medium"},
+    ),
+    model_activity_config={
+        "start_to_close_timeout": timedelta(minutes=2)
+    }
+)
+
+# workflows/troubleshoot.py
+@workflow.defn
+class TroubleshootWorkflow:
+    @workflow.run
+    async def run(self, issue_data: dict) -> TechnicalAnalysis:
+        # Temporal handles durability, retries, observability
+        result = await gpt5_medium_agent.run(issue_data)
+        return result.output
+
+# activities/memory.py
+@activity.defn
+async def retrieve_memory(issue_data: dict) -> str:
+    """Retrieve similar cases from Snowflake."""
+    # Use framework's Snowflake utilities
+    pass
+```
+
+### Step 3: Update CLI to Use Workflows
+
+CLI commands should trigger Temporal workflows, not Runner classes:
+
+```python
+# cli/process.py
+async def troubleshoot(issue_number: int, agent_name: str):
+    # Start Temporal workflow
+    client = await Client.connect("localhost:7233")
+    result = await client.execute_workflow(
+        TroubleshootWorkflow.run,
+        issue_data,
+        id=f"troubleshoot-{org}-{repo}-{issue_number}",
+        task_queue="gh-analysis-queue",
+    )
+```
+
+### Step 4: Remove Old Code
+
+Delete deprecated patterns:
+- `gh_analysis/runners/base/` - GitHubIssueRunner classes
+- `gh_analysis/runners/troubleshooting/` - old runner implementations
+- `gh_analysis/runners/utils/` - now in framework
+- Replace with Temporal workflows/activities
 
 ## Overview
 
