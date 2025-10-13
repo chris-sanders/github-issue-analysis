@@ -27,7 +27,6 @@ from framework.temporal.observability import (
 
 # Import workflows and activities (relative imports within exp05_temporal)
 from gh_analysis.activities.github import (
-    cleanup_mcp_bundles,
     fetch_github_issue,
     run_agent_analysis,
 )
@@ -118,7 +117,6 @@ class Exp05Worker:
             task_queue=self.task_queue,
             workflows=[GitHubAnalysisWorkflow],
             activities=[
-                cleanup_mcp_bundles,  # Clean bundles first
                 fetch_github_issue,
                 run_agent_analysis,  # For v1 agents
             ],

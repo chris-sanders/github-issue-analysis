@@ -1,92 +1,43 @@
-"""
-GitHub issue analysis workflow using Temporal and PydanticAI agents.
-
-This workflow orchestrates the fetching and analysis of GitHub issues using
-troubleshooting agents with MCP tool access.
-"""
+"""GitHub issue analysis workflow using Temporal and PydanticAI agents."""
 
 import logging
 from datetime import timedelta
 from typing import Optional
 
-from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from gh_analysis.temporal.models import TechnicalAnalysis
+from gh_analysis.temporal.models import AnalysisRequest, AnalysisResult
 
 logger = logging.getLogger(__name__)
 
 
-class AnalysisRequest(BaseModel):
-    """Request for GitHub issue analysis."""
-
-    repo_owner: str
-    repo_name: str
-    issue_number: int
-    agent_type: str = "gpt5_mini_medium"  # Agent to use
-    comment_limit: Optional[int] = None  # Limit number of comments
-
-
-class AnalysisResult(BaseModel):
-    """Result from GitHub issue analysis."""
-
-    issue_number: int
-    agent_used: str
-    analysis: TechnicalAnalysis
-    execution_time_seconds: float
-
-
 @workflow.defn
 class GitHubAnalysisWorkflow:
-    """
-    Workflow for analyzing GitHub issues with AI agents.
-
-    This workflow:
-    1. Fetches GitHub issue data with comments
-    2. Runs agent analysis with MCP tools
-    3. Returns structured analysis result
-    """
+    """Workflow for analyzing GitHub issues with AI agents."""
 
     def __init__(self):
         self._execution_start_time: Optional[float] = None
         self._fetch_duration: Optional[float] = None
         self._analysis_duration: Optional[float] = None
-        self._tool_call_count: int = 0
 
     @workflow.run
     async def run(self, request: AnalysisRequest) -> AnalysisResult:
         """Execute GitHub issue analysis workflow."""
-        from ..activities import (
-            cleanup_mcp_bundles,
-            fetch_github_issue,
-            run_agent_analysis,
-        )
-        from ..agents.troubleshoot import gpt5_mini_medium_agent
+        from gh_analysis.activities import fetch_github_issue
+        from gh_analysis.agents.troubleshoot import gpt5_mini_medium_agent
 
         self._execution_start_time = workflow.now().timestamp()
 
         workflow.logger.info(
-            f"Starting analysis: {request.repo_owner}/{request.repo_name}#{request.issue_number} "
-            f"with {request.agent_type}"
-        )
-
-        # Clean MCP bundle storage first (prevents cross-workflow contamination)
-        await workflow.execute_activity(
-            cleanup_mcp_bundles,
-            start_to_close_timeout=timedelta(seconds=30),
+            f"Starting analysis: {request.repo_owner}/{request.repo_name}#{request.issue_number}"
         )
 
         # Fetch GitHub issue data
         fetch_start = workflow.now().timestamp()
         issue_data = await workflow.execute_activity(
             fetch_github_issue,
-            args=[
-                request.repo_owner,
-                request.repo_name,
-                request.issue_number,
-                request.comment_limit,
-            ],
+            args=[request.repo_owner, request.repo_name, request.issue_number, request.comment_limit],
             start_to_close_timeout=timedelta(minutes=5),
             retry_policy=RetryPolicy(
                 maximum_attempts=3,
@@ -97,45 +48,22 @@ class GitHubAnalysisWorkflow:
         self._fetch_duration = workflow.now().timestamp() - fetch_start
         workflow.logger.info(f"Fetched issue data in {self._fetch_duration:.2f}s")
 
-        # Check if using TemporalAgent (v2) or activity-based (v1)
-        if request.agent_type == "gpt5_mini_medium":
-            # V2 Pattern: Use TemporalAgent with persistent bundle storage
-            from gh_analysis.agents.troubleshoot import gpt5_mini_medium_agent
+        # Format issue context
+        issue = issue_data.get("issue", {})
+        context = "**Problem Description:**\n"
+        context += f"Title: {issue.get('title', 'N/A')}\n"
+        context += f"Body: {issue.get('body', 'N/A')}\n\n"
 
-            workflow.logger.info(
-                "Using TemporalAgent (v2) with persistent bundle storage"
-            )
+        if issue.get("comments"):
+            context += "**Comments:**\n"
+            for i, comment in enumerate(issue["comments"], 1):
+                context += f"\nComment {i}:\n{comment.get('body', '')}\n"
 
-            # Format issue context
-            issue = issue_data.get("issue", {})
-            context = f"**Problem Description:**\n"
-            context += f"Title: {issue.get('title', 'N/A')}\n"
-            context += f"Body: {issue.get('body', 'N/A')}\n\n"
-
-            if issue.get("comments"):
-                context += "**Comments:**\n"
-                for i, comment in enumerate(issue["comments"], 1):
-                    context += f"\nComment {i}:\n{comment.get('body', '')}\n"
-
-            analysis_start = workflow.now().timestamp()
-            result = await gpt5_mini_medium_agent.run(context)
-            self._analysis_duration = workflow.now().timestamp() - analysis_start
-            analysis = result.output
-        else:
-            # V1 Pattern: Run agent in activity (fallback for other agents)
-            workflow.logger.info("Using activity-based agent (v1)")
-            analysis_start = workflow.now().timestamp()
-            analysis = await workflow.execute_activity(
-                run_agent_analysis,
-                args=[issue_data, request.agent_type],
-                start_to_close_timeout=timedelta(minutes=30),
-                retry_policy=RetryPolicy(
-                    maximum_attempts=2,
-                    backoff_coefficient=1.5,
-                    initial_interval=timedelta(seconds=10),
-                ),
-            )
-            self._analysis_duration = workflow.now().timestamp() - analysis_start
+        # Run TemporalAgent analysis (each tool call becomes activity)
+        analysis_start = workflow.now().timestamp()
+        result = await gpt5_mini_medium_agent.run(context)
+        self._analysis_duration = workflow.now().timestamp() - analysis_start
+        analysis = result.output
 
         workflow.logger.info(f"Completed analysis in {self._analysis_duration:.2f}s")
 
@@ -157,17 +85,9 @@ class GitHubAnalysisWorkflow:
         current_time = workflow.now().timestamp()
         elapsed = current_time - self._execution_start_time
 
-        status = {
+        return {
             "status": "running",
             "elapsed_seconds": elapsed,
             "fetch_completed": self._fetch_duration is not None,
             "analysis_completed": self._analysis_duration is not None,
-            "tool_call_count": self._tool_call_count,
         }
-
-        if self._fetch_duration:
-            status["fetch_duration_seconds"] = self._fetch_duration
-        if self._analysis_duration:
-            status["analysis_duration_seconds"] = self._analysis_duration
-
-        return status
