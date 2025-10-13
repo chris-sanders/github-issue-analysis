@@ -37,7 +37,10 @@ async def _run(org: str, repo: str, issue: int, agent: str, comment_limit: int |
         comment_limit=comment_limit,
     )
 
-    workflow_id = f"troubleshoot-{org}-{repo}-{issue}"
+    # Add timestamp to allow multiple runs (like exp05)
+    import time
+    timestamp = int(time.time())
+    workflow_id = f"troubleshoot-{org}-{repo}-{issue}-{timestamp}"
 
     async with TemporalManager() as manager:
         console.print("⏳ Running workflow...")
