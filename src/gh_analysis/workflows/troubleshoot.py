@@ -9,10 +9,11 @@ import logging
 from datetime import timedelta
 from typing import Optional
 
+from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from gh_analysis.temporal.models import AnalysisRequest, AnalysisResult
+from gh_analysis.temporal.models import TechnicalAnalysis
 
 logger = logging.getLogger(__name__)
 
@@ -56,12 +57,12 @@ class GitHubAnalysisWorkflow:
     @workflow.run
     async def run(self, request: AnalysisRequest) -> AnalysisResult:
         """Execute GitHub issue analysis workflow."""
-        from gh_analysis.activities.github import (
+        from ..activities import (
             cleanup_mcp_bundles,
             fetch_github_issue,
             run_agent_analysis,
         )
-        from gh_analysis.agents.troubleshoot import gpt5_mini_medium_agent
+        from ..agents.troubleshoot import gpt5_mini_medium_agent
 
         self._execution_start_time = workflow.now().timestamp()
 
@@ -107,7 +108,7 @@ class GitHubAnalysisWorkflow:
 
             # Format issue context
             issue = issue_data.get("issue", {})
-            context = "**Problem Description:**\n"
+            context = f"**Problem Description:**\n"
             context += f"Title: {issue.get('title', 'N/A')}\n"
             context += f"Body: {issue.get('body', 'N/A')}\n\n"
 
