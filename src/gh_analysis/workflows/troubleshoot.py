@@ -9,11 +9,10 @@ import logging
 from datetime import timedelta
 from typing import Optional
 
-from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from gh_analysis.ai.models import TechnicalAnalysis
+from gh_analysis.temporal.models import AnalysisRequest, AnalysisResult
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +99,7 @@ class GitHubAnalysisWorkflow:
         # Check if using TemporalAgent (v2) or activity-based (v1)
         if request.agent_type == "gpt5_mini_medium":
             # V2 Pattern: Use TemporalAgent with persistent bundle storage
-            from exp.exp05_temporal.agents.troubleshoot import gpt5_mini_medium_agent
+            from gh_analysis.agents.troubleshoot import gpt5_mini_medium_agent
 
             workflow.logger.info(
                 "Using TemporalAgent (v2) with persistent bundle storage"
@@ -108,7 +107,7 @@ class GitHubAnalysisWorkflow:
 
             # Format issue context
             issue = issue_data.get("issue", {})
-            context = f"**Problem Description:**\n"
+            context = "**Problem Description:**\n"
             context += f"Title: {issue.get('title', 'N/A')}\n"
             context += f"Body: {issue.get('body', 'N/A')}\n\n"
 
