@@ -75,8 +75,26 @@ class TemporalManager:
             stderr=subprocess.DEVNULL,
         )
 
-        await asyncio.sleep(3)
-        logger.info("✓ Temporal server ready")
+        # Wait for Temporal to be actually ready
+        await asyncio.sleep(5)
+
+        # Poll until connection works
+        for i in range(30):
+            try:
+                test_proc = subprocess.Popen(
+                    ["temporal", "operator", "namespace", "list"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                test_proc.wait()
+                if test_proc.returncode == 0:
+                    logger.info("✓ Temporal server ready")
+                    return
+            except:
+                pass
+            await asyncio.sleep(1)
+
+        logger.warning("Temporal may not be ready, continuing anyway...")
 
     async def _connect_client(self):
         """Connect Temporal client."""
@@ -93,7 +111,7 @@ class TemporalManager:
 
     def _start_worker_subprocess(self):
         """Start worker as subprocess."""
-        logger.info("Starting worker...")
+        logger.info("Starting worker (subprocess)...")
 
         self.worker_process = subprocess.Popen(
             ["uv", "run", "python", "-m", "gh_analysis.workers.main_worker"],
@@ -102,4 +120,7 @@ class TemporalManager:
             env=os.environ.copy(),
         )
 
-        logger.info("✓ Worker started (subprocess)")
+        # Give worker time to connect and register
+        time.sleep(5)
+
+        logger.info("✓ Worker subprocess started")
