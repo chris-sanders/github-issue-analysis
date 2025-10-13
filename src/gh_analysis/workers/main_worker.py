@@ -36,7 +36,7 @@ from gh_analysis.workflows.troubleshoot import GitHubAnalysisWorkflow
 logger = logging.getLogger(__name__)
 
 
-class Exp05Worker:
+class GhAnalysisWorker:
     """Worker for exp05_temporal workflows."""
 
     def __init__(self):
@@ -48,7 +48,7 @@ class Exp05Worker:
         # Configuration
         self.temporal_host = os.getenv("TEMPORAL_HOST", "localhost:7233")
         self.temporal_namespace = os.getenv("TEMPORAL_NAMESPACE", "default")
-        self.task_queue = os.getenv("TASK_QUEUE", "exp05-analysis")
+        self.task_queue = os.getenv("TASK_QUEUE", "gh-analysis-queue")
         self.max_concurrent_activities = int(
             os.getenv("MAX_CONCURRENT_ACTIVITIES", "5")
         )
@@ -161,7 +161,7 @@ class Exp05Worker:
         self.logger.info("🚀 Starting Exp05 Temporal Worker...")
 
         # Initialize Phoenix observability FIRST (before any Temporal operations)
-        init_observability(project_name="exp05-temporal")
+        init_observability(project_name="gh-analysis")
 
         self._setup_signal_handlers()
 
@@ -205,7 +205,7 @@ class Exp05Worker:
 
 async def main():
     """Main entry point."""
-    worker = Exp05Worker()
+    worker = GhAnalysisWorker()
     try:
         await worker.start()
     except Exception as e:
