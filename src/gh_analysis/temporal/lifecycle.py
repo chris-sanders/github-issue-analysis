@@ -1,13 +1,9 @@
-"""CLI-managed Temporal server and worker lifecycle.
-
-Allows single-command CLI usage by managing Temporal infrastructure automatically.
-"""
+"""CLI-managed Temporal server and worker lifecycle."""
 
 import asyncio
 import logging
 import os
 import subprocess
-import time
 from typing import Any
 
 from pydantic_ai.durable_exec.temporal import PydanticAIPlugin
@@ -40,7 +36,7 @@ class TemporalManager:
 
         await self._start_temporal_server()
         await self._connect_client()
-        self._start_worker_subprocess()
+        await self._start_worker_subprocess()
 
         logger.info("✅ Temporal infrastructure ready")
         return self
@@ -49,20 +45,24 @@ class TemporalManager:
         """Shutdown Temporal server and worker."""
         logger.info("🛑 Shutting down...")
 
+        # Kill worker subprocess first
         if self.worker_process:
             self.worker_process.terminate()
             try:
                 self.worker_process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 self.worker_process.kill()
+                self.worker_process.wait()
             logger.info("✓ Worker stopped")
 
+        # Then kill Temporal server
         if self.server_process:
             self.server_process.terminate()
             try:
                 self.server_process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 self.server_process.kill()
+                self.server_process.wait()
             logger.info("✓ Temporal stopped")
 
     async def _start_temporal_server(self):
@@ -75,26 +75,29 @@ class TemporalManager:
             stderr=subprocess.DEVNULL,
         )
 
-        # Wait for Temporal to be actually ready
-        await asyncio.sleep(5)
+        # Give it initial time to start
+        await asyncio.sleep(2)
 
-        # Poll until connection works
+        # Poll until Temporal is ready (matching exp05 pattern)
         for i in range(30):
             try:
-                test_proc = subprocess.Popen(
-                    ["temporal", "operator", "namespace", "list"],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
+                test_proc = await asyncio.create_subprocess_exec(
+                    "temporal",
+                    "operator",
+                    "namespace",
+                    "list",
+                    stdout=asyncio.subprocess.DEVNULL,
+                    stderr=asyncio.subprocess.DEVNULL,
                 )
-                test_proc.wait()
+                await test_proc.wait()
                 if test_proc.returncode == 0:
                     logger.info("✓ Temporal server ready")
                     return
-            except:
+            except Exception:
                 pass
             await asyncio.sleep(1)
 
-        logger.warning("Temporal may not be ready, continuing anyway...")
+        raise RuntimeError("Temporal server failed to start after 30 seconds")
 
     async def _connect_client(self):
         """Connect Temporal client."""
@@ -109,7 +112,7 @@ class TemporalManager:
 
         logger.info("✓ Connected")
 
-    def _start_worker_subprocess(self):
+    async def _start_worker_subprocess(self):
         """Start worker as subprocess."""
         logger.info("Starting worker (subprocess)...")
 
@@ -120,7 +123,7 @@ class TemporalManager:
             env=os.environ.copy(),
         )
 
-        # Give worker time to connect and register
-        time.sleep(5)
+        # Give worker time to connect and register (exp05 uses 3 seconds)
+        await asyncio.sleep(3)
 
         logger.info("✓ Worker subprocess started")
