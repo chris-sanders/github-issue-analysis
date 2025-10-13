@@ -37,7 +37,12 @@ class GitHubAnalysisWorkflow:
         fetch_start = workflow.now().timestamp()
         issue_data = await workflow.execute_activity(
             fetch_github_issue,
-            args=[request.repo_owner, request.repo_name, request.issue_number, request.comment_limit],
+            args=[
+                request.repo_owner,
+                request.repo_name,
+                request.issue_number,
+                request.comment_limit,
+            ],
             start_to_close_timeout=timedelta(minutes=5),
             retry_policy=RetryPolicy(
                 maximum_attempts=3,

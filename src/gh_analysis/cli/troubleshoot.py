@@ -19,7 +19,9 @@ def run(
     repo: str = typer.Option(..., "--repo", "-r", help="Repository name"),
     issue: int = typer.Option(..., "--issue", "-n", help="Issue number"),
     agent: str = typer.Option("gpt5_mini_medium", "--agent", "-a", help="Agent type"),
-    comment_limit: int = typer.Option(None, "--comment-limit", "-c", help="Limit comments"),
+    comment_limit: int = typer.Option(
+        None, "--comment-limit", "-c", help="Limit comments"
+    ),
 ) -> None:
     """Run troubleshooting analysis via Temporal workflow.
 
@@ -28,12 +30,16 @@ def run(
     asyncio.run(_run_troubleshoot(org, repo, issue, agent, comment_limit))
 
 
-async def _run_troubleshoot(org: str, repo: str, issue: int, agent: str, comment_limit: int | None) -> None:
+async def _run_troubleshoot(
+    org: str, repo: str, issue: int, agent: str, comment_limit: int | None
+) -> None:
     """Execute troubleshooting with inline service management."""
     from temporalio.client import Client
     from temporalio.contrib.pydantic import pydantic_data_converter
 
-    console.print(f"\n[cyan]🔍 Troubleshooting {org}/{repo}#{issue} with {agent}[/cyan]\n")
+    console.print(
+        f"\n[cyan]🔍 Troubleshooting {org}/{repo}#{issue} with {agent}[/cyan]\n"
+    )
 
     # Start services
     console.print("🚀 Starting services...")
@@ -77,7 +83,9 @@ async def _run_troubleshoot(org: str, repo: str, issue: int, agent: str, comment
         console.print("⏳ Waiting for analysis...")
         result = await handle.result()
 
-        console.print(f"\n[green]✅ Complete ({result.execution_time_seconds:.1f}s)[/green]\n")
+        console.print(
+            f"\n[green]✅ Complete ({result.execution_time_seconds:.1f}s)[/green]\n"
+        )
         console.print(f"Status: {result.analysis.status}")
         if hasattr(result.analysis, "root_cause"):
             console.print(f"Root Cause: {result.analysis.root_cause[:200]}...")
