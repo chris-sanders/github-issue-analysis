@@ -15,8 +15,8 @@ from pydantic_ai.durable_exec.temporal import TemporalAgent
 from pydantic_ai.models.openai import OpenAIResponsesModel
 
 from framework.temporal import create_mcp_toolset
-from exp.exp05_temporal.models import TechnicalAnalysis
-from exp.exp05_temporal.prompts import SYSTEM_PROMPT
+from gh_analysis.ai.models import TechnicalAnalysis
+from gh_analysis.ai.prompts import SYSTEM_PROMPT
 
 logger = logging.getLogger(__name__)
 

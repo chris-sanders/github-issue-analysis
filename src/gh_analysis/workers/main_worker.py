@@ -26,9 +26,9 @@ from framework.temporal.observability import (
 )
 
 # Import workflows and activities (relative imports within exp05_temporal)
-from ..activities import cleanup_mcp_bundles, fetch_github_issue, run_agent_analysis
-from ..agents.troubleshoot import gpt5_mini_medium_agent
-from ..workflows.github_analysis import GitHubAnalysisWorkflow
+from gh_analysis.activities.github import cleanup_mcp_bundles, fetch_github_issue, run_agent_analysis
+from gh_analysis.agents.troubleshoot import gpt5_mini_medium_agent
+from gh_analysis.workflows.troubleshoot import GitHubAnalysisWorkflow
 
 logger = logging.getLogger(__name__)
 
