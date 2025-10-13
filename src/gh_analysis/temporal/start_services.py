@@ -50,8 +50,10 @@ async def shutdown_services():
     # Wait for graceful shutdown
     try:
         await asyncio.wait_for(
-            asyncio.gather(*[proc.wait() for proc in processes], return_exceptions=True),
-            timeout=3.0
+            asyncio.gather(
+                *[proc.wait() for proc in processes], return_exceptions=True
+            ),
+            timeout=3.0,
         )
     except asyncio.TimeoutError:
         # Force kill process groups
@@ -65,7 +67,9 @@ async def shutdown_services():
                 except:
                     pass
         # Wait for kill to complete
-        await asyncio.gather(*[proc.wait() for proc in processes], return_exceptions=True)
+        await asyncio.gather(
+            *[proc.wait() for proc in processes], return_exceptions=True
+        )
 
     print("✅ All services stopped")
 
@@ -87,7 +91,7 @@ async def start_temporal():
         "8233",
         stdout=devnull,
         stderr=devnull,
-        preexec_fn=os.setsid if hasattr(os, 'setsid') else None,
+        preexec_fn=os.setsid if hasattr(os, "setsid") else None,
     )
     processes.append(proc)
 
@@ -138,7 +142,7 @@ async def start_phoenix():
         stdout=devnull,
         stderr=devnull,
         env=env,
-        preexec_fn=os.setsid if hasattr(os, 'setsid') else None,
+        preexec_fn=os.setsid if hasattr(os, "setsid") else None,
     )
     processes.append(proc)
 
@@ -148,8 +152,7 @@ async def start_phoenix():
         try:
             # Check if port is open
             reader, writer = await asyncio.wait_for(
-                asyncio.open_connection("localhost", 6006),
-                timeout=1.0
+                asyncio.open_connection("localhost", 6006), timeout=1.0
             )
             writer.close()
             await writer.wait_closed()
@@ -176,7 +179,7 @@ async def start_worker():
         "exp.exp05_temporal.workers.main_worker",
         stdout=devnull,
         stderr=devnull,
-        preexec_fn=os.setsid if hasattr(os, 'setsid') else None,
+        preexec_fn=os.setsid if hasattr(os, "setsid") else None,
     )
     processes.append(proc)
 
@@ -213,6 +216,7 @@ async def main():
     # This deletes all traces on startup
     if os.getenv("CLEAN_PHOENIX_DATA", "").lower() in ("1", "true", "yes"):
         import shutil
+
         phoenix_home = Path.home() / ".phoenix"
         phoenix_data = Path("data/phoenix")
 
