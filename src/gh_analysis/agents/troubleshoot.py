@@ -16,7 +16,7 @@ from pydantic_ai.models.openai import OpenAIResponsesModel
 
 from framework.temporal import create_mcp_toolset
 from gh_analysis.ai.models import TechnicalAnalysis
-from gh_analysis.ai.prompts import SYSTEM_PROMPT
+from gh_analysis.ai.prompts import TROUBLESHOOTING_PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ gpt5_mini_medium_agent = TemporalAgent(
         name="g5m-med",
         model=OpenAIResponsesModel("gpt-5-mini"),
         output_type=TechnicalAnalysis,
-        instructions=SYSTEM_PROMPT,
+        instructions=TROUBLESHOOTING_PROMPT,
         toolsets=[mcp_tools],
         retries=3,
         model_settings={
@@ -93,7 +93,7 @@ def create_gpt5_mini_high_agent() -> TemporalAgent[None, TechnicalAnalysis]:
             name="g5m-high",
             model=OpenAIResponsesModel("gpt-5-mini"),
             output_type=TechnicalAnalysis,
-            instructions=SYSTEM_PROMPT,
+            instructions=TROUBLESHOOTING_PROMPT,
             toolsets=[mcp_tools],
             retries=3,
             model_settings={
@@ -122,7 +122,7 @@ def create_gpt5_medium_agent() -> TemporalAgent[None, TechnicalAnalysis]:
             name="g5-med",
             model=OpenAIResponsesModel("gpt-5"),
             output_type=TechnicalAnalysis,
-            instructions=SYSTEM_PROMPT,
+            instructions=TROUBLESHOOTING_PROMPT,
             toolsets=[mcp_tools],
             retries=3,
             model_settings={
@@ -151,7 +151,7 @@ def create_gpt5_high_agent() -> TemporalAgent[None, TechnicalAnalysis]:
             name="g5-high",
             model=OpenAIResponsesModel("gpt-5"),
             output_type=TechnicalAnalysis,
-            instructions=SYSTEM_PROMPT,
+            instructions=TROUBLESHOOTING_PROMPT,
             toolsets=[mcp_tools],
             retries=3,
             model_settings={
