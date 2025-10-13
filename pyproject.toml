@@ -51,9 +51,12 @@ export = [
 [project.scripts]
 gh-analysis = "gh_analysis.cli.main:app"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# Also include root-level packages
 [tool.setuptools]
-packages = ["gh_analysis"]
-package-dir = {"" = "src"}
+py-modules = []
 
 [tool.ruff]
 line-length = 88
