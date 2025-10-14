@@ -2,19 +2,22 @@
 """Start services for debugging - KEEP STDERR VISIBLE."""
 
 import asyncio
-import os
 import signal
-from pathlib import Path
 
 processes = []
+
 
 async def start_temporal():
     """Start Temporal - stderr VISIBLE."""
     print("📦 Starting Temporal...")
     proc = await asyncio.create_subprocess_exec(
-        "temporal", "server", "start-dev",
-        "--ip", "0.0.0.0",
-        "--ui-port", "8233",
+        "temporal",
+        "server",
+        "start-dev",
+        "--ip",
+        "0.0.0.0",
+        "--ui-port",
+        "8233",
         stdout=asyncio.subprocess.DEVNULL,
         # Keep stderr visible to see crashes!
     )
@@ -24,7 +27,10 @@ async def start_temporal():
     for i in range(30):
         try:
             test = await asyncio.create_subprocess_exec(
-                "temporal", "operator", "namespace", "list",
+                "temporal",
+                "operator",
+                "namespace",
+                "list",
                 stdout=asyncio.subprocess.DEVNULL,
                 stderr=asyncio.subprocess.DEVNULL,
             )
@@ -36,17 +42,23 @@ async def start_temporal():
             pass
         await asyncio.sleep(1)
 
+
 async def start_worker():
     """Start worker - stderr VISIBLE."""
     print("⚙️  Starting worker...")
     proc = await asyncio.create_subprocess_exec(
-        "uv", "run", "python", "-m", "gh_analysis.workers.main_worker",
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "gh_analysis.workers.main_worker",
         stdout=asyncio.subprocess.DEVNULL,
         # Keep stderr visible!
     )
     processes.append(proc)
     await asyncio.sleep(3)
     print("   ✅ Worker started")
+
 
 async def main():
     signal.signal(signal.SIGINT, lambda s, f: print("\nStopping...") or exit(0))
@@ -57,6 +69,7 @@ async def main():
     print("\n✅ Services running - Press Ctrl+C to stop\n")
     while True:
         await asyncio.sleep(1)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -4,9 +4,7 @@ import asyncio
 import logging
 import os
 import subprocess
-from typing import Any
 
-from pydantic_ai.durable_exec.temporal import PydanticAIPlugin
 from temporalio.client import Client
 from temporalio.contrib.pydantic import pydantic_data_converter
 
@@ -107,7 +105,7 @@ class TemporalManager:
             self.temporal_host,
             namespace=self.namespace,
             data_converter=pydantic_data_converter,
-            plugins=[PydanticAIPlugin()],
+            # No plugins on client - only worker needs PydanticAIPlugin
         )
 
         logger.info("✓ Connected")

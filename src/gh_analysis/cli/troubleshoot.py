@@ -19,13 +19,17 @@ def run(
     repo: str = typer.Option(..., "--repo", "-r", help="Repository name"),
     issue: int = typer.Option(..., "--issue", "-n", help="Issue number"),
     agent: str = typer.Option("gpt5_mini_medium", "--agent", "-a", help="Agent type"),
-    comment_limit: int = typer.Option(None, "--comment-limit", "-c", help="Limit comments"),
+    comment_limit: int = typer.Option(
+        None, "--comment-limit", "-c", help="Limit comments"
+    ),
 ) -> None:
     """Run troubleshooting via Temporal (single command: start → run → stop)."""
     asyncio.run(_run(org, repo, issue, agent, comment_limit))
 
 
-async def _run(org: str, repo: str, issue: int, agent: str, comment_limit: int | None) -> None:
+async def _run(
+    org: str, repo: str, issue: int, agent: str, comment_limit: int | None
+) -> None:
     """Execute troubleshooting."""
     console.print(f"\n[cyan]🔍 Troubleshooting {org}/{repo}#{issue}[/cyan]\n")
 
@@ -39,6 +43,7 @@ async def _run(org: str, repo: str, issue: int, agent: str, comment_limit: int |
 
     # Add timestamp to allow multiple runs (like exp05)
     import time
+
     timestamp = int(time.time())
     workflow_id = f"troubleshoot-{org}-{repo}-{issue}-{timestamp}"
 
@@ -52,9 +57,23 @@ async def _run(org: str, repo: str, issue: int, agent: str, comment_limit: int |
             task_queue="gh-analysis-queue",
         )
 
-        result = await handle.result()
+        # Poll for result with progress updates
+        while True:
+            try:
+                result = await asyncio.wait_for(handle.result(), timeout=5.0)
+                break
+            except asyncio.TimeoutError:
+                # Still running, show progress
+                try:
+                    status = await handle.query(GitHubAnalysisWorkflow.get_status)
+                    elapsed = status.get("elapsed_seconds", 0)
+                    console.print(f"\r   ⏱️  Elapsed: {elapsed:.0f}s", end="")
+                except Exception:
+                    pass
 
-        console.print(f"\n[green]✅ Complete ({result.execution_time_seconds:.1f}s)[/green]\n")
+        console.print(
+            f"\n\n[green]✅ Complete ({result.execution_time_seconds:.1f}s)[/green]\n"
+        )
         console.print(f"Status: {result.analysis.status}")
         if hasattr(result.analysis, "root_cause"):
             console.print(f"Root Cause: {result.analysis.root_cause[:200]}...")
