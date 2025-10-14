@@ -57,23 +57,39 @@ class SlackClient:
 
                 # Search for messages containing the issue URL or issue reference
                 search_query = f"in:{self.config.channel.lstrip('#')} {issue_url}"
+                logger.info(f"Searching Slack for: {search_query}")
 
                 result = self.user_client.search_messages(query=search_query)
+                logger.info(
+                    f"URL search found {result.get('messages', {}).get('total', 0)} matches"
+                )
 
                 if result["ok"] and result["messages"]["total"] > 0:
                     # Return the timestamp of the first matching message
                     first_match = result["messages"]["matches"][0]
+                    logger.info(f"Found thread via URL search: ts={first_match['ts']}")
                     return str(first_match["ts"])
 
                 # If direct URL search fails, try searching by issue reference
                 search_query = f"in:{self.config.channel.lstrip('#')} #{issue_number}"
+                logger.info(f"Trying fallback search: {search_query}")
                 result = self.user_client.search_messages(query=search_query)
+                logger.info(
+                    f"Issue number search found {result.get('messages', {}).get('total', 0)} matches"
+                )
 
                 if result["ok"] and result["messages"]["total"] > 0:
                     for match in result["messages"]["matches"]:
                         # Check if the message contains the repo name
                         if repo_name.lower() in match["text"].lower():
+                            logger.info(
+                                f"Found thread via issue number: ts={match['ts']}"
+                            )
                             return str(match["ts"])
+
+                logger.warning(
+                    f"No existing Slack thread found for {issue_url} - will create new message"
+                )
 
         except SlackApiError as e:
             logger.error(f"Error searching for issue in Slack: {e}")
