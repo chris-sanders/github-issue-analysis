@@ -163,8 +163,7 @@ class Exp05Worker:
         self.logger.info("🚀 Starting Exp05 Temporal Worker...")
 
         # Initialize Phoenix observability FIRST (before any Temporal operations)
-        # DISABLE Temporal tracing to debug
-        init_observability(project_name="gh-analysis", enable_temporal=False)
+        init_observability(project_name="gh-analysis")
 
         self._setup_signal_handlers()
 
