@@ -26,17 +26,14 @@ from framework.temporal.observability import (
 )
 
 # Import workflows and activities (relative imports within exp05_temporal)
-from gh_analysis.activities.github import (
-    fetch_github_issue,
-    run_agent_analysis,
-)
+from gh_analysis.activities import cleanup_mcp_bundles, fetch_github_issue, run_agent_analysis
 from gh_analysis.agents.troubleshoot import gpt5_mini_medium_agent
-from gh_analysis.workflows.troubleshoot import GitHubAnalysisWorkflow
+from gh_analysis.workflows.github_analysis import GitHubAnalysisWorkflow
 
 logger = logging.getLogger(__name__)
 
 
-class GhAnalysisWorker:
+class Exp05Worker:
     """Worker for exp05_temporal workflows."""
 
     def __init__(self):
@@ -49,9 +46,7 @@ class GhAnalysisWorker:
         self.temporal_host = os.getenv("TEMPORAL_HOST", "localhost:7233")
         self.temporal_namespace = os.getenv("TEMPORAL_NAMESPACE", "default")
         self.task_queue = os.getenv("TASK_QUEUE", "gh-analysis-queue")
-        self.max_concurrent_activities = int(
-            os.getenv("MAX_CONCURRENT_ACTIVITIES", "5")
-        )
+        self.max_concurrent_activities = int(os.getenv("MAX_CONCURRENT_ACTIVITIES", "5"))
         self.max_concurrent_workflows = int(os.getenv("MAX_CONCURRENT_WORKFLOWS", "3"))
 
     def _setup_logging(self) -> logging.Logger:
@@ -92,13 +87,9 @@ class GhAnalysisWorker:
                 interceptors=interceptors,  # Add tracing interceptor
             )
             if temporal_interceptor:
-                self.logger.info(
-                    "Successfully connected to Temporal with PydanticAI plugin and tracing"
-                )
+                self.logger.info("Successfully connected to Temporal with PydanticAI plugin and tracing")
             else:
-                self.logger.info(
-                    "Successfully connected to Temporal with PydanticAI plugin (no tracing)"
-                )
+                self.logger.info("Successfully connected to Temporal with PydanticAI plugin (no tracing)")
             return client
         except Exception as e:
             self.logger.error(f"Failed to connect to Temporal: {e}")
@@ -106,9 +97,7 @@ class GhAnalysisWorker:
 
     def _create_worker(self, client: Client) -> Worker:
         """Create Temporal worker."""
-        self.logger.info(
-            "Creating Temporal worker with TemporalAgent and persistent storage..."
-        )
+        self.logger.info("Creating Temporal worker with TemporalAgent and persistent storage...")
 
         # TemporalAgent must be registered via AgentPlugin at worker startup
         # Uses shared bundle storage - MCP server manages multiple bundles
@@ -117,22 +106,19 @@ class GhAnalysisWorker:
             task_queue=self.task_queue,
             workflows=[GitHubAnalysisWorkflow],
             activities=[
+                cleanup_mcp_bundles,  # Clean bundles first
                 fetch_github_issue,
                 run_agent_analysis,  # For v1 agents
             ],
             plugins=[
-                AgentPlugin(
-                    gpt5_mini_medium_agent
-                ),  # Registers UV-based MCP activities
+                AgentPlugin(gpt5_mini_medium_agent),  # Registers UV-based MCP activities
             ],
             max_concurrent_activities=self.max_concurrent_activities,
             max_concurrent_workflow_tasks=self.max_concurrent_workflows,
             workflow_runner=UnsandboxedWorkflowRunner(),
         )
 
-        self.logger.info(
-            "Worker created with TemporalAgent using UV + persistent bundle storage"
-        )
+        self.logger.info("Worker created with TemporalAgent using UV + persistent bundle storage")
         return worker
 
     def _log_configuration(self):
@@ -205,7 +191,7 @@ class GhAnalysisWorker:
 
 async def main():
     """Main entry point."""
-    worker = GhAnalysisWorker()
+    worker = Exp05Worker()
     try:
         await worker.start()
     except Exception as e:
