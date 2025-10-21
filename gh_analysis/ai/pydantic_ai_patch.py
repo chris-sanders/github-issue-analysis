@@ -7,10 +7,8 @@
 from typing import Any
 
 from openai.types import chat
-from pydantic_ai._utils import guard_tool_call_id as _guard_tool_call_id
 from pydantic_ai.messages import ToolCallPart
 from pydantic_ai.models import openai as openai_model
-from pydantic_ai.models.openai import OpenAIResponsesModel
 
 
 def patched_map_tool_call(t: ToolCallPart) -> Any:
@@ -37,25 +35,31 @@ def patched_map_tool_call(t: ToolCallPart) -> Any:
 
 
 def apply_pydantic_ai_patch() -> None:
-    """Apply patches to fix PydanticAI compatibility issues."""
-    # 1. Fix Union instantiation error
-    setattr(
-        openai_model.OpenAIModel, "_map_tool_call", staticmethod(patched_map_tool_call)
-    )
+    """Apply patches to fix PydanticAI compatibility issues.
 
-    # 2. Fix OpenAI Responses API tool call ID synchronization
-    # Based on context-experiments fix for tool call coordination
-    original_process_response = OpenAIResponsesModel._process_response
+    TESTING: Patches disabled to test if pydantic-ai 1.2.1+ fixes these issues.
+    """
+    # DISABLED FOR TESTING: Check if pydantic-ai 1.2.1+ fixes these issues
+    pass
 
-    def patched_process_response(self: Any, response: Any) -> Any:
-        """Patched version that applies guard_tool_call_id like Chat API."""
-        result = original_process_response(self, response)
+    # # 1. Fix Union instantiation error
+    # setattr(
+    #     openai_model.OpenAIModel, "_map_tool_call", staticmethod(patched_map_tool_call)
+    # )
 
-        # Apply guard_tool_call_id to all ToolCallPart items for consistency
-        for item in result.parts:
-            if isinstance(item, ToolCallPart):
-                item.tool_call_id = _guard_tool_call_id(item)
+    # # 2. Fix OpenAI Responses API tool call ID synchronization
+    # # Based on context-experiments fix for tool call coordination
+    # original_process_response = OpenAIResponsesModel._process_response
 
-        return result
+    # def patched_process_response(self: Any, response: Any) -> Any:
+    #     """Patched version that applies guard_tool_call_id like Chat API."""
+    #     result = original_process_response(self, response)
 
-    OpenAIResponsesModel._process_response = patched_process_response  # type: ignore[method-assign]
+    #     # Apply guard_tool_call_id to all ToolCallPart items for consistency
+    #     for item in result.parts:
+    #         if isinstance(item, ToolCallPart):
+    #             item.tool_call_id = _guard_tool_call_id(item)
+
+    #     return result
+
+    # OpenAIResponsesModel._process_response = patched_process_response  # type: ignore[method-assign]

@@ -209,27 +209,29 @@ class BaseAgentRunner(ABC):
     def _apply_openai_responses_patch(self):
         """Apply OpenAI Responses API tool call ID synchronization patch.
 
-        Fixes inconsistency between Chat Completions and Responses API tool call handling
-        by applying the same guard_tool_call_id logic to Responses API.
+        TESTING: Patch disabled to test if pydantic-ai 1.2.1+ fixes this issue.
         """
-        from pydantic_ai.models.openai import OpenAIResponsesModel
-        from pydantic_ai._utils import guard_tool_call_id as _guard_tool_call_id
-        from pydantic_ai.messages import ToolCallPart
+        # DISABLED FOR TESTING: Check if pydantic-ai 1.2.1+ fixes this issue
+        pass
 
-        original_process_response = OpenAIResponsesModel._process_response
+        # from pydantic_ai.models.openai import OpenAIResponsesModel
+        # from pydantic_ai._utils import guard_tool_call_id as _guard_tool_call_id
+        # from pydantic_ai.messages import ToolCallPart
 
-        def patched_process_response(self, response):
-            """Patched version that applies guard_tool_call_id like Chat Completions API does."""
-            result = original_process_response(self, response)
+        # original_process_response = OpenAIResponsesModel._process_response
 
-            # Apply guard_tool_call_id to all ToolCallPart items for consistency
-            for item in result.parts:
-                if isinstance(item, ToolCallPart):
-                    item.tool_call_id = _guard_tool_call_id(item)
+        # def patched_process_response(self, response):
+        #     """Patched version that applies guard_tool_call_id like Chat Completions API does."""
+        #     result = original_process_response(self, response)
 
-            return result
+        #     # Apply guard_tool_call_id to all ToolCallPart items for consistency
+        #     for item in result.parts:
+        #         if isinstance(item, ToolCallPart):
+        #             item.tool_call_id = _guard_tool_call_id(item)
 
-        OpenAIResponsesModel._process_response = patched_process_response
+        #     return result
+
+        # OpenAIResponsesModel._process_response = patched_process_response
 
     async def _run_agent_with_custom_span(self, user_message: str, usage_limits):
         """Run agent with Phoenix tracing."""
